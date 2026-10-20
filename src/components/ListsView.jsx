@@ -1,0 +1,88 @@
+import { useState } from "react";
+import { Cloud, ListChecks, ShoppingBasket } from "lucide-react";
+import { DEMO_MODE } from "../config";
+import { HandwritingSheet } from "./HandwritingSheet";
+import { ListCard } from "./ListCard";
+
+const INK_LISTS = {
+  shopping: "La compra",
+  tasks: "Tareas",
+};
+
+export function ListsView({ lists }) {
+  const [inkListId, setInkListId] = useState(null);
+  const openCount = lists.items.filter((item) => !item.done).length;
+
+  function saveRecognizedText(text) {
+    if (!inkListId) return;
+    lists.addItem(inkListId, text);
+    setInkListId(null);
+  }
+
+  return (
+    <section className="view lists-view" aria-labelledby="lists-title">
+      <header className="lists-head">
+        <div>
+          <span className="eyebrow">Compartido · BBDS</span>
+          <h1 id="lists-title">Listas</h1>
+          <p>
+            La compra y lo que ronda por casa. Escribe rápido; el lápiz queda
+            para cuando apetezca.
+          </p>
+        </div>
+
+        <div className="lists-head__aside">
+          <div className="lists-head__count">
+            <strong>{openCount}</strong>
+            <span>{openCount === 1 ? "pendiente" : "pendientes"} en total</span>
+          </div>
+          <span className="lists-head__sync">
+            <Cloud size={15} strokeWidth={1.8} aria-hidden="true" />
+            {DEMO_MODE ? "Guardado en este navegador" : "Sincronizado entre dispositivos"}
+          </span>
+        </div>
+      </header>
+
+      {lists.error ? (
+        <div className="inline-alert" role="status">
+          No se pudo sincronizar: {lists.error}. Los cambios se reintentarán al
+          recargar.
+        </div>
+      ) : null}
+
+      <div className="lists-grid">
+        <ListCard
+          listId="shopping"
+          title="La compra"
+          subtitle="Para la nevera y el súper"
+          Icon={ShoppingBasket}
+          items={lists.byList("shopping")}
+          onAdd={lists.addItem}
+          onToggle={lists.toggleItem}
+          onRemove={lists.removeItem}
+          onClear={lists.clearDone}
+          onDraw={setInkListId}
+        />
+        <ListCard
+          listId="tasks"
+          title="Tareas"
+          subtitle="Cosas pequeñas de la casa"
+          Icon={ListChecks}
+          items={lists.byList("tasks")}
+          onAdd={lists.addItem}
+          onToggle={lists.toggleItem}
+          onRemove={lists.removeItem}
+          onClear={lists.clearDone}
+          onDraw={setInkListId}
+        />
+      </div>
+
+      <HandwritingSheet
+        open={Boolean(inkListId)}
+        listTitle={inkListId ? INK_LISTS[inkListId] : ""}
+        onClose={() => setInkListId(null)}
+        onSave={saveRecognizedText}
+      />
+    </section>
+  );
+}

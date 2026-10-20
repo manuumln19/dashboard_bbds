@@ -1,0 +1,1112 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>BBDS · Estudio A · Almanaque cálido</title>
+    <link rel="stylesheet" href="./fonts/fonts.css" />
+    <style>
+      :root {
+        --paper: #f2eadc;
+        --paper-hi: #f8f2e7;
+        --paper-lo: #e7dccb;
+        --ink: #1d1b16;
+        --muted: #756a59;
+        --faint: #9a8e7a;
+        --rule: #c8bba7;
+        --rule-soft: #ddd1bf;
+        --accent: #a5432f;
+        --accent-soft: rgba(165, 67, 47, 0.09);
+        --olive: #5d6552;
+        --blue: #506a74;
+        --sun: #c28c2e;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 100%;
+        min-width: 1280px;
+        height: 100%;
+        min-height: 800px;
+        margin: 0;
+      }
+
+      body {
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+        background: #1d1b16;
+        color: var(--ink);
+        font-family: "IBM Plex Sans", sans-serif;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+      }
+
+      button,
+      a {
+        font: inherit;
+      }
+
+      .page {
+        position: relative;
+        display: grid;
+        grid-template-columns: 148px minmax(0, 1fr);
+        width: 1280px;
+        height: 800px;
+        overflow: hidden;
+        background: var(--paper);
+      }
+
+      .page::after {
+        position: absolute;
+        z-index: 10;
+        inset: 0;
+        pointer-events: none;
+        background-image: radial-gradient(rgba(29, 27, 22, 0.22) 0.38px, transparent 0.58px);
+        background-size: 4px 4px;
+        mix-blend-mode: multiply;
+        opacity: 0.08;
+        content: "";
+      }
+
+      .spine {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        padding: 26px 20px 18px;
+        border-right: 1px solid var(--rule);
+        background:
+          linear-gradient(180deg, rgba(255, 252, 244, 0.38), transparent 45%),
+          var(--paper-lo);
+      }
+
+      .brand-name {
+        display: block;
+        font-family: "Fraunces", Georgia, serif;
+        font-size: 35px;
+        font-variation-settings: "opsz" 90, "SOFT" 20, "WONK" 0;
+        font-weight: 360;
+        letter-spacing: -0.055em;
+        line-height: 0.9;
+      }
+
+      .brand-sub {
+        display: block;
+        margin-top: 9px;
+        color: var(--muted);
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 7.5px;
+        letter-spacing: 0.09em;
+        line-height: 1.55;
+        text-transform: uppercase;
+      }
+
+      .brand-rule {
+        width: 30px;
+        height: 2px;
+        margin-top: 15px;
+        background: var(--accent);
+      }
+
+      .nav {
+        display: flex;
+        flex-direction: column;
+        margin-top: 43px;
+        border-top: 1px solid var(--rule);
+      }
+
+      .nav a {
+        position: relative;
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+        padding: 12px 0 12px 13px;
+        border-bottom: 1px solid rgba(200, 187, 167, 0.72);
+        color: var(--muted);
+        text-decoration: none;
+      }
+
+      .nav a::before {
+        position: absolute;
+        top: 12px;
+        bottom: 12px;
+        left: 0;
+        width: 2px;
+        background: transparent;
+        content: "";
+      }
+
+      .nav a:hover,
+      .nav a:focus-visible {
+        color: var(--ink);
+      }
+
+      .nav a.is-active {
+        color: var(--ink);
+      }
+
+      .nav a.is-active::before {
+        background: var(--accent);
+      }
+
+      .nav .num {
+        min-width: 14px;
+        color: var(--faint);
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 7.5px;
+        letter-spacing: 0.04em;
+      }
+
+      .nav .label {
+        font-size: 13px;
+        font-weight: 500;
+        letter-spacing: 0.005em;
+      }
+
+      .nav a.is-active .num {
+        color: var(--accent);
+      }
+
+      .nav a.is-active .label {
+        font-weight: 600;
+      }
+
+      .spine-bottom {
+        margin-top: auto;
+      }
+
+      .clock {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 8px;
+        padding-top: 14px;
+        border-top: 1px solid var(--rule);
+      }
+
+      .clock strong {
+        font-family: "Fraunces", Georgia, serif;
+        font-size: 37px;
+        font-variation-settings: "opsz" 80;
+        font-weight: 360;
+        letter-spacing: -0.055em;
+        line-height: 1;
+      }
+
+      .clock span {
+        flex: 0 0 56px;
+        color: var(--muted);
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 7.5px;
+        letter-spacing: 0.07em;
+        line-height: 1.5;
+        text-transform: uppercase;
+      }
+
+      .spine-actions {
+        display: flex;
+        gap: 7px;
+        margin: 13px 0 17px;
+      }
+
+      .text-button {
+        flex: 1;
+        padding: 8px 0 7px;
+        border: 0;
+        border-bottom: 1px solid var(--rule);
+        background: transparent;
+        color: var(--muted);
+        cursor: pointer;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 7.5px;
+        letter-spacing: 0.08em;
+        text-align: left;
+        text-transform: uppercase;
+      }
+
+      .text-button:hover,
+      .text-button:focus-visible {
+        border-bottom-color: var(--accent);
+        color: var(--ink);
+      }
+
+      .coords {
+        color: var(--faint);
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 7.5px;
+        letter-spacing: 0.04em;
+        line-height: 1.65;
+      }
+
+      .sheet {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        min-width: 0;
+        height: 100%;
+        flex-direction: column;
+        padding: 23px 36px 14px 38px;
+      }
+
+      .head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 32px;
+      }
+
+      .kicker {
+        margin: 0;
+        color: var(--muted);
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 8.5px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 5px 0 0;
+        font-family: "Fraunces", Georgia, serif;
+        font-size: 55px;
+        font-variation-settings: "opsz" 120, "SOFT" 18, "WONK" 0;
+        font-weight: 340;
+        letter-spacing: -0.052em;
+        line-height: 0.88;
+      }
+
+      h1 em {
+        color: var(--accent);
+        font-style: italic;
+        font-weight: 310;
+      }
+
+      .head-note {
+        margin: 0 0 1px;
+        color: var(--muted);
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 7.5px;
+        letter-spacing: 0.07em;
+        line-height: 1.75;
+        text-align: right;
+        text-transform: uppercase;
+      }
+
+      .head-note strong {
+        color: var(--ink);
+        font-weight: 500;
+      }
+
+      .rule {
+        height: 1px;
+        margin-top: 13px;
+        background: var(--rule);
+      }
+
+      .rule--heavy {
+        height: 2px;
+        margin-top: 13px;
+        background: var(--ink);
+      }
+
+      .now {
+        display: grid;
+        min-height: 190px;
+        grid-template-columns: minmax(0, 1fr) 326px;
+        gap: 36px;
+        padding: 16px 0 12px;
+      }
+
+      .now-main {
+        display: flex;
+        min-width: 0;
+        flex-direction: column;
+      }
+
+      .now-meta {
+        color: var(--muted);
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 7.5px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      .temp-line {
+        display: flex;
+        align-items: flex-start;
+        min-width: 0;
+        margin-top: 1px;
+      }
+
+      .temp {
+        font-family: "Fraunces", Georgia, serif;
+        font-size: 154px;
+        font-variation-settings: "opsz" 144, "SOFT" 22, "WONK" 0;
+        font-weight: 290;
+        font-variant-numeric: lining-nums tabular-nums;
+        letter-spacing: -0.075em;
+        line-height: 0.79;
+      }
+
+      .degree {
+        margin-top: 8px;
+        font-family: "Fraunces", Georgia, serif;
+        font-size: 52px;
+        font-variation-settings: "opsz" 144;
+        font-weight: 300;
+        letter-spacing: -0.04em;
+        line-height: 1;
+      }
+
+      .condition {
+        max-width: 225px;
+        margin-left: 27px;
+        padding-top: 13px;
+      }
+
+      .condition svg {
+        width: 58px;
+        height: 58px;
+        margin-bottom: 4px;
+        color: var(--accent);
+      }
+
+      .condition-title {
+        margin: 0;
+        font-family: "Fraunces", Georgia, serif;
+        font-size: 25px;
+        font-style: italic;
+        font-weight: 340;
+        letter-spacing: -0.025em;
+        line-height: 1;
+      }
+
+      .condition-sub {
+        margin: 8px 0 0;
+        color: var(--muted);
+        font-size: 9.5px;
+        line-height: 1.5;
+      }
+
+      .now-foot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-top: auto;
+        padding-top: 8px;
+        border-top: 1px solid var(--rule-soft);
+        color: var(--muted);
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 7.5px;
+        letter-spacing: 0.045em;
+        line-height: 1.4;
+        text-transform: uppercase;
+      }
+
+      .now-foot span:last-child {
+        text-align: right;
+      }
+
+      .metrics {
+        display: grid;
+        height: 100%;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: repeat(3, 1fr);
+        margin: 0;
+        border-top: 2px solid var(--ink);
+        border-bottom: 1px solid var(--rule);
+      }
+
+      .metrics > div {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 7px 12px 6px 0;
+        border-bottom: 1px solid var(--rule-soft);
+      }
+
+      .metrics > div:nth-child(odd) {
+        border-right: 1px solid var(--rule-soft);
+      }
+
+      .metrics > div:nth-last-child(-n + 2) {
+        border-bottom: 0;
+      }
+
+      .metrics dt {
+        color: var(--muted);
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 7px;
+        letter-spacing: 0.09em;
+        line-height: 1.2;
+        text-transform: uppercase;
+      }
+
+      .metrics dd {
+        margin: 4px 0 0;
+        font-family: "Fraunces", Georgia, serif;
+        font-size: 24px;
+        font-variation-settings: "opsz" 80;
+        font-weight: 400;
+        letter-spacing: -0.035em;
+        line-height: 1;
+      }
+
+      .metrics dd small {
+        margin-left: 2px;
+        color: var(--muted);
+        font-family: "IBM Plex Sans", sans-serif;
+        font-size: 9px;
+        font-weight: 500;
+        letter-spacing: 0;
+      }
+
+      .forecast {
+        margin-top: 13px;
+      }
+
+      .section-head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 18px;
+        padding-bottom: 6px;
+        border-bottom: 1px solid var(--ink);
+      }
+
+      .section-head h2 {
+        margin: 0;
+        font-family: "Fraunces", Georgia, serif;
+        font-size: 21px;
+        font-variation-settings: "opsz" 80;
+        font-weight: 400;
+        letter-spacing: -0.025em;
+        line-height: 1;
+      }
+
+      .section-note {
+        color: var(--muted);
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 7px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .days {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+      }
+
+      .day {
+        position: relative;
+        display: flex;
+        min-width: 0;
+        min-height: 115px;
+        flex-direction: column;
+        padding: 9px 11px 7px 13px;
+        border-left: 1px solid var(--rule-soft);
+      }
+
+      .day:first-child {
+        padding-left: 0;
+        border-left: 0;
+      }
+
+      .day.is-today {
+        background: linear-gradient(180deg, var(--accent-soft), transparent 82%);
+      }
+
+      .day.is-today::before {
+        position: absolute;
+        inset: 0 0 auto;
+        height: 2px;
+        background: var(--accent);
+        content: "";
+      }
+
+      .day-name {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 8px;
+        color: var(--muted);
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 7.5px;
+        letter-spacing: 0.055em;
+        line-height: 1.2;
+        text-transform: uppercase;
+      }
+
+      .day-name strong {
+        color: var(--ink);
+        font-weight: 500;
+      }
+
+      .day.is-today .day-name,
+      .day.is-today .day-name strong {
+        color: var(--accent);
+      }
+
+      .day-body {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 7px;
+      }
+
+      .day-glyph {
+        width: 29px;
+        height: 29px;
+        flex: none;
+        color: var(--olive);
+      }
+
+      .day.is-today .day-glyph {
+        color: var(--accent);
+      }
+
+      .day-temps {
+        display: flex;
+        align-items: baseline;
+        gap: 5px;
+      }
+
+      .day-max {
+        font-family: "Fraunces", Georgia, serif;
+        font-size: 24px;
+        font-variation-settings: "opsz" 60;
+        font-weight: 400;
+        letter-spacing: -0.035em;
+        line-height: 1;
+      }
+
+      .day-min {
+        color: var(--muted);
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 8px;
+        letter-spacing: 0.01em;
+      }
+
+      .day-rain {
+        margin: 6px 0 0;
+        color: var(--blue);
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 7px;
+        letter-spacing: 0.02em;
+      }
+
+      .day-range {
+        position: relative;
+        height: 3px;
+        margin-top: auto;
+        background: var(--rule-soft);
+      }
+
+      .day-range span {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        background: var(--olive);
+      }
+
+      .day.is-today .day-range span {
+        background: var(--accent);
+      }
+
+      .radar {
+        position: relative;
+        display: flex;
+        min-height: 0;
+        flex: 1;
+        flex-direction: column;
+        margin-top: 15px;
+        padding: 14px 20px 11px;
+        overflow: hidden;
+        background: var(--ink);
+        color: var(--paper);
+      }
+
+      .radar::after {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background-image: radial-gradient(rgba(242, 234, 220, 0.2) 0.4px, transparent 0.6px);
+        background-size: 4px 4px;
+        opacity: 0.09;
+        content: "";
+      }
+
+      .radar-head {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 24px;
+      }
+
+      .radar-kicker {
+        margin: 0;
+        color: #cbbda9;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 7px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .radar h2 {
+        margin: 2px 0 0;
+        font-family: "Fraunces", Georgia, serif;
+        font-size: 23px;
+        font-variation-settings: "opsz" 80;
+        font-weight: 340;
+        letter-spacing: -0.025em;
+        line-height: 1;
+      }
+
+      .radar-meta {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        color: #bfb19e;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 7px;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+      }
+
+      .radar-meta strong {
+        color: var(--paper-hi);
+        font-weight: 500;
+      }
+
+      .radar-stage {
+        position: relative;
+        min-height: 0;
+        flex: 1;
+        margin-top: 5px;
+        overflow: hidden;
+      }
+
+      .radar-stage > svg {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      .radar-legend {
+        position: absolute;
+        bottom: 3px;
+        left: 0;
+        z-index: 3;
+        display: flex;
+        align-items: flex-end;
+        gap: 12px;
+      }
+
+      .radar-scale {
+        width: 128px;
+      }
+
+      .radar-scale-bar {
+        height: 4px;
+        background: linear-gradient(90deg, #5d6552 0%, #a58a3e 48%, #c26638 76%, #a5432f 100%);
+      }
+
+      .radar-scale-labels {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 4px;
+        color: #b7a994;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 6px;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+      }
+
+      .radar-note {
+        color: #b7a994;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 6.5px;
+        letter-spacing: 0.04em;
+        line-height: 1.5;
+        text-transform: uppercase;
+      }
+
+      .radar-tools {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        z-index: 3;
+        display: flex;
+        align-items: stretch;
+        gap: 5px;
+      }
+
+      .radar-tools button {
+        display: grid;
+        place-items: center;
+        min-width: 31px;
+        height: 31px;
+        padding: 0;
+        border: 1px solid rgba(242, 234, 220, 0.26);
+        border-radius: 0;
+        background: rgba(242, 234, 220, 0.055);
+        color: var(--paper);
+        cursor: pointer;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 9px;
+      }
+
+      .radar-tools button:hover,
+      .radar-tools button:focus-visible {
+        border-color: rgba(242, 234, 220, 0.6);
+        background: rgba(242, 234, 220, 0.12);
+      }
+
+      .radar-tools .zoom-value {
+        display: grid;
+        place-items: center;
+        width: 28px;
+        color: #cbbda9;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 7px;
+      }
+
+      .radar-tools .play-button {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 0 11px;
+        font-size: 7.5px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .play-button svg {
+        width: 10px;
+        height: 10px;
+      }
+
+      .radar-compass {
+        position: absolute;
+        top: 4px;
+        right: 0;
+        z-index: 3;
+        color: #b7a994;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 6.5px;
+        letter-spacing: 0.08em;
+        line-height: 1.5;
+        text-align: right;
+        text-transform: uppercase;
+      }
+
+      .colophon {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        padding-top: 7px;
+        color: var(--faint);
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 6.5px;
+        letter-spacing: 0.07em;
+        line-height: 1.3;
+        text-transform: uppercase;
+      }
+
+      .icon-set {
+        position: absolute;
+        width: 0;
+        height: 0;
+        overflow: hidden;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.001ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.001ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <svg class="icon-set" aria-hidden="true">
+      <symbol id="icon-partly" viewBox="0 0 48 48">
+        <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6">
+          <circle cx="18" cy="17" r="7.5" />
+          <path d="M18 3.5v4M18 26.5v4M4.5 17h4M27.5 17h4M8.4 7.4l2.8 2.8M24.8 23.8l2.8 2.8M8.4 26.6l2.8-2.8" />
+          <path d="M19.5 33.5h16.2a6.2 6.2 0 0 0 .2-12.4 9.1 9.1 0 0 0-16.4 2.2 5.1 5.1 0 0 0 0 10.2Z" />
+        </g>
+      </symbol>
+      <symbol id="icon-cloud" viewBox="0 0 48 48">
+        <path d="M14.5 35.5h20.7a7 7 0 0 0 .3-14 10.2 10.2 0 0 0-18.4 2.5 5.8 5.8 0 0 0-2.6 11.5Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" />
+      </symbol>
+      <symbol id="icon-rain" viewBox="0 0 48 48">
+        <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6">
+          <path d="M14.5 29.5h20.7a7 7 0 0 0 .3-14 10.2 10.2 0 0 0-18.4 2.5 5.8 5.8 0 0 0-2.6 11.5Z" />
+          <path d="M17 35.5l-2 5M25 35.5l-2 5M33 35.5l-2 5" />
+        </g>
+      </symbol>
+      <symbol id="icon-storm" viewBox="0 0 48 48">
+        <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6">
+          <path d="M14.5 28.5h20.7a7 7 0 0 0 .3-14 10.2 10.2 0 0 0-18.4 2.5 5.8 5.8 0 0 0-2.6 11.5Z" />
+          <path d="m25 32-4 8h7l-3 6" />
+          <path d="M17 35.5l-1.5 4M35 35.5l-1.5 4" />
+        </g>
+      </symbol>
+      <symbol id="icon-sun" viewBox="0 0 48 48">
+        <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.6">
+          <circle cx="24" cy="24" r="8" />
+          <path d="M24 7v5M24 36v5M7 24h5M36 24h5M12 12l3.5 3.5M32.5 32.5 36 36M12 36l3.5-3.5M32.5 15.5 36 12" />
+        </g>
+      </symbol>
+    </svg>
+
+    <main class="page">
+      <aside class="spine">
+        <div class="brand">
+          <span class="brand-name">BBDS</span>
+          <span class="brand-sub">Almanaque doméstico<br />Jaén · edición diaria</span>
+          <div class="brand-rule"></div>
+        </div>
+
+        <nav class="nav" aria-label="Secciones">
+          <a href="#home"><span class="num">01</span><span class="label">Hoy</span></a>
+          <a href="#agenda"><span class="num">02</span><span class="label">Agenda</span></a>
+          <a href="#lists"><span class="num">03</span><span class="label">Listas</span></a>
+          <a href="#cleaning"><span class="num">04</span><span class="label">Limpieza</span></a>
+          <a class="is-active" href="#weather"><span class="num">05</span><span class="label">Tiempo</span></a>
+        </nav>
+
+        <div class="spine-bottom">
+          <div class="clock"><strong>16:24</strong><span>Martes<br />20 oct 26</span></div>
+          <div class="spine-actions">
+            <button class="text-button" type="button">Galería</button>
+            <button class="text-button" type="button">Noche</button>
+          </div>
+          <div class="coords">37.7796° N · 3.7849° O<br />Hoja 05 / tiempo</div>
+        </div>
+      </aside>
+
+      <section class="sheet">
+        <header class="head">
+          <div>
+            <p class="kicker">Martes, 20 de octubre de 2026</p>
+            <h1>El tiempo <em>en Jaén</em></h1>
+          </div>
+          <p class="head-note">Observación <strong>16:24</strong><br />Actualizado ahora · demo</p>
+        </header>
+
+        <div class="rule rule--heavy"></div>
+
+        <section class="now" aria-label="Tiempo actual">
+          <div class="now-main">
+            <p class="now-meta">Ahora / exterior</p>
+            <div class="temp-line">
+              <span class="temp">21</span><span class="degree">°</span>
+              <div class="condition">
+                <svg aria-hidden="true"><use href="#icon-partly"></use></svg>
+                <p class="condition-title">Casi despejado</p>
+                <p class="condition-sub">Sensación de 21°<br />Máx 23° · Mín 12°</p>
+              </div>
+            </div>
+            <div class="now-foot">
+              <span>Hoy · 11 h 14 min de luz</span>
+              <span>Sale 07:58 · Se pone 19:12</span>
+            </div>
+          </div>
+
+          <dl class="metrics">
+            <div><dt>Humedad</dt><dd>46<small>%</small></dd></div>
+            <div><dt>Viento</dt><dd>11<small>km/h</small></dd></div>
+            <div><dt>Prob. lluvia</dt><dd>10<small>%</small></dd></div>
+            <div><dt>Índice UV</dt><dd>4<small>moderado</small></dd></div>
+            <div><dt>Amanece</dt><dd>07:58</dd></div>
+            <div><dt>Anochece</dt><dd>19:12</dd></div>
+          </dl>
+        </section>
+
+        <section class="forecast" aria-labelledby="forecast-title">
+          <header class="section-head">
+            <h2 id="forecast-title">Previsión</h2>
+            <span class="section-note">Siete días · temperatura / lluvia</span>
+          </header>
+          <div class="days">
+            <article class="day is-today">
+              <p class="day-name"><strong>Hoy</strong><span>20</span></p>
+              <div class="day-body">
+                <svg class="day-glyph" aria-hidden="true"><use href="#icon-partly"></use></svg>
+                <div class="day-temps"><span class="day-max">23°</span><span class="day-min">12°</span></div>
+              </div>
+              <p class="day-rain">10% · lluvia</p>
+              <div class="day-range"><span style="left: 20%; width: 73.3%"></span></div>
+            </article>
+            <article class="day">
+              <p class="day-name"><strong>Mié</strong><span>21</span></p>
+              <div class="day-body">
+                <svg class="day-glyph" aria-hidden="true"><use href="#icon-rain"></use></svg>
+                <div class="day-temps"><span class="day-max">20°</span><span class="day-min">11°</span></div>
+              </div>
+              <p class="day-rain">65% · lluvia</p>
+              <div class="day-range"><span style="left: 13.3%; width: 60%"></span></div>
+            </article>
+            <article class="day">
+              <p class="day-name"><strong>Jue</strong><span>22</span></p>
+              <div class="day-body">
+                <svg class="day-glyph" aria-hidden="true"><use href="#icon-cloud"></use></svg>
+                <div class="day-temps"><span class="day-max">19°</span><span class="day-min">11°</span></div>
+              </div>
+              <p class="day-rain">20% · lluvia</p>
+              <div class="day-range"><span style="left: 13.3%; width: 53.3%"></span></div>
+            </article>
+            <article class="day">
+              <p class="day-name"><strong>Vie</strong><span>23</span></p>
+              <div class="day-body">
+                <svg class="day-glyph" aria-hidden="true"><use href="#icon-partly"></use></svg>
+                <div class="day-temps"><span class="day-max">21°</span><span class="day-min">12°</span></div>
+              </div>
+              <p class="day-rain">5% · lluvia</p>
+              <div class="day-range"><span style="left: 20%; width: 60%"></span></div>
+            </article>
+            <article class="day">
+              <p class="day-name"><strong>Sáb</strong><span>24</span></p>
+              <div class="day-body">
+                <svg class="day-glyph" aria-hidden="true"><use href="#icon-sun"></use></svg>
+                <div class="day-temps"><span class="day-max">22°</span><span class="day-min">13°</span></div>
+              </div>
+              <p class="day-rain">15% · lluvia</p>
+              <div class="day-range"><span style="left: 26.7%; width: 60%"></span></div>
+            </article>
+            <article class="day">
+              <p class="day-name"><strong>Dom</strong><span>25</span></p>
+              <div class="day-body">
+                <svg class="day-glyph" aria-hidden="true"><use href="#icon-storm"></use></svg>
+                <div class="day-temps"><span class="day-max">19°</span><span class="day-min">10°</span></div>
+              </div>
+              <p class="day-rain">55% · lluvia</p>
+              <div class="day-range"><span style="left: 6.7%; width: 60%"></span></div>
+            </article>
+            <article class="day">
+              <p class="day-name"><strong>Lun</strong><span>26</span></p>
+              <div class="day-body">
+                <svg class="day-glyph" aria-hidden="true"><use href="#icon-rain"></use></svg>
+                <div class="day-temps"><span class="day-max">18°</span><span class="day-min">9°</span></div>
+              </div>
+              <p class="day-rain">40% · lluvia</p>
+              <div class="day-range"><span style="left: 0%; width: 60%"></span></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="radar" aria-labelledby="radar-title">
+          <header class="radar-head">
+            <div>
+              <p class="radar-kicker">Mapa de precipitación · lectura local</p>
+              <h2 id="radar-title">Radar de lluvia · Jaén</h2>
+            </div>
+            <div class="radar-meta"><span>Barrido <strong>16:20</strong></span><span>Ilustrativo</span><span>0,0 mm</span></div>
+          </header>
+
+          <div class="radar-stage">
+            <svg viewBox="0 0 1000 240" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Radar de lluvia ilustrativo sobre Jaén, sin precipitación cercana">
+              <defs>
+                <radialGradient id="rain-core" cx="50%" cy="50%" r="50%">
+                  <stop offset="0" stop-color="#d2794a" stop-opacity=".62" />
+                  <stop offset=".58" stop-color="#bd6138" stop-opacity=".3" />
+                  <stop offset="1" stop-color="#b95c36" stop-opacity="0" />
+                </radialGradient>
+                <linearGradient id="sweep" x1="0" x2="1" y1="0" y2="0">
+                  <stop offset="0" stop-color="#e3d4bf" stop-opacity=".24" />
+                  <stop offset="1" stop-color="#e3d4bf" stop-opacity="0" />
+                </linearGradient>
+                <clipPath id="radar-clip"><rect width="1000" height="240" /></clipPath>
+              </defs>
+
+              <g clip-path="url(#radar-clip)">
+                <g stroke="#d5c7b4" stroke-opacity=".1" stroke-width="1">
+                  <path d="M0 53h1000M0 112h1000M0 171h1000M0 230h1000" />
+                  <path d="M128 0v240M278 0v240M428 0v240M578 0v240M728 0v240M878 0v240" />
+                </g>
+
+                <g fill="none" stroke="#d8c8b1" stroke-linecap="round">
+                  <path stroke-opacity=".36" stroke-width="1.2" d="M-20 187c78-4 116-52 190-56s104 42 177 30 96-68 173-69 104 53 169 49 108-53 173-63 105 14 158 7" />
+                  <path stroke-opacity=".25" stroke-width="1" d="M-10 207c91-3 120-45 196-48s96 40 164 32 102-51 166-51 96 48 169 44 106-33 167-44 100 9 158 1" />
+                  <path stroke-opacity=".2" stroke-width="1" d="M-10 156c63-15 95-46 165-45s99 35 154 25 104-54 169-57 100 44 169 38 105-37 167-45 104 8 176 1" />
+                  <path stroke-opacity=".18" stroke-width="1" d="M-30 113c77 3 126-24 188-19s92 29 156 23 97-34 161-39 112 36 164 31 101-28 167-38 101 13 154 4" />
+                  <path stroke-opacity=".2" stroke-width="1" d="M32 0c-11 49-2 78 31 104s42 66 26 136M318 0c19 44 14 65-13 102s-28 90 5 138M671 0c-8 43 3 77 34 105s35 93 7 135M908 0c-14 57-1 83 33 105s36 82 8 135" />
+                </g>
+
+                <g opacity=".8">
+                  <ellipse cx="785" cy="90" rx="120" ry="34" fill="url(#rain-core)" />
+                  <ellipse cx="816" cy="86" rx="62" ry="20" fill="none" stroke="#d8885a" stroke-opacity=".34" stroke-dasharray="3 5" />
+                  <ellipse cx="814" cy="86" rx="30" ry="10" fill="none" stroke="#e0a070" stroke-opacity=".38" stroke-dasharray="2 4" />
+                  <path d="M690 104c26-21 47-27 70-24M855 48c-20 6-38 10-54 17" fill="none" stroke="#cf7d50" stroke-opacity=".22" />
+                </g>
+
+                <g opacity=".55">
+                  <ellipse cx="151" cy="61" rx="82" ry="27" fill="url(#rain-core)" />
+                  <ellipse cx="151" cy="61" rx="42" ry="13" fill="none" stroke="#d8885a" stroke-opacity=".28" stroke-dasharray="2 4" />
+                </g>
+
+                <g opacity=".44">
+                  <path d="M395 57c18-19 40-26 63-20s36 24 33 40-22 29-45 26-46-16-51-46Z" fill="url(#rain-core)" />
+                  <path d="M409 61c15-12 28-16 40-12" fill="none" stroke="#d8885a" stroke-opacity=".38" />
+                </g>
+
+                <g transform="translate(514 132)">
+                  <path d="M-7 0h14M0-7v14" stroke="#f2eadc" stroke-width="1.1" />
+                  <circle r="2.2" fill="#d98c5e" />
+                  <text x="12" y="-9" fill="#e6d8c4" font-family="IBM Plex Mono, monospace" font-size="8" letter-spacing="1.2">JAÉN</text>
+                  <text x="12" y="17" fill="#b9aa96" font-family="IBM Plex Mono, monospace" font-size="6.5" letter-spacing=".6">37.7796 N / 3.7849 O</text>
+                </g>
+
+                <g opacity=".9">
+                  <path d="M514 132 940 34 1000 240H514Z" fill="url(#sweep)" />
+                  <path d="M514 132 940 34" stroke="#ebddc8" stroke-opacity=".35" stroke-width="1" />
+                  <circle cx="514" cy="132" r="145" fill="none" stroke="#eadbc4" stroke-opacity=".09" stroke-dasharray="2 7" />
+                  <circle cx="514" cy="132" r="248" fill="none" stroke="#eadbc4" stroke-opacity=".07" stroke-dasharray="2 7" />
+                </g>
+
+                <g fill="none" stroke="#eadbc4" stroke-opacity=".24">
+                  <path d="M0 228h72M928 228h72M0 12h72M928 12h72" />
+                  <path d="M0 224v8M72 224v8M928 224v8M1000 224v8M0 8v8M72 8v8M928 8v8M1000 8v8" />
+                </g>
+              </g>
+            </svg>
+
+            <div class="radar-compass">N ↑<br />radio 40 km</div>
+            <div class="radar-legend">
+              <div class="radar-scale">
+                <div class="radar-scale-bar"></div>
+                <div class="radar-scale-labels"><span>Débil</span><span>Intensa</span></div>
+              </div>
+              <div class="radar-note">Sin lluvia cerca<br />Recurso de demostración</div>
+            </div>
+            <div class="radar-tools" aria-label="Controles del radar">
+              <button type="button" aria-label="Alejar">−</button>
+              <span class="zoom-value">1×</span>
+              <button type="button" aria-label="Acercar">+</button>
+              <button class="play-button" type="button"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.5v9L10 6 3 1.5Z" fill="currentColor" /></svg>Pausa</button>
+            </div>
+          </div>
+        </section>
+
+        <footer class="colophon">
+          <span>Open-Meteo · datos de demostración · Jaén 37.7796° N / 3.7849° O</span>
+          <span>BBDS · Estudio A · Almanaque cálido</span>
+        </footer>
+      </section>
+    </main>
+  </body>
+</html>

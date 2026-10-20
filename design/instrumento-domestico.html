@@ -1,0 +1,1333 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>BBDS · Estudio B · Instrumento doméstico</title>
+    <link rel="stylesheet" href="./fonts/fonts.css" />
+    <style>
+      :root {
+        --console: #171814;
+        --bar: #1d1e19;
+        --panel: #e8e2d6;
+        --panel-hi: #f1ece2;
+        --ink: #191a17;
+        --muted: #6a665b;
+        --faint: #948d7d;
+        --line: #b8afa0;
+        --line-dark: #8c8374;
+        --orange: #d9562b;
+        --orange-soft: rgba(217, 86, 43, 0.12);
+        --olive: #626b53;
+        --blue: #4d6873;
+        --paper: #f0eadf;
+        --mono: "IBM Plex Mono", monospace;
+        --display: "Archivo", sans-serif;
+        --body: "IBM Plex Sans", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 100%;
+        min-width: 1280px;
+        height: 100%;
+        min-height: 800px;
+        margin: 0;
+      }
+
+      body {
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+        background: #10110e;
+        color: var(--ink);
+        font-family: var(--body);
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+      }
+
+      button,
+      a {
+        font: inherit;
+      }
+
+      .console {
+        display: flex;
+        width: 1280px;
+        height: 800px;
+        flex-direction: column;
+        overflow: hidden;
+        background: var(--console);
+      }
+
+      .bar {
+        display: grid;
+        height: 64px;
+        flex: none;
+        grid-template-columns: 186px minmax(0, 1fr) 320px;
+        align-items: stretch;
+        padding: 0 20px;
+        border-bottom: 1px solid #36372f;
+        background: var(--bar);
+        color: var(--paper);
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .brand-mark {
+        font-family: var(--display);
+        font-size: 23px;
+        font-variation-settings: "wght" 720;
+        font-weight: 720;
+        letter-spacing: -0.055em;
+        line-height: 1;
+      }
+
+      .brand-sub {
+        padding-left: 13px;
+        border-left: 1px solid #45463d;
+        color: #a8a294;
+        font-family: var(--mono);
+        font-size: 6.5px;
+        letter-spacing: 0.08em;
+        line-height: 1.55;
+        text-transform: uppercase;
+      }
+
+      .bar-nav {
+        display: flex;
+        align-items: stretch;
+        justify-content: center;
+        gap: 2px;
+      }
+
+      .bar-nav a {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 0 12px;
+        color: #a9a395;
+        font-family: var(--mono);
+        font-size: 7.5px;
+        letter-spacing: 0.055em;
+        text-decoration: none;
+        text-transform: uppercase;
+      }
+
+      .bar-nav a::after {
+        position: absolute;
+        right: 12px;
+        bottom: 0;
+        left: 12px;
+        height: 2px;
+        background: transparent;
+        content: "";
+      }
+
+      .bar-nav a:hover,
+      .bar-nav a:focus-visible {
+        color: var(--paper);
+      }
+
+      .bar-nav a.is-active {
+        color: var(--paper);
+      }
+
+      .bar-nav a.is-active::after {
+        background: var(--orange);
+      }
+
+      .bar-nav small {
+        color: #66675d;
+        font-size: 6.5px;
+        letter-spacing: 0;
+      }
+
+      .bar-nav a.is-active small {
+        color: var(--orange);
+      }
+
+      .bar-status {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 12px;
+        border-left: 1px solid #45463d;
+      }
+
+      .bar-actions {
+        display: flex;
+        align-items: stretch;
+        align-self: stretch;
+        margin-right: 2px;
+        padding-right: 8px;
+        border-right: 1px solid #45463d;
+      }
+
+      .bar-actions button {
+        padding: 0 7px;
+        border: 0;
+        background: transparent;
+        color: #a8a294;
+        cursor: pointer;
+        font-family: var(--mono);
+        font-size: 6.5px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .bar-actions button:hover,
+      .bar-actions button:focus-visible {
+        color: var(--paper);
+      }
+
+      .live-dot {
+        width: 6px;
+        height: 6px;
+        flex: none;
+        background: var(--orange);
+      }
+
+      .bar-time {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+      }
+
+      .bar-time strong {
+        font-family: var(--display);
+        font-size: 25px;
+        font-variation-settings: "wght" 560;
+        font-weight: 560;
+        letter-spacing: -0.045em;
+        line-height: 1;
+      }
+
+      .bar-time span {
+        color: #a8a294;
+        font-family: var(--mono);
+        font-size: 6.5px;
+        letter-spacing: 0.045em;
+        line-height: 1.4;
+        text-align: right;
+        text-transform: uppercase;
+      }
+
+      .panel {
+        display: grid;
+        min-height: 0;
+        flex: 1;
+        grid-template-rows: 222px 146px minmax(0, 1fr) 14px;
+        grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+        gap: 1px;
+        margin: 14px 18px 12px;
+        background: var(--line);
+      }
+
+      .module {
+        min-width: 0;
+        min-height: 0;
+        background: var(--panel);
+      }
+
+      .observation {
+        display: flex;
+        flex-direction: column;
+        padding: 14px 21px 14px;
+      }
+
+      .module-head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 16px;
+        padding-bottom: 7px;
+        border-bottom: 1px solid var(--line);
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 7px;
+        letter-spacing: 0.085em;
+        line-height: 1.2;
+        text-transform: uppercase;
+      }
+
+      .module-head strong {
+        color: var(--ink);
+        font-weight: 500;
+      }
+
+      .obs-main {
+        display: grid;
+        min-height: 0;
+        flex: 1;
+        grid-template-columns: minmax(0, 1fr) 132px 120px;
+        gap: 16px;
+        align-items: center;
+      }
+
+      .obs-primary {
+        min-width: 0;
+      }
+
+      .obs-label {
+        margin: 0;
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 6.5px;
+        letter-spacing: 0.1em;
+        line-height: 1;
+        text-transform: uppercase;
+      }
+
+      .temp-line {
+        display: flex;
+        align-items: flex-start;
+        min-width: 0;
+        margin-top: 5px;
+      }
+
+      .temp {
+        font-family: var(--display);
+        font-size: 132px;
+        font-variation-settings: "wght" 590;
+        font-weight: 590;
+        font-variant-numeric: lining-nums tabular-nums;
+        letter-spacing: -0.075em;
+        line-height: 0.75;
+      }
+
+      .degree {
+        margin-top: 3px;
+        color: var(--orange);
+        font-family: var(--display);
+        font-size: 36px;
+        font-variation-settings: "wght" 480;
+        font-weight: 480;
+        letter-spacing: -0.04em;
+        line-height: 1;
+      }
+
+      .condition {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+        margin-top: 11px;
+      }
+
+      .condition strong {
+        font-family: var(--display);
+        font-size: 17px;
+        font-variation-settings: "wght" 620;
+        font-weight: 620;
+        letter-spacing: -0.02em;
+        line-height: 1;
+        text-transform: uppercase;
+      }
+
+      .condition span {
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 6.5px;
+        letter-spacing: 0.035em;
+        line-height: 1.4;
+        text-transform: uppercase;
+      }
+
+      .obs-glyph {
+        display: grid;
+        width: 132px;
+        height: 132px;
+        place-items: center;
+        color: var(--ink);
+      }
+
+      .obs-glyph svg {
+        width: 122px;
+        height: 122px;
+      }
+
+      .obs-mini {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 7px;
+      }
+
+      .mini-stat {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 6px 0;
+        border-top: 1px solid var(--line);
+      }
+
+      .mini-stat:last-child {
+        border-bottom: 1px solid var(--line);
+      }
+
+      .mini-stat span {
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 6.5px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .mini-stat strong {
+        font-family: var(--display);
+        font-size: 20px;
+        font-variation-settings: "wght" 550;
+        font-weight: 550;
+        letter-spacing: -0.045em;
+        line-height: 1;
+        white-space: nowrap;
+      }
+
+      .mini-stat strong small {
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 7px;
+        font-weight: 400;
+        letter-spacing: 0;
+      }
+
+      .measurements {
+        display: flex;
+        flex-direction: column;
+        padding: 14px 18px 14px;
+      }
+
+      .measure-grid {
+        display: grid;
+        min-height: 0;
+        flex: 1;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: repeat(3, 1fr);
+        margin-top: 8px;
+        border-top: 1px solid var(--line-dark);
+      }
+
+      .measurement {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 7px 10px 6px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .measurement:nth-child(odd) {
+        padding-left: 0;
+        border-right: 1px solid var(--line);
+      }
+
+      .measurement:nth-child(even) {
+        padding-right: 0;
+      }
+
+      .measurement:nth-last-child(-n + 2) {
+        border-bottom: 0;
+      }
+
+      .measurement dt {
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 6.5px;
+        letter-spacing: 0.085em;
+        line-height: 1.2;
+        text-transform: uppercase;
+      }
+
+      .measurement dd {
+        margin: 5px 0 0;
+        font-family: var(--display);
+        font-size: 26px;
+        font-variation-settings: "wght" 560;
+        font-weight: 560;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: -0.045em;
+        line-height: 0.9;
+        white-space: nowrap;
+      }
+
+      .measurement dd small {
+        margin-left: 3px;
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 7px;
+        font-weight: 400;
+        letter-spacing: 0;
+        vertical-align: 2px;
+      }
+
+      .forecast {
+        grid-column: 1 / -1;
+        padding: 11px 20px 0;
+      }
+
+      .forecast-head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 20px;
+        padding-bottom: 6px;
+        border-bottom: 1px solid var(--line-dark);
+      }
+
+      .forecast-head h2 {
+        margin: 0;
+        font-family: var(--display);
+        font-size: 11px;
+        font-variation-settings: "wght" 700;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        line-height: 1;
+        text-transform: uppercase;
+      }
+
+      .forecast-head span {
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 6.5px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .days {
+        display: grid;
+        height: 103px;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+      }
+
+      .day {
+        display: flex;
+        min-width: 0;
+        flex-direction: column;
+        padding: 8px 12px 7px;
+        border-left: 1px solid var(--line);
+      }
+
+      .day:first-child {
+        padding-left: 0;
+        border-left: 0;
+      }
+
+      .day.is-today {
+        margin-top: -7px;
+        padding-top: 7px;
+        border-top: 2px solid var(--orange);
+        background: var(--orange-soft);
+      }
+
+      .day-head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 8px;
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 6.5px;
+        letter-spacing: 0.06em;
+        line-height: 1.1;
+        text-transform: uppercase;
+      }
+
+      .day-head strong {
+        color: var(--ink);
+        font-weight: 500;
+      }
+
+      .day.is-today .day-head,
+      .day.is-today .day-head strong {
+        color: var(--orange);
+      }
+
+      .day-mid {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 7px;
+      }
+
+      .day-glyph {
+        width: 20px;
+        height: 20px;
+        flex: none;
+        color: var(--olive);
+      }
+
+      .day.is-today .day-glyph {
+        color: var(--orange);
+      }
+
+      .day-temp {
+        display: flex;
+        align-items: baseline;
+        gap: 5px;
+      }
+
+      .day-temp strong {
+        font-family: var(--display);
+        font-size: 19px;
+        font-variation-settings: "wght" 570;
+        font-weight: 570;
+        letter-spacing: -0.05em;
+        line-height: 1;
+      }
+
+      .day-temp span {
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 6.5px;
+      }
+
+      .day-rain {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        margin: 5px 0 0;
+        color: var(--blue);
+        font-family: var(--mono);
+        font-size: 6.5px;
+        letter-spacing: 0.01em;
+        line-height: 1;
+      }
+
+      .day-rain svg {
+        width: 7px;
+        height: 7px;
+      }
+
+      .range {
+        position: relative;
+        height: 4px;
+        margin-top: auto;
+        background: rgba(140, 131, 116, 0.4);
+      }
+
+      .range span {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        background: var(--ink);
+      }
+
+      .range::after {
+        position: absolute;
+        top: -1px;
+        bottom: -1px;
+        width: 1px;
+        background: var(--panel);
+        content: "";
+      }
+
+      .day.is-today .range span {
+        background: var(--orange);
+      }
+
+      .radar {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        background: #151612;
+        color: var(--paper);
+      }
+
+      .radar::after {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background-image: radial-gradient(rgba(240, 234, 223, 0.3) 0.4px, transparent 0.6px);
+        background-size: 4px 4px;
+        opacity: 0.08;
+        content: "";
+      }
+
+      .radar-head {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 13px 18px 7px;
+        border-bottom: 1px solid #383931;
+      }
+
+      .radar-head h2 {
+        margin: 0;
+        color: var(--paper);
+        font-family: var(--display);
+        font-size: 11px;
+        font-variation-settings: "wght" 700;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        line-height: 1;
+        text-transform: uppercase;
+      }
+
+      .radar-head span {
+        color: #a9a294;
+        font-family: var(--mono);
+        font-size: 6.5px;
+        letter-spacing: 0.06em;
+        line-height: 1;
+        text-transform: uppercase;
+      }
+
+      .radar-body {
+        position: relative;
+        z-index: 2;
+        display: grid;
+        min-height: 0;
+        flex: 1;
+        grid-template-columns: 254px minmax(0, 1fr);
+        gap: 18px;
+        padding: 10px 18px 12px;
+      }
+
+      .scope {
+        position: relative;
+        display: grid;
+        min-width: 0;
+        place-items: center;
+        border-right: 1px solid #383931;
+      }
+
+      .scope svg {
+        width: 236px;
+        height: 236px;
+      }
+
+      .scope-label {
+        position: absolute;
+        right: 18px;
+        bottom: 0;
+        color: #7e7b70;
+        font-family: var(--mono);
+        font-size: 6px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .radar-info {
+        display: flex;
+        min-width: 0;
+        flex-direction: column;
+        justify-content: space-between;
+        padding-top: 2px;
+      }
+
+      .radar-status-label {
+        margin: 0;
+        color: #8c897c;
+        font-family: var(--mono);
+        font-size: 6.5px;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+      }
+
+      .radar-status {
+        margin: 4px 0 0;
+        color: var(--paper);
+        font-family: var(--display);
+        font-size: 24px;
+        font-variation-settings: "wght" 540;
+        font-weight: 540;
+        letter-spacing: -0.055em;
+        line-height: 1.02;
+        text-transform: uppercase;
+      }
+
+      .radar-status span {
+        display: block;
+        color: #9e9a8d;
+        font-family: var(--mono);
+        font-size: 6.5px;
+        font-weight: 400;
+        letter-spacing: 0.055em;
+        line-height: 1.5;
+        text-transform: uppercase;
+      }
+
+      .radar-scale {
+        margin-top: 8px;
+      }
+
+      .radar-scale-bar {
+        display: flex;
+        height: 6px;
+      }
+
+      .radar-scale-bar i {
+        display: block;
+        flex: 1;
+        background: #5e6853;
+      }
+
+      .radar-scale-bar i:nth-child(2) {
+        background: #8a824b;
+      }
+
+      .radar-scale-bar i:nth-child(3) {
+        background: #c18a3c;
+      }
+
+      .radar-scale-bar i:nth-child(4) {
+        background: #d26332;
+      }
+
+      .radar-scale-labels {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 4px;
+        color: #858276;
+        font-family: var(--mono);
+        font-size: 6px;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+      }
+
+      .scan-times {
+        display: flex;
+        gap: 4px;
+        margin-top: 9px;
+      }
+
+      .scan-times span {
+        flex: 1;
+        padding-top: 4px;
+        border-top: 1px solid #45463d;
+        color: #77766c;
+        font-family: var(--mono);
+        font-size: 6px;
+        letter-spacing: 0.02em;
+        text-align: center;
+      }
+
+      .scan-times span.is-current {
+        border-top-color: var(--orange);
+        color: var(--paper);
+      }
+
+      .radar-controls {
+        display: flex;
+        align-items: stretch;
+        gap: 5px;
+        margin-top: 9px;
+      }
+
+      .radar-controls button {
+        display: grid;
+        min-width: 31px;
+        height: 31px;
+        place-items: center;
+        padding: 0;
+        border: 1px solid #55564b;
+        border-radius: 0;
+        background: transparent;
+        color: var(--paper);
+        cursor: pointer;
+        font-family: var(--mono);
+        font-size: 8px;
+      }
+
+      .radar-controls button:hover,
+      .radar-controls button:focus-visible {
+        border-color: var(--paper);
+      }
+
+      .radar-controls .zoom-value {
+        display: grid;
+        width: 27px;
+        place-items: center;
+        color: #9d9a8d;
+        font-family: var(--mono);
+        font-size: 6.5px;
+      }
+
+      .radar-controls .play-button {
+        display: flex;
+        flex: 1;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 6px;
+        padding: 0 10px;
+        font-size: 6.5px;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+      }
+
+      .radar-controls .play-button span {
+        margin-left: auto;
+        color: #858276;
+        font-size: 6px;
+        letter-spacing: 0.04em;
+      }
+
+      .play-button svg {
+        width: 9px;
+        height: 9px;
+      }
+
+      .sun {
+        display: flex;
+        flex-direction: column;
+        padding: 14px 18px 12px;
+      }
+
+      .sun-head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 18px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .sun-head h2 {
+        margin: 0;
+        font-family: var(--display);
+        font-size: 11px;
+        font-variation-settings: "wght" 700;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .sun-head span {
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 6.5px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .sun-total {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        margin-top: 12px;
+      }
+
+      .sun-total strong {
+        font-family: var(--display);
+        font-size: 36px;
+        font-variation-settings: "wght" 560;
+        font-weight: 560;
+        letter-spacing: -0.055em;
+        line-height: 1;
+      }
+
+      .sun-total span {
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 6.5px;
+        letter-spacing: 0.08em;
+        line-height: 1.35;
+        text-transform: uppercase;
+      }
+
+      .sun-diagram {
+        display: grid;
+        min-height: 0;
+        flex: 1;
+        place-items: center;
+        padding: 4px 0 0;
+      }
+
+      .sun-diagram svg {
+        width: 100%;
+        max-width: 430px;
+        height: auto;
+      }
+
+      .sun-foot {
+        display: flex;
+        justify-content: space-between;
+        gap: 18px;
+        padding-top: 7px;
+        border-top: 1px solid var(--line);
+      }
+
+      .sun-foot div {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+
+      .sun-foot div:last-child {
+        align-items: flex-end;
+        text-align: right;
+      }
+
+      .sun-foot span {
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 6px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .sun-foot strong {
+        font-family: var(--display);
+        font-size: 16px;
+        font-variation-settings: "wght" 560;
+        font-weight: 560;
+        letter-spacing: -0.04em;
+        line-height: 1;
+      }
+
+      .footer {
+        display: flex;
+        grid-column: 1 / -1;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 0 10px;
+        background: #25261f;
+        color: #969183;
+        font-family: var(--mono);
+        font-size: 6px;
+        letter-spacing: 0.065em;
+        line-height: 1;
+        text-transform: uppercase;
+      }
+
+      .footer span:last-child {
+        color: #b8b1a2;
+      }
+
+      .icon-set {
+        position: absolute;
+        width: 0;
+        height: 0;
+        overflow: hidden;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.001ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.001ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <svg class="icon-set" aria-hidden="true">
+      <symbol id="b-partly" viewBox="0 0 48 48">
+        <g fill="none" stroke="currentColor" stroke-linecap="square" stroke-linejoin="miter" stroke-width="2">
+          <circle cx="17" cy="17" r="7" />
+          <path d="M17 3v5M17 26v5M3 17h5M26 17h5M7 7l3.5 3.5M24.5 24.5 28 28M7 27l3.5-3.5M24.5 9.5 28 6" />
+          <path d="M20 34h17a6 6 0 0 0 .1-12 9 9 0 0 0-16.3 2.2A5 5 0 0 0 20 34Z" />
+        </g>
+      </symbol>
+      <symbol id="b-cloud" viewBox="0 0 48 48">
+        <path d="M14 35h21a7 7 0 0 0 .3-14 10.2 10.2 0 0 0-18.4 2.5A5.8 5.8 0 0 0 14 35Z" fill="none" stroke="currentColor" stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" />
+      </symbol>
+      <symbol id="b-rain" viewBox="0 0 48 48">
+        <g fill="none" stroke="currentColor" stroke-linecap="square" stroke-linejoin="miter" stroke-width="2">
+          <path d="M14 29h21a7 7 0 0 0 .3-14 10.2 10.2 0 0 0-18.4 2.5A5.8 5.8 0 0 0 14 29Z" />
+          <path d="m17 35-2 6M25 35l-2 6M33 35l-2 6" />
+        </g>
+      </symbol>
+      <symbol id="b-storm" viewBox="0 0 48 48">
+        <g fill="none" stroke="currentColor" stroke-linecap="square" stroke-linejoin="miter" stroke-width="2">
+          <path d="M14 28h21a7 7 0 0 0 .3-14 10.2 10.2 0 0 0-18.4 2.5A5.8 5.8 0 0 0 14 28Z" />
+          <path d="m25 31-4 8h7l-3 7" />
+        </g>
+      </symbol>
+      <symbol id="b-sun" viewBox="0 0 48 48">
+        <g fill="none" stroke="currentColor" stroke-linecap="square" stroke-width="2">
+          <circle cx="24" cy="24" r="8" />
+          <path d="M24 5v5M24 38v5M5 24h5M38 24h5M10.5 10.5l3.5 3.5M34 34l3.5 3.5M10.5 37.5 14 34M34 14l3.5-3.5" />
+        </g>
+      </symbol>
+      <symbol id="b-drop" viewBox="0 0 12 12">
+        <path d="M6 1.2C4.4 3.4 2.8 5 2.8 7a3.2 3.2 0 0 0 6.4 0c0-2-1.6-3.6-3.2-5.8Z" fill="none" stroke="currentColor" stroke-width="1.1" />
+      </symbol>
+    </svg>
+
+    <main class="console">
+      <header class="bar">
+        <div class="brand">
+          <span class="brand-mark">BBDS</span>
+          <span class="brand-sub">Weather station 01<br />Jaén · ES</span>
+        </div>
+
+        <nav class="bar-nav" aria-label="Secciones">
+          <a href="#home"><small>01</small>Hoy</a>
+          <a href="#agenda"><small>02</small>Agenda</a>
+          <a href="#lists"><small>03</small>Listas</a>
+          <a href="#cleaning"><small>04</small>Limpieza</a>
+          <a class="is-active" href="#weather"><small>05</small>Tiempo</a>
+        </nav>
+
+        <div class="bar-status">
+          <div class="bar-actions">
+            <button type="button">Galería</button>
+            <button type="button">Noche</button>
+          </div>
+          <span class="live-dot"></span>
+          <div class="bar-time"><strong>16:24</strong><span>Local<br />Mar 20 oct 2026</span></div>
+        </div>
+      </header>
+
+      <div class="panel">
+        <section class="module observation" aria-label="Observación actual">
+          <header class="module-head">
+            <span>Observación / exterior</span>
+            <span><strong>Jaén</strong> · 37.7796 N / 3.7849 O</span>
+          </header>
+
+          <div class="obs-main">
+            <div class="obs-primary">
+              <p class="obs-label">Temperatura del aire · ahora</p>
+              <div class="temp-line"><span class="temp">21</span><span class="degree">°</span></div>
+              <div class="condition"><strong>Casi despejado</strong><span>Sensación 21°</span></div>
+            </div>
+
+            <div class="obs-glyph" aria-hidden="true">
+              <svg viewBox="0 0 48 48">
+                <g fill="none" stroke-linecap="square" stroke-linejoin="miter">
+                  <g stroke="var(--orange)" stroke-width="1.7">
+                    <circle cx="16.5" cy="17" r="7.4" />
+                    <path d="M16.5 2.5v5M16.5 26.5v5M2 17h5M26 17h5M6.3 6.8l3.5 3.5M23.2 23.7l3.5 3.5M6.3 27.2l3.5-3.5M23.2 10.3l3.5-3.5" />
+                  </g>
+                  <path d="M20 36h17.2a6.4 6.4 0 0 0 .2-12.8 9.6 9.6 0 0 0-17.3 2.4A5.3 5.3 0 0 0 20 36Z" stroke="var(--ink)" stroke-width="1.8" />
+                </g>
+              </svg>
+            </div>
+
+            <div class="obs-mini">
+              <div class="mini-stat"><span>Máx</span><strong>23°</strong></div>
+              <div class="mini-stat"><span>Mín</span><strong>12°</strong></div>
+              <div class="mini-stat"><span>Luz</span><strong>11h <small>14m</small></strong></div>
+            </div>
+          </div>
+        </section>
+
+        <aside class="module measurements" aria-label="Mediciones">
+          <header class="module-head"><span>Mediciones</span><span>Estación <strong>WX-01</strong></span></header>
+          <dl class="measure-grid">
+            <div class="measurement"><dt>Humedad</dt><dd>46<small>%</small></dd></div>
+            <div class="measurement"><dt>Viento</dt><dd>11<small>km/h</small></dd></div>
+            <div class="measurement"><dt>Prob. lluvia</dt><dd>10<small>%</small></dd></div>
+            <div class="measurement"><dt>Índice UV</dt><dd>4<small>moderado</small></dd></div>
+            <div class="measurement"><dt>Amanece</dt><dd>07:58</dd></div>
+            <div class="measurement"><dt>Anochece</dt><dd>19:12</dd></div>
+          </dl>
+        </aside>
+
+        <section class="module forecast" aria-labelledby="b-forecast-title">
+          <header class="forecast-head">
+            <h2 id="b-forecast-title">Previsión / 7 días</h2>
+            <span>Temperatura °C · escala 9 — 24</span>
+          </header>
+          <div class="days">
+            <article class="day is-today">
+              <div class="day-head"><strong>Hoy</strong><span>20</span></div>
+              <div class="day-mid">
+                <svg class="day-glyph" aria-hidden="true"><use href="#b-partly"></use></svg>
+                <div class="day-temp"><strong>23°</strong><span>12°</span></div>
+              </div>
+              <p class="day-rain"><svg aria-hidden="true"><use href="#b-drop"></use></svg>10%</p>
+              <div class="range"><span style="left: 20%; width: 73.3%"></span></div>
+            </article>
+            <article class="day">
+              <div class="day-head"><strong>Mié</strong><span>21</span></div>
+              <div class="day-mid">
+                <svg class="day-glyph" aria-hidden="true"><use href="#b-rain"></use></svg>
+                <div class="day-temp"><strong>20°</strong><span>11°</span></div>
+              </div>
+              <p class="day-rain"><svg aria-hidden="true"><use href="#b-drop"></use></svg>65%</p>
+              <div class="range"><span style="left: 13.3%; width: 60%"></span></div>
+            </article>
+            <article class="day">
+              <div class="day-head"><strong>Jue</strong><span>22</span></div>
+              <div class="day-mid">
+                <svg class="day-glyph" aria-hidden="true"><use href="#b-cloud"></use></svg>
+                <div class="day-temp"><strong>19°</strong><span>11°</span></div>
+              </div>
+              <p class="day-rain"><svg aria-hidden="true"><use href="#b-drop"></use></svg>20%</p>
+              <div class="range"><span style="left: 13.3%; width: 53.3%"></span></div>
+            </article>
+            <article class="day">
+              <div class="day-head"><strong>Vie</strong><span>23</span></div>
+              <div class="day-mid">
+                <svg class="day-glyph" aria-hidden="true"><use href="#b-partly"></use></svg>
+                <div class="day-temp"><strong>21°</strong><span>12°</span></div>
+              </div>
+              <p class="day-rain"><svg aria-hidden="true"><use href="#b-drop"></use></svg>5%</p>
+              <div class="range"><span style="left: 20%; width: 60%"></span></div>
+            </article>
+            <article class="day">
+              <div class="day-head"><strong>Sáb</strong><span>24</span></div>
+              <div class="day-mid">
+                <svg class="day-glyph" aria-hidden="true"><use href="#b-sun"></use></svg>
+                <div class="day-temp"><strong>22°</strong><span>13°</span></div>
+              </div>
+              <p class="day-rain"><svg aria-hidden="true"><use href="#b-drop"></use></svg>15%</p>
+              <div class="range"><span style="left: 26.7%; width: 60%"></span></div>
+            </article>
+            <article class="day">
+              <div class="day-head"><strong>Dom</strong><span>25</span></div>
+              <div class="day-mid">
+                <svg class="day-glyph" aria-hidden="true"><use href="#b-storm"></use></svg>
+                <div class="day-temp"><strong>19°</strong><span>10°</span></div>
+              </div>
+              <p class="day-rain"><svg aria-hidden="true"><use href="#b-drop"></use></svg>55%</p>
+              <div class="range"><span style="left: 6.7%; width: 60%"></span></div>
+            </article>
+            <article class="day">
+              <div class="day-head"><strong>Lun</strong><span>26</span></div>
+              <div class="day-mid">
+                <svg class="day-glyph" aria-hidden="true"><use href="#b-rain"></use></svg>
+                <div class="day-temp"><strong>18°</strong><span>9°</span></div>
+              </div>
+              <p class="day-rain"><svg aria-hidden="true"><use href="#b-drop"></use></svg>40%</p>
+              <div class="range"><span style="left: 0%; width: 60%"></span></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="module radar" aria-labelledby="b-radar-title">
+          <header class="radar-head">
+            <h2 id="b-radar-title">Radar / precipitación</h2>
+            <span>Jaén · radio 40 km · 16:20</span>
+          </header>
+
+          <div class="radar-body">
+            <div class="scope">
+              <svg viewBox="0 0 240 240" role="img" aria-label="Radar circular ilustrativo, sin lluvia cercana">
+                <defs>
+                  <linearGradient id="b-sweep" x1="0" x2="1" y1="0" y2="0">
+                    <stop offset="0" stop-color="#d9562b" stop-opacity=".18" />
+                    <stop offset="1" stop-color="#d9562b" stop-opacity="0" />
+                  </linearGradient>
+                </defs>
+                <circle cx="120" cy="120" r="108" fill="#10110d" stroke="#45463d" stroke-width="1" />
+                <g fill="none" stroke="#4b4c43" stroke-width="1">
+                  <circle cx="120" cy="120" r="86" />
+                  <circle cx="120" cy="120" r="64" />
+                  <circle cx="120" cy="120" r="42" />
+                  <circle cx="120" cy="120" r="20" />
+                  <path d="M12 120h216M120 12v216" />
+                  <path d="M46 46l148 148M194 46 46 194" stroke-dasharray="1 5" stroke-opacity=".65" />
+                </g>
+                <g fill="#9a9485" font-family="IBM Plex Mono, monospace" font-size="6" letter-spacing=".5">
+                  <text x="120" y="6" text-anchor="middle">N</text>
+                  <text x="236" y="122" text-anchor="end">E</text>
+                  <text x="120" y="238" text-anchor="middle">S</text>
+                  <text x="4" y="122">O</text>
+                </g>
+                <g stroke="#777569" stroke-width="1">
+                  <path d="M120 8v5M120 227v5M8 120h5M227 120h5" />
+                </g>
+                <path d="M120 120 203 40 232 120Z" fill="url(#b-sweep)" />
+                <path d="M120 120 203 40" stroke="#d9562b" stroke-opacity=".7" stroke-width="1" />
+                <g opacity=".8">
+                  <path d="M45 84c10-11 23-14 33-8s10 16 3 22-21 7-31 2-10-10-5-16Z" fill="none" stroke="#747b60" stroke-width="1" />
+                  <path d="M53 85c7-6 15-8 22-4" fill="none" stroke="#9a9e7e" stroke-width="1" stroke-opacity=".7" />
+                </g>
+                <g transform="translate(120 120)">
+                  <path d="M-5 0h10M0-5v10" stroke="#f0eadf" stroke-width="1" />
+                  <circle r="2" fill="#d9562b" />
+                </g>
+                <g stroke="#f0eadf" stroke-opacity=".45" stroke-width="1">
+                  <path d="M120 120v7M120 120v-7M120 120h7M120 120h-7" stroke-opacity=".25" />
+                </g>
+                <text x="120" y="148" fill="#d5cebf" font-family="IBM Plex Mono, monospace" font-size="6.5" letter-spacing=".8" text-anchor="middle">JAÉN</text>
+                <text x="120" y="160" fill="#777569" font-family="IBM Plex Mono, monospace" font-size="5.5" letter-spacing=".5" text-anchor="middle">37.7796 N / 3.7849 O</text>
+              </svg>
+              <span class="scope-label">40 km / 5 km grid</span>
+            </div>
+
+            <div class="radar-info">
+              <div>
+                <p class="radar-status-label">Barrido actual · 16:20</p>
+                <p class="radar-status">Sin lluvia<span>cercana · 0,0 mm acumulados<br />Lectura ilustrativa</span></p>
+                <div class="radar-scale">
+                  <div class="radar-scale-bar"><i></i><i></i><i></i><i></i></div>
+                  <div class="radar-scale-labels"><span>Débil</span><span>Moderada</span><span>Intensa</span></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="scan-times" aria-label="Fotogramas del radar">
+                  <span class="is-current">16:20</span><span>16:30</span><span>16:40</span><span>16:50</span><span>17:00</span>
+                </div>
+                <div class="radar-controls" aria-label="Controles del radar">
+                  <button type="button" aria-label="Alejar">−</button>
+                  <span class="zoom-value">1×</span>
+                  <button type="button" aria-label="Acercar">+</button>
+                  <button class="play-button" type="button"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.5v9L10 6 3 1.5Z" fill="currentColor" /></svg>Pausa<span>Barrido automático</span></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="module sun" aria-labelledby="b-sun-title">
+          <header class="sun-head">
+            <h2 id="b-sun-title">Sol / Jaén</h2>
+            <span>Altitud solar · 24,8°</span>
+          </header>
+
+          <div class="sun-total"><strong>11h 14m</strong><span>de luz<br />hoy</span></div>
+
+          <div class="sun-diagram" aria-hidden="true">
+            <svg viewBox="0 0 430 170">
+              <defs>
+                <linearGradient id="sun-arc" x1="0" x2="1" y1="0" y2="0">
+                  <stop offset="0" stop-color="#d9562b" stop-opacity=".38" />
+                  <stop offset="1" stop-color="#d9562b" stop-opacity=".9" />
+                </linearGradient>
+              </defs>
+              <path d="M42 142h346" stroke="#b8afa0" stroke-width="1" />
+              <path d="M86 142A129 129 0 0 1 344 142" fill="none" stroke="#b8afa0" stroke-width="1" stroke-dasharray="2 5" />
+              <path d="M86 142A129 129 0 0 1 300 62" fill="none" stroke="url(#sun-arc)" stroke-width="3" />
+              <g stroke="#a79e8e" stroke-width="1">
+                <path d="M86 142v8M129 92l-6-5M215 51v9M301 92l6-5M344 142v8" />
+              </g>
+              <g fill="#837b6c" font-family="IBM Plex Mono, monospace" font-size="6" letter-spacing=".6">
+                <text x="86" y="163" text-anchor="middle">07:58</text>
+                <text x="344" y="163" text-anchor="middle">19:12</text>
+                <text x="215" y="42" text-anchor="middle">CENIT 13:35</text>
+              </g>
+              <circle cx="300" cy="62" r="13" fill="var(--orange-soft)" />
+              <circle cx="300" cy="62" r="4.5" fill="#d9562b" />
+              <path d="M300 48v6" stroke="#d9562b" stroke-width="1" />
+              <text x="312" y="66" fill="#6a665b" font-family="IBM Plex Mono, monospace" font-size="6.5" letter-spacing=".4">AHORA 16:24</text>
+              <path d="M26 142h-14M418 142h-14" stroke="#b8afa0" stroke-width="1" />
+            </svg>
+          </div>
+
+          <div class="sun-foot">
+            <div><span>Salida</span><strong>07:58</strong></div>
+            <div><span>Puesta</span><strong>19:12</strong></div>
+          </div>
+        </section>
+
+        <footer class="footer">
+          <span>Open-Meteo · datos de demostración · estación WX-01</span>
+          <span>BBDS · Estudio B · Instrumento doméstico</span>
+        </footer>
+      </div>
+    </main>
+  </body>
+</html>

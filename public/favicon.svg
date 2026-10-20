@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="BBDS">
+  <defs>
+    <linearGradient id="ink" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#25231f" />
+      <stop offset="1" stop-color="#11110f" />
+    </linearGradient>
+    <linearGradient id="paper" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fffaf0" />
+      <stop offset="1" stop-color="#e9dfcf" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="118" fill="url(#paper)" />
+  <rect x="32" y="32" width="448" height="448" rx="92" fill="url(#ink)" />
+  <circle cx="384" cy="132" r="28" fill="#e1326d" />
+  <text x="118" y="372" fill="#f7f1e6" font-family="Georgia, 'Times New Roman', serif" font-size="330" font-weight="600" letter-spacing="-24">B</text>
+  <path d="M122 420h268" stroke="#f7f1e6" stroke-opacity=".22" stroke-width="4" stroke-linecap="round" />
+</svg>

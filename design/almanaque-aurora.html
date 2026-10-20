@@ -1,0 +1,1795 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>BBDS · Estudio C · Almanaque aurora</title>
+    <link rel="stylesheet" href="./fonts/fonts.css" />
+    <style>
+      :root {
+        --paper: #f3ede4;
+        --paper-hi: #faf6ef;
+        --ink: #1f1c18;
+        --muted: #675d53;
+        --faint: #948777;
+        --line: rgba(49, 39, 33, 0.13);
+        --line-strong: rgba(49, 39, 33, 0.24);
+        --accent: #cf1f5e;
+        --accent-soft: rgba(217, 35, 99, 0.1);
+        --mint: #249b80;
+        --mint-soft: rgba(36, 155, 128, 0.12);
+        --amber: #a76a1c;
+        --amber-soft: rgba(167, 106, 28, 0.12);
+        --lilac: #6c57a9;
+        --lilac-soft: rgba(108, 87, 169, 0.12);
+        --blue: #3d7c9f;
+        --blue-soft: rgba(61, 124, 159, 0.12);
+        --serif: "Instrument Serif", "Newsreader", Georgia, serif;
+        --sans: "Manrope", sans-serif;
+        --mono: "IBM Plex Mono", monospace;
+        --radius: 28px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 100%;
+        min-width: 1280px;
+        height: 100%;
+        min-height: 800px;
+        margin: 0;
+      }
+
+      body {
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+        background: #171613;
+        color: var(--ink);
+        font-family: var(--sans);
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+      }
+
+      button,
+      a {
+        font: inherit;
+      }
+
+      button {
+        color: inherit;
+      }
+
+      .app {
+        position: relative;
+        isolation: isolate;
+        display: grid;
+        width: 1280px;
+        height: 800px;
+        grid-template-columns: 112px minmax(0, 1fr);
+        overflow: hidden;
+        background: var(--paper);
+      }
+
+      .ambient {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        overflow: hidden;
+        pointer-events: none;
+        background:
+          radial-gradient(34% 40% at 8% -6%, rgba(255, 185, 145, 0.34), transparent 70%),
+          radial-gradient(42% 48% at 88% -8%, rgba(255, 160, 116, 0.72), transparent 68%),
+          radial-gradient(34% 50% at 102% 32%, rgba(207, 31, 94, 0.24), transparent 74%),
+          radial-gradient(50% 56% at -8% 104%, rgba(35, 172, 143, 0.46), transparent 70%),
+          radial-gradient(42% 50% at 46% 58%, rgba(148, 117, 228, 0.28), transparent 74%),
+          radial-gradient(32% 38% at 62% 105%, rgba(240, 193, 122, 0.2), transparent 72%),
+          linear-gradient(145deg, #f7f0e6 0%, #f2ebe1 56%, #eee6dc 100%);
+      }
+
+      .ambient::before {
+        position: absolute;
+        top: -22%;
+        right: -12%;
+        width: 78%;
+        height: 88%;
+        background: linear-gradient(116deg, transparent 12%, rgba(255, 255, 255, 0.28) 30%, rgba(255, 188, 146, 0.16) 38%, rgba(178, 154, 245, 0.1) 50%, transparent 66%);
+        opacity: 0.82;
+        transform: rotate(-8deg);
+        pointer-events: none;
+        content: "";
+      }
+
+      .ambient__grain {
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(rgba(67, 54, 44, 0.22) 0.38px, transparent 0.58px);
+        background-size: 4px 4px;
+        mix-blend-mode: multiply;
+        opacity: 0.04;
+      }
+
+      @keyframes radar-sweep {
+        to { transform: rotate(360deg); }
+      }
+
+      .rail {
+        position: relative;
+        z-index: 3;
+        display: flex;
+        min-height: 0;
+        flex-direction: column;
+        padding: 20px 12px 16px;
+        border-right: 1px solid rgba(52, 42, 35, 0.1);
+        background: linear-gradient(180deg, rgba(255, 251, 245, 0.4), rgba(255, 250, 243, 0.18));
+      }
+
+      .rail-brand {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 7px;
+        padding-bottom: 18px;
+      }
+
+      .monogram {
+        display: grid;
+        width: 48px;
+        height: 48px;
+        place-items: center;
+        border-radius: 17px;
+        background: #1c1916;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+        color: #fbf6ed;
+        font-family: var(--serif);
+        font-size: 32px;
+        font-weight: 400;
+        letter-spacing: -0.03em;
+        line-height: 1;
+      }
+
+      .wordmark {
+        color: var(--ink);
+        font-family: var(--serif);
+        font-size: 14px;
+        font-weight: 400;
+        letter-spacing: 0.1em;
+        line-height: 1;
+      }
+
+      .wordmark-sub {
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 7px;
+        letter-spacing: 0.14em;
+        line-height: 1;
+        text-transform: uppercase;
+      }
+
+      .rail-nav {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        margin-top: 15px;
+      }
+
+      .rail-item {
+        display: flex;
+        width: 100%;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        padding: 3px 0;
+        border: 0;
+        background: transparent;
+        color: var(--muted);
+        cursor: pointer;
+        text-decoration: none;
+      }
+
+      .nav-icon {
+        display: grid;
+        width: 42px;
+        height: 42px;
+        place-items: center;
+        border: 1px solid transparent;
+        border-radius: 15px;
+        transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
+      }
+
+      .nav-icon svg {
+        width: 20px;
+        height: 20px;
+        fill: none;
+        stroke: currentColor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.65;
+      }
+
+      .nav-label {
+        font-family: var(--mono);
+        font-size: 8.5px;
+        letter-spacing: 0.015em;
+        line-height: 1;
+      }
+
+      .rail-item:hover .nav-icon,
+      .rail-item:focus-visible .nav-icon {
+        border-color: rgba(255, 255, 255, 0.55);
+        background: rgba(255, 255, 255, 0.35);
+        color: var(--ink);
+      }
+
+      .rail-item.is-active {
+        color: var(--ink);
+      }
+
+      .rail-item.is-active .nav-icon {
+        border-color: #1d1a17;
+        background: #1d1a17;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        color: #fbf5ec;
+      }
+
+      .rail-item.is-active .nav-label {
+        font-weight: 500;
+      }
+
+      .rail-bottom {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        margin-top: auto;
+      }
+
+      .rail-clock {
+        display: flex;
+        width: 100%;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        padding-top: 12px;
+        border-top: 1px solid var(--line);
+      }
+
+      .rail-clock strong {
+        font-family: var(--serif);
+        font-size: 30px;
+        font-variant-numeric: tabular-nums;
+        font-weight: 400;
+        letter-spacing: -0.025em;
+        line-height: 1;
+      }
+
+      .rail-clock span {
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 7px;
+        letter-spacing: 0.08em;
+        line-height: 1.55;
+        text-align: center;
+        text-transform: uppercase;
+      }
+
+      .demo-tag {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        color: var(--amber);
+        font-family: var(--mono);
+        font-size: 7px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .demo-tag i {
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: var(--amber);
+      }
+
+      .rail-actions {
+        display: flex;
+        gap: 6px;
+      }
+
+      .icon-button {
+        display: grid;
+        width: 44px;
+        height: 44px;
+        place-items: center;
+        padding: 0;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.3);
+        color: var(--muted);
+        cursor: pointer;
+      }
+
+      .icon-button:hover,
+      .icon-button:focus-visible {
+        border-color: rgba(32, 29, 25, 0.28);
+        background: rgba(255, 255, 255, 0.58);
+        color: var(--ink);
+      }
+
+      .icon-button svg {
+        width: 16px;
+        height: 16px;
+        fill: none;
+        stroke: currentColor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.7;
+      }
+
+      .main {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        min-width: 0;
+        min-height: 0;
+        flex-direction: column;
+        padding: 18px 26px 14px 30px;
+      }
+
+      .head {
+        display: flex;
+        height: 92px;
+        flex: none;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 30px;
+        padding: 0 2px 12px;
+      }
+
+      .kicker {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        margin: 0;
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 8.5px;
+        letter-spacing: 0.08em;
+        line-height: 1.2;
+        text-transform: uppercase;
+      }
+
+      .kicker i {
+        width: 19px;
+        height: 1px;
+        background: var(--accent);
+      }
+
+      h1 {
+        margin: 3px 0 0;
+        font-family: var(--serif);
+        font-size: 62px;
+        font-weight: 400;
+        letter-spacing: -0.035em;
+        line-height: 0.8;
+      }
+
+      .location {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin: 8px 0 0;
+        color: var(--muted);
+        font-size: 10.5px;
+        line-height: 1.2;
+      }
+
+      .location svg {
+        width: 11px;
+        height: 11px;
+        flex: none;
+        fill: none;
+        stroke: var(--accent);
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.8;
+      }
+
+      .head-right {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 5px;
+        padding-bottom: 0;
+      }
+
+      .updated {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin: 0;
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 8px;
+        letter-spacing: 0.055em;
+        line-height: 1;
+        text-transform: uppercase;
+      }
+
+      .updated i {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: var(--mint);
+        box-shadow: 0 0 0 4px rgba(36, 155, 128, 0.1);
+      }
+
+      .head-date {
+        display: flex;
+        align-items: flex-start;
+        gap: 6px;
+        margin: 0;
+      }
+
+      .head-date strong {
+        color: var(--ink);
+        font-family: var(--serif);
+        font-size: 46px;
+        font-weight: 400;
+        letter-spacing: -0.02em;
+        line-height: 0.72;
+      }
+
+      .head-date span {
+        padding-top: 1px;
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 7.5px;
+        letter-spacing: 0.08em;
+        line-height: 1.45;
+        text-transform: uppercase;
+      }
+
+      .folio {
+        margin: 0;
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 7.5px;
+        letter-spacing: 0.075em;
+        line-height: 1;
+        text-transform: uppercase;
+      }
+
+      .content {
+        display: grid;
+        min-height: 0;
+        flex: 1;
+        grid-template-columns: minmax(0, 1fr) 424px;
+        grid-template-rows: 286px minmax(0, 1fr);
+        gap: 16px;
+      }
+
+      .now {
+        position: relative;
+        display: flex;
+        min-width: 0;
+        min-height: 0;
+        grid-column: 1;
+        grid-row: 1;
+        flex-direction: column;
+        overflow: hidden;
+        padding: 16px 20px 14px;
+        border: 1px solid rgba(255, 255, 255, 0.62);
+        border-radius: var(--radius);
+        background:
+          linear-gradient(135deg, rgba(255, 252, 247, 0.48), rgba(255, 249, 242, 0.2)),
+          radial-gradient(90% 140% at 0% 0%, rgba(255, 255, 255, 0.16), transparent 60%);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.88),
+          inset 0 -1px 0 rgba(255, 255, 255, 0.16);
+        -webkit-backdrop-filter: blur(18px) saturate(155%) brightness(1.02);
+        backdrop-filter: blur(18px) saturate(155%) brightness(1.02);
+      }
+
+      .now::before {
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background:
+          linear-gradient(118deg, transparent 32%, rgba(255, 255, 255, 0.36) 44%, rgba(255, 255, 255, 0.06) 52%, transparent 62%),
+          radial-gradient(56% 100% at 0% -8%, rgba(255, 255, 255, 0.72), transparent 64%),
+          radial-gradient(58% 94% at 103% 106%, rgba(207, 31, 94, 0.18), transparent 64%),
+          radial-gradient(38% 72% at 58% 6%, rgba(160, 120, 235, 0.13), transparent 72%),
+          radial-gradient(36% 62% at 28% 105%, rgba(45, 180, 150, 0.1), transparent 72%);
+        pointer-events: none;
+        content: "";
+      }
+
+      .now::after {
+        position: absolute;
+        z-index: 2;
+        inset: 0;
+        padding: 1px;
+        border-radius: inherit;
+        background: linear-gradient(132deg, rgba(255, 255, 255, 0.95), rgba(255, 204, 177, 0.28) 18%, rgba(255, 255, 255, 0) 42%, rgba(210, 180, 255, 0.22) 70%, rgba(255, 255, 255, 0.72));
+        -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+        -webkit-mask-composite: xor;
+        mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+        mask-composite: exclude;
+        pointer-events: none;
+        content: "";
+      }
+
+      .now > * {
+        position: relative;
+        z-index: 1;
+      }
+
+      .now-glow {
+        position: absolute;
+        z-index: 0;
+        top: 48%;
+        left: -7%;
+        width: 54%;
+        height: 132%;
+        border-radius: 50%;
+        background: radial-gradient(ellipse at 48% 50%, rgba(255, 177, 137, 0.25), rgba(183, 151, 244, 0.13) 38%, rgba(54, 182, 151, 0.07) 60%, transparent 74%);
+        pointer-events: none;
+        transform: translateY(-50%);
+      }
+
+      .now-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 8px;
+        letter-spacing: 0.085em;
+        line-height: 1;
+        text-transform: uppercase;
+      }
+
+      .now-top span:first-child {
+        color: var(--accent);
+      }
+
+      .now-body {
+        display: flex;
+        min-height: 0;
+        flex: 1;
+        align-items: center;
+        gap: 15px;
+      }
+
+      .now-icon {
+        display: grid;
+        width: 64px;
+        height: 64px;
+        flex: none;
+        place-items: center;
+        border: 1px solid rgba(255, 255, 255, 0.72);
+        border-radius: 50%;
+        background: radial-gradient(circle at 32% 22%, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.08));
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        color: var(--accent);
+      }
+
+      .now-icon svg {
+        width: 43px;
+        height: 43px;
+        fill: none;
+        stroke: currentColor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.35;
+      }
+
+      .now-temp {
+        display: flex;
+        flex: none;
+        align-items: flex-start;
+        color: var(--ink);
+        font-family: var(--serif);
+        font-size: 146px;
+        font-variant-numeric: lining-nums tabular-nums;
+        font-weight: 400;
+        letter-spacing: -0.055em;
+        line-height: 0.66;
+      }
+
+      .now-temp span {
+        margin-top: 3px;
+        color: var(--muted);
+        font-size: 32px;
+        font-weight: 400;
+        letter-spacing: -0.02em;
+      }
+
+      .now-copy {
+        min-width: 0;
+        max-width: 230px;
+      }
+
+      .now-copy h2 {
+        margin: 0;
+        font-family: var(--serif);
+        font-size: 29px;
+        font-style: italic;
+        font-weight: 400;
+        letter-spacing: -0.02em;
+        line-height: 0.95;
+      }
+
+      .now-copy p {
+        margin: 7px 0 0;
+        color: var(--muted);
+        font-size: 10.5px;
+        line-height: 1.5;
+      }
+
+      .now-extremes {
+        display: flex;
+        flex: none;
+        gap: 14px;
+        margin-left: auto;
+        padding-left: 14px;
+        border-left: 1px solid var(--line);
+      }
+
+      .now-extremes div {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .now-extremes span {
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 8px;
+        letter-spacing: 0.06em;
+        line-height: 1;
+        text-transform: uppercase;
+      }
+
+      .now-extremes strong {
+        font-family: var(--serif);
+        font-size: 24px;
+        font-variant-numeric: tabular-nums;
+        font-weight: 400;
+        letter-spacing: -0.02em;
+        line-height: 1;
+        white-space: nowrap;
+      }
+
+      .daylight {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        align-items: end;
+        gap: 12px;
+        margin-top: 5px;
+        padding: 7px 0 4px;
+        border-top: 1px solid rgba(90, 70, 62, 0.15);
+      }
+
+      .daylight-label {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 7.5px;
+        letter-spacing: 0.055em;
+        line-height: 1;
+        text-transform: uppercase;
+      }
+
+      .daylight-label strong {
+        color: var(--ink);
+        font-family: var(--serif);
+        font-size: 16px;
+        font-weight: 400;
+        letter-spacing: 0;
+        line-height: 1;
+      }
+
+      .daylight-label--end {
+        align-items: flex-end;
+        text-align: right;
+      }
+
+      .daylight-track {
+        position: relative;
+        height: 30px;
+      }
+
+      .daylight-arc {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+      }
+
+      .daylight-arc-base,
+      .daylight-arc-live,
+      .daylight-arc-glow {
+        fill: none;
+        stroke-linecap: round;
+        vector-effect: non-scaling-stroke;
+      }
+
+      .daylight-arc-glow {
+        stroke: url("#daylight-gradient");
+        stroke-width: 5px;
+        opacity: 0.1;
+      }
+
+      .daylight-arc-base {
+        stroke: rgba(49, 39, 33, 0.16);
+        stroke-width: 1px;
+      }
+
+      .daylight-arc-live {
+        stroke: url("#daylight-gradient");
+        stroke-width: 1.5px;
+      }
+
+      .daylight-sun {
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        border: 1px solid #a76a1c;
+        border-radius: 50%;
+        background: #fff8e9;
+        transform: translate(-50%, -50%);
+      }
+
+      .daylight-sun::after {
+        position: absolute;
+        inset: -7px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(167, 106, 28, 0.28), transparent 68%);
+        content: "";
+      }
+
+      .now-metrics {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        margin: 0;
+        padding-top: 5px;
+      }
+
+      .now-metric {
+        min-width: 0;
+        padding: 0 13px;
+        border-left: 1px solid rgba(90, 70, 62, 0.12);
+      }
+
+      .now-metric:first-child {
+        padding-left: 0;
+        border-left: 0;
+      }
+
+      .now-metric dt {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        overflow: hidden;
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 8.5px;
+        letter-spacing: 0.055em;
+        line-height: 1;
+        text-overflow: ellipsis;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+
+      .now-metric dt i {
+        width: 4px;
+        height: 4px;
+        flex: none;
+        border-radius: 50%;
+        background: var(--metric);
+      }
+
+      .now-metric dd {
+        margin: 5px 0 0;
+        color: var(--ink);
+        font-size: 17px;
+        font-variant-numeric: tabular-nums;
+        font-weight: 720;
+        letter-spacing: -0.025em;
+        line-height: 1;
+        white-space: nowrap;
+      }
+
+      .forecast {
+        position: relative;
+        display: flex;
+        min-width: 0;
+        min-height: 0;
+        grid-column: 1;
+        grid-row: 2;
+        flex-direction: column;
+        padding: 0 3px;
+      }
+
+      .forecast-head {
+        display: flex;
+        flex: none;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 0 0 8px;
+      }
+
+      .forecast-head h2 {
+        margin: 0;
+        font-family: var(--serif);
+        font-size: 30px;
+        font-weight: 400;
+        letter-spacing: -0.025em;
+        line-height: 1;
+      }
+
+      .forecast-head p {
+        margin: 0 0 1px;
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 8px;
+        letter-spacing: 0.055em;
+        line-height: 1.4;
+        text-align: right;
+        text-transform: uppercase;
+      }
+
+      .forecast-rows {
+        display: flex;
+        min-height: 0;
+        flex: 1;
+        flex-direction: column;
+        border-top: 1px solid var(--line-strong);
+      }
+
+      .forecast-row {
+        display: grid;
+        min-height: 0;
+        flex: 1;
+        grid-template-columns: 66px 28px minmax(92px, 1fr) 40px minmax(110px, 1.2fr) 36px 46px;
+        align-items: center;
+        gap: 10px;
+        padding: 0 4px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .forecast-row:last-child {
+        border-bottom: 0;
+      }
+
+      .forecast-row.is-today {
+        background: linear-gradient(90deg, rgba(217, 35, 99, 0.085), rgba(217, 35, 99, 0.025) 62%, transparent);
+        box-shadow: inset 2px 0 0 var(--accent);
+      }
+
+      .row-day {
+        display: flex;
+        min-width: 0;
+        flex-direction: column;
+        gap: 3px;
+      }
+
+      .row-day strong {
+        color: var(--ink);
+        font-family: var(--serif);
+        font-size: 18px;
+        font-weight: 400;
+        letter-spacing: -0.015em;
+        line-height: 1;
+      }
+
+      .row-day span {
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 8px;
+        letter-spacing: 0.025em;
+        line-height: 1;
+        text-transform: uppercase;
+      }
+
+      .forecast-row.is-today .row-day strong,
+      .forecast-row.is-today .row-day span {
+        color: var(--accent);
+      }
+
+      .row-icon {
+        width: 28px;
+        height: 28px;
+        fill: none;
+        stroke: #675d54;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.4;
+      }
+
+      .forecast-row.is-today .row-icon {
+        stroke: var(--accent);
+      }
+
+      .row-condition {
+        overflow: hidden;
+        color: var(--muted);
+        font-size: 11px;
+        line-height: 1.2;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .forecast-row.is-today .row-condition {
+        color: var(--ink);
+      }
+
+      .row-max {
+        color: var(--ink);
+        font-family: var(--serif);
+        font-size: 24px;
+        font-variant-numeric: tabular-nums;
+        font-weight: 400;
+        letter-spacing: -0.02em;
+        line-height: 1;
+        text-align: right;
+      }
+
+      .row-range {
+        position: relative;
+        height: 5px;
+        background: rgba(65, 52, 43, 0.12);
+      }
+
+      .row-range span {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        background: rgba(183, 121, 34, 0.72);
+      }
+
+      .forecast-row.is-today .row-range span {
+        background: var(--accent);
+      }
+
+      .row-min {
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 10px;
+        font-variant-numeric: tabular-nums;
+        line-height: 1;
+      }
+
+      .row-rain {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 3px;
+        color: var(--lilac);
+        font-family: var(--mono);
+        font-size: 9px;
+        line-height: 1;
+      }
+
+      .row-rain svg {
+        width: 8px;
+        height: 8px;
+        fill: none;
+        stroke: currentColor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.3;
+      }
+
+      .forecast-foot {
+        display: flex;
+        flex: none;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding-top: 7px;
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 8px;
+        letter-spacing: 0.06em;
+        line-height: 1;
+        text-transform: uppercase;
+      }
+
+      .forecast-foot strong {
+        color: var(--accent);
+        font-weight: 500;
+      }
+
+      .radar {
+        position: relative;
+        display: flex;
+        min-width: 0;
+        min-height: 0;
+        grid-column: 2;
+        grid-row: 1 / 3;
+        flex-direction: column;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: var(--radius);
+        background: linear-gradient(155deg, rgba(37, 29, 38, 0.93), rgba(17, 26, 30, 0.9));
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        color: #f7f0e7;
+        -webkit-backdrop-filter: blur(18px) saturate(130%);
+        backdrop-filter: blur(18px) saturate(130%);
+      }
+
+      .radar::before {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        border-radius: inherit;
+        background:
+          radial-gradient(68% 45% at 104% 0%, rgba(217, 35, 99, 0.24), transparent 65%),
+          radial-gradient(44% 40% at -4% 102%, rgba(41, 166, 139, 0.2), transparent 67%),
+          radial-gradient(40% 30% at 52% 35%, rgba(136, 105, 219, 0.12), transparent 70%);
+        pointer-events: none;
+        content: "";
+      }
+
+      .radar > * {
+        position: relative;
+        z-index: 1;
+      }
+
+      .radar::after {
+        position: absolute;
+        z-index: 2;
+        inset: 0;
+        padding: 1px;
+        border-radius: inherit;
+        background: linear-gradient(158deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.02) 28%, rgba(255, 255, 255, 0) 66%, rgba(255, 255, 255, 0.14));
+        -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+        -webkit-mask-composite: xor;
+        mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+        mask-composite: exclude;
+        pointer-events: none;
+        content: "";
+      }
+
+      .radar-head {
+        display: flex;
+        flex: none;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 17px 18px 11px;
+      }
+
+      .radar-kicker {
+        margin: 0;
+        color: #cbbbae;
+        font-family: var(--mono);
+        font-size: 7.5px;
+        letter-spacing: 0.095em;
+        line-height: 1;
+        text-transform: uppercase;
+      }
+
+      .radar h2 {
+        margin: 3px 0 0;
+        color: #fbf5ec;
+        font-family: var(--serif);
+        font-size: 26px;
+        font-weight: 400;
+        letter-spacing: -0.02em;
+        line-height: 1;
+      }
+
+      .radar-meta {
+        margin: 0;
+        color: #b9aa9d;
+        font-family: var(--mono);
+        font-size: 7.5px;
+        letter-spacing: 0.045em;
+        line-height: 1.6;
+        text-align: right;
+        text-transform: uppercase;
+      }
+
+      .radar-meta strong {
+        color: #fbf5ec;
+        font-weight: 500;
+      }
+
+      .radar-stage {
+        position: relative;
+        min-height: 0;
+        flex: 1;
+        overflow: hidden;
+        border-top: 1px solid rgba(255, 255, 255, 0.09);
+      }
+
+      .radar-map {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      .radar-map .land {
+        fill: #192022;
+      }
+
+      .radar-map .park {
+        fill: rgba(81, 175, 145, 0.12);
+        stroke: rgba(100, 202, 169, 0.2);
+        stroke-width: 1;
+      }
+
+      .radar-map .river {
+        fill: none;
+        stroke: rgba(94, 158, 185, 0.33);
+        stroke-width: 9;
+      }
+
+      .radar-map .road-major {
+        fill: none;
+        stroke: rgba(239, 232, 221, 0.17);
+        stroke-linecap: round;
+        stroke-width: 6;
+      }
+
+      .radar-map .road {
+        fill: none;
+        stroke: rgba(239, 232, 221, 0.1);
+        stroke-linecap: round;
+        stroke-width: 1.8;
+      }
+
+      .radar-map .blocks {
+        fill: rgba(239, 232, 221, 0.045);
+        stroke: rgba(239, 232, 221, 0.08);
+        stroke-width: 1;
+      }
+
+      .radar-map .map-label {
+        fill: rgba(239, 232, 221, 0.45);
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 1.05px;
+      }
+
+      .radar-map .rings {
+        fill: none;
+        stroke: rgba(239, 232, 221, 0.18);
+        stroke-dasharray: 2 7;
+        stroke-width: 1;
+      }
+
+      .radar-map .rings-axis {
+        stroke: rgba(239, 232, 221, 0.09);
+        stroke-width: 1;
+      }
+
+      .radar-map .rain {
+        opacity: 0.94;
+      }
+
+      .radar-map .home-halo {
+        fill: rgba(217, 35, 99, 0.22);
+      }
+
+      .radar-map .home-dot {
+        fill: #ff6f9c;
+      }
+
+      .radar-map .home-label {
+        fill: #f7e8e5;
+        font-family: var(--mono);
+        font-size: 8px;
+        letter-spacing: 1px;
+      }
+
+      .radar-sweep {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 92%;
+        aspect-ratio: 1;
+        margin: -46% 0 0 -46%;
+        transform-origin: center;
+        pointer-events: none;
+        background: conic-gradient(
+          from 122deg,
+          transparent 0deg,
+          rgba(255, 255, 255, 0.01) 12deg,
+          rgba(255, 255, 255, 0.055) 30deg,
+          transparent 52deg
+        );
+        mix-blend-mode: screen;
+        will-change: transform;
+        animation: radar-sweep 16s linear infinite;
+      }
+
+      .radar-status {
+        position: absolute;
+        top: 13px;
+        left: 15px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin: 0;
+        color: #c8b9ad;
+        font-family: var(--mono);
+        font-size: 8px;
+        letter-spacing: 0.065em;
+        line-height: 1;
+        text-transform: uppercase;
+      }
+
+      .radar-status i {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: var(--mint);
+        box-shadow: 0 0 0 4px rgba(36, 155, 128, 0.11);
+      }
+
+      .radar-zoom {
+        position: absolute;
+        top: 13px;
+        right: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        align-items: stretch;
+      }
+
+      .radar-zoom button {
+        display: grid;
+        width: 42px;
+        height: 42px;
+        place-items: center;
+        padding: 0;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 13px;
+        background: rgba(255, 255, 255, 0.075);
+        color: #f4ece3;
+        cursor: pointer;
+      }
+
+      .radar-zoom button:hover,
+      .radar-zoom button:focus-visible {
+        border-color: rgba(255, 255, 255, 0.46);
+        background: rgba(255, 255, 255, 0.13);
+      }
+
+      .radar-zoom button svg {
+        width: 13px;
+        height: 13px;
+        fill: none;
+        stroke: currentColor;
+        stroke-linecap: round;
+        stroke-width: 1.9;
+      }
+
+      .radar-zoom span {
+        display: grid;
+        min-height: 21px;
+        place-items: center;
+        color: #b7a99c;
+        font-family: var(--mono);
+        font-size: 6.8px;
+        letter-spacing: 0.02em;
+      }
+
+      .radar-scale {
+        position: absolute;
+        right: 15px;
+        bottom: 13px;
+        color: #a89b8f;
+        font-family: var(--mono);
+        font-size: 6.8px;
+        letter-spacing: 0.035em;
+        text-transform: uppercase;
+      }
+
+      .radar-scale span {
+        display: inline-block;
+        width: 34px;
+        height: 1px;
+        margin: 0 5px 2px 0;
+        background: rgba(239, 232, 221, 0.35);
+      }
+
+      .radar-foot {
+        display: flex;
+        flex: none;
+        align-items: center;
+        gap: 12px;
+        padding: 11px 16px 14px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        background: linear-gradient(180deg, rgba(17, 22, 23, 0), rgba(14, 17, 19, 0.34));
+      }
+
+      .radar-legend {
+        width: 116px;
+        flex: none;
+      }
+
+      .radar-legend-bar {
+        height: 4px;
+        background: linear-gradient(90deg, #5ac7aa 0%, #eacb6f 52%, #e46f91 100%);
+      }
+
+      .radar-legend-labels {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 4px;
+        color: #a99b8f;
+        font-family: var(--mono);
+        font-size: 7.2px;
+        letter-spacing: 0.035em;
+        text-transform: uppercase;
+      }
+
+      .radar-note {
+        min-width: 0;
+        color: #c0b2a5;
+        font-family: var(--mono);
+        font-size: 7.5px;
+        letter-spacing: 0.03em;
+        line-height: 1.5;
+        text-transform: uppercase;
+      }
+
+      .radar-note strong {
+        display: block;
+        color: #f7f0e7;
+        font-weight: 500;
+      }
+
+      .radar-play {
+        display: flex;
+        height: 40px;
+        flex: none;
+        align-items: center;
+        gap: 6px;
+        margin-left: auto;
+        padding: 0 12px;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        border-radius: 13px;
+        background: rgba(255, 255, 255, 0.075);
+        color: #f7f0e7;
+        cursor: pointer;
+        font-family: var(--mono);
+        font-size: 7.5px;
+        letter-spacing: 0.055em;
+        text-transform: uppercase;
+      }
+
+      .radar-play:hover,
+      .radar-play:focus-visible {
+        border-color: rgba(255, 255, 255, 0.46);
+        background: rgba(255, 255, 255, 0.13);
+      }
+
+      .radar-play svg {
+        width: 10px;
+        height: 10px;
+        fill: currentColor;
+      }
+
+      .icon-set {
+        position: absolute;
+        width: 0;
+        height: 0;
+        overflow: hidden;
+      }
+
+      @supports not (mask-composite: exclude) {
+        .now::after,
+        .radar::after {
+          display: none;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.001ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.001ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <svg class="icon-set" aria-hidden="true">
+      <symbol id="i-home" viewBox="0 0 24 24">
+        <path d="M3.8 10.7 12 4l8.2 6.7V20h-5.4v-5.2H9.2V20H3.8Z" />
+      </symbol>
+      <symbol id="i-calendar" viewBox="0 0 24 24">
+        <rect x="4" y="5.5" width="16" height="15" rx="2.2" />
+        <path d="M8 3.8v3.5M16 3.8v3.5M4 10h16M8.3 14h2M13.7 14h2M8.3 17.2h2" />
+      </symbol>
+      <symbol id="i-list" viewBox="0 0 24 24">
+        <path d="M9 6.2h10M9 12h10M9 17.8h10" />
+        <path d="m4.2 6.2.8.8 1.5-1.7M4.2 12l.8.8 1.5-1.7M4.2 17.8l.8.8 1.5-1.7" />
+      </symbol>
+      <symbol id="i-spray" viewBox="0 0 24 24">
+        <path d="M8.5 8.5h7v11.3h-7zM10 8.5V5.2h4v3.3M14 5.2h4M14.8 2.8h2.5M14 11.8h1.8M14 15.2h1.8M7.6 8.5H5.8" />
+      </symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="4.2" />
+        <path d="M12 2.8v2.3M12 18.9v2.3M2.8 12h2.3M18.9 12h2.3M5.5 5.5l1.6 1.6M16.9 16.9l1.6 1.6M5.5 18.5l1.6-1.6M16.9 7.1l1.6-1.6" />
+      </symbol>
+      <symbol id="i-image" viewBox="0 0 24 24">
+        <rect x="3.8" y="4.5" width="16.4" height="15" rx="2.4" />
+        <circle cx="8.2" cy="9" r="1.4" />
+        <path d="m4.7 17 4.6-4.4 3.1 3 2.3-2.1 4.8 4.4" />
+      </symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24">
+        <path d="M19.7 14.6A8 8 0 0 1 9.4 4.3 8.1 8.1 0 1 0 19.7 14.6Z" />
+      </symbol>
+      <symbol id="i-pin" viewBox="0 0 24 24">
+        <path d="M12 21s6-5.4 6-10a6 6 0 1 0-12 0c0 4.6 6 10 6 10Z" />
+        <circle cx="12" cy="11" r="2.1" />
+      </symbol>
+      <symbol id="i-drop" viewBox="0 0 12 12">
+        <path d="M6 1.4C4.6 3.4 3.1 5.1 3.1 7a2.9 2.9 0 0 0 5.8 0C8.9 5.1 7.4 3.4 6 1.4Z" />
+      </symbol>
+      <symbol id="i-pause" viewBox="0 0 14 14">
+        <rect x="3" y="2" width="3" height="10" rx="0.6" />
+        <rect x="8" y="2" width="3" height="10" rx="0.6" />
+      </symbol>
+      <symbol id="i-play" viewBox="0 0 14 14">
+        <path d="M3 2.2v9.6L11.5 7 3 2.2Z" />
+      </symbol>
+      <symbol id="i-minus" viewBox="0 0 16 16">
+        <path d="M3.5 8h9" />
+      </symbol>
+      <symbol id="i-plus" viewBox="0 0 16 16">
+        <path d="M8 3.5v9M3.5 8h9" />
+      </symbol>
+      <symbol id="w-partly" viewBox="0 0 48 48">
+        <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.55">
+          <circle cx="18" cy="17" r="7.4" />
+          <path d="M18 3.5v4M18 26.5v4M4.5 17h4M27.5 17h4M8.4 7.4l2.8 2.8M24.8 23.8l2.8 2.8M8.4 26.6l2.8-2.8M24.8 10.2l2.8-2.8" />
+          <path d="M19.5 34h16.4a6.3 6.3 0 0 0 .2-12.6 9.2 9.2 0 0 0-16.6 2.2A5.2 5.2 0 0 0 19.5 34Z" />
+        </g>
+      </symbol>
+      <symbol id="w-cloud" viewBox="0 0 48 48">
+        <path d="M14.5 35h20.7a7 7 0 0 0 .3-14 10.2 10.2 0 0 0-18.4 2.5A5.8 5.8 0 0 0 14.5 35Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.55" />
+      </symbol>
+      <symbol id="w-rain" viewBox="0 0 48 48">
+        <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.55">
+          <path d="M14.5 29h20.7a7 7 0 0 0 .3-14 10.2 10.2 0 0 0-18.4 2.5A5.8 5.8 0 0 0 14.5 29Z" />
+          <path d="m17 35-2 5M25 35l-2 5M33 35l-2 5" />
+        </g>
+      </symbol>
+      <symbol id="w-storm" viewBox="0 0 48 48">
+        <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.55">
+          <path d="M14.5 28h20.7a7 7 0 0 0 .3-14 10.2 10.2 0 0 0-18.4 2.5A5.8 5.8 0 0 0 14.5 28Z" />
+          <path d="m25 31-4 8h7l-3 6" />
+          <path d="M17 35.5l-1.5 4M35 35.5l-1.5 4" />
+        </g>
+      </symbol>
+      <symbol id="w-sun" viewBox="0 0 48 48">
+        <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.55">
+          <circle cx="24" cy="24" r="8" />
+          <path d="M24 7v5M24 36v5M7 24h5M36 24h5M12 12l3.5 3.5M32.5 32.5 36 36M12 36l3.5-3.5M32.5 15.5 36 12" />
+        </g>
+      </symbol>
+    </svg>
+
+    <main class="app">
+      <div class="ambient" aria-hidden="true">
+        <span class="ambient__grain"></span>
+      </div>
+
+      <aside class="rail">
+        <div class="rail-brand">
+          <span class="monogram">B</span>
+          <span class="wordmark">BBDS</span>
+          <span class="wordmark-sub">Jaén</span>
+        </div>
+
+        <nav class="rail-nav" aria-label="Secciones">
+          <a class="rail-item" href="#home">
+            <span class="nav-icon"><svg aria-hidden="true"><use href="#i-home"></use></svg></span>
+            <span class="nav-label">Hoy</span>
+          </a>
+          <a class="rail-item" href="#agenda">
+            <span class="nav-icon"><svg aria-hidden="true"><use href="#i-calendar"></use></svg></span>
+            <span class="nav-label">Agenda</span>
+          </a>
+          <a class="rail-item" href="#lists">
+            <span class="nav-icon"><svg aria-hidden="true"><use href="#i-list"></use></svg></span>
+            <span class="nav-label">Listas</span>
+          </a>
+          <a class="rail-item" href="#cleaning">
+            <span class="nav-icon"><svg aria-hidden="true"><use href="#i-spray"></use></svg></span>
+            <span class="nav-label">Limpieza</span>
+          </a>
+          <a class="rail-item is-active" href="#weather" aria-current="page">
+            <span class="nav-icon"><svg aria-hidden="true"><use href="#i-sun"></use></svg></span>
+            <span class="nav-label">Tiempo</span>
+          </a>
+        </nav>
+
+        <div class="rail-bottom">
+          <div class="rail-clock"><strong>16:34</strong><span>Martes<br />20 oct 26</span></div>
+          <span class="demo-tag"><i></i>Demo local</span>
+          <div class="rail-actions">
+            <button class="icon-button" type="button" aria-label="Abrir galería" title="Abrir galería"><svg aria-hidden="true"><use href="#i-image"></use></svg></button>
+            <button class="icon-button" type="button" aria-label="Modo noche" title="Modo noche"><svg aria-hidden="true"><use href="#i-moon"></use></svg></button>
+          </div>
+        </div>
+      </aside>
+
+      <section class="main">
+        <header class="head">
+          <div>
+            <p class="kicker"><i></i>Fuera de casa · Martes</p>
+            <h1>El tiempo</h1>
+            <p class="location"><svg aria-hidden="true"><use href="#i-pin"></use></svg>Jaén · 37.7796° N, 3.7849° O</p>
+          </div>
+          <div class="head-right">
+            <p class="updated"><i></i>Actualizado 16:34</p>
+            <p class="head-date"><strong>20</strong><span>Oct<br />2026</span></p>
+            <p class="folio">Día 293 · Semana 43</p>
+          </div>
+        </header>
+
+        <div class="content">
+          <section class="now" aria-label="Tiempo actual">
+            <span class="now-glow" aria-hidden="true"></span>
+            <div class="now-top"><span>Ahora / exterior</span><span>Observación 16:34</span></div>
+
+            <div class="now-body">
+              <div class="now-icon" aria-hidden="true">
+                <svg><use href="#w-partly"></use></svg>
+              </div>
+              <div class="now-temp">21<span>°</span></div>
+              <div class="now-copy">
+                <h2>Casi despejado</h2>
+                <p>Sensación de 21° · Viento suave del suroeste</p>
+              </div>
+              <div class="now-extremes">
+                <div><span>Máx</span><strong>23°</strong></div>
+                <div><span>Mín</span><strong>12°</strong></div>
+              </div>
+            </div>
+
+            <div class="daylight" aria-label="Luz del día: amanece a las 07:58 y anochece a las 19:12">
+              <span class="daylight-label">Amanece<strong>07:58</strong></span>
+              <div class="daylight-track" aria-hidden="true">
+                <svg class="daylight-arc" viewBox="0 0 600 30" preserveAspectRatio="none">
+                  <defs>
+                    <linearGradient id="daylight-gradient" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0" stop-color="#edb387" />
+                      <stop offset="0.4" stop-color="#e6c46f" />
+                      <stop offset="0.74" stop-color="#e79a9f" />
+                      <stop offset="0.9" stop-color="#cf1f5e" />
+                    </linearGradient>
+                  </defs>
+                  <path class="daylight-arc-glow" d="M2 27 Q300 1 598 27" pathLength="100" stroke="url(#daylight-gradient)" vector-effect="non-scaling-stroke" />
+                  <path class="daylight-arc-base" d="M2 27 Q300 1 598 27" pathLength="100" stroke="rgba(49, 39, 33, 0.16)" vector-effect="non-scaling-stroke" />
+                  <path class="daylight-arc-live" d="M2 27 Q300 1 598 27" pathLength="100" stroke="url(#daylight-gradient)" stroke-dasharray="76.6 100" vector-effect="non-scaling-stroke" />
+                </svg>
+                <i class="daylight-sun" style="left: 76.6%; top: 59%"></i>
+              </div>
+              <span class="daylight-label daylight-label--end">Anochece<strong>19:12</strong></span>
+            </div>
+
+            <dl class="now-metrics">
+              <div class="now-metric" style="--metric: var(--mint)">
+                <dt><i></i>Humedad</dt><dd>46%</dd>
+              </div>
+              <div class="now-metric" style="--metric: var(--blue)">
+                <dt><i></i>Viento</dt><dd>11 km/h</dd>
+              </div>
+              <div class="now-metric" style="--metric: var(--lilac)">
+                <dt><i></i>Lluvia</dt><dd>10%</dd>
+              </div>
+              <div class="now-metric" style="--metric: var(--amber)">
+                <dt><i></i>UV</dt><dd>4</dd>
+              </div>
+            </dl>
+          </section>
+
+          <section class="forecast" aria-labelledby="forecast-title">
+            <header class="forecast-head">
+              <h2 id="forecast-title">Previsión</h2>
+              <p>Siete días · 20—26 oct<br />Temperatura °C · escala 9—24</p>
+            </header>
+
+            <div class="forecast-rows">
+              <article class="forecast-row is-today">
+                <div class="row-day"><strong>Hoy</strong><span>20 oct</span></div>
+                <svg class="row-icon" aria-hidden="true"><use href="#w-partly"></use></svg>
+                <span class="row-condition">Casi despejado</span>
+                <span class="row-max">23°</span>
+                <div class="row-range"><span style="left: 20%; width: 73.3%"></span></div>
+                <span class="row-min">12°</span>
+                <span class="row-rain"><svg aria-hidden="true"><use href="#i-drop"></use></svg>10%</span>
+              </article>
+              <article class="forecast-row">
+                <div class="row-day"><strong>Mié</strong><span>21 oct</span></div>
+                <svg class="row-icon" aria-hidden="true"><use href="#w-rain"></use></svg>
+                <span class="row-condition">Lluvia</span>
+                <span class="row-max">20°</span>
+                <div class="row-range"><span style="left: 13.3%; width: 60%"></span></div>
+                <span class="row-min">11°</span>
+                <span class="row-rain"><svg aria-hidden="true"><use href="#i-drop"></use></svg>65%</span>
+              </article>
+              <article class="forecast-row">
+                <div class="row-day"><strong>Jue</strong><span>22 oct</span></div>
+                <svg class="row-icon" aria-hidden="true"><use href="#w-cloud"></use></svg>
+                <span class="row-condition">Nubes</span>
+                <span class="row-max">19°</span>
+                <div class="row-range"><span style="left: 13.3%; width: 53.3%"></span></div>
+                <span class="row-min">11°</span>
+                <span class="row-rain"><svg aria-hidden="true"><use href="#i-drop"></use></svg>20%</span>
+              </article>
+              <article class="forecast-row">
+                <div class="row-day"><strong>Vie</strong><span>23 oct</span></div>
+                <svg class="row-icon" aria-hidden="true"><use href="#w-partly"></use></svg>
+                <span class="row-condition">Claros</span>
+                <span class="row-max">21°</span>
+                <div class="row-range"><span style="left: 20%; width: 60%"></span></div>
+                <span class="row-min">12°</span>
+                <span class="row-rain"><svg aria-hidden="true"><use href="#i-drop"></use></svg>5%</span>
+              </article>
+              <article class="forecast-row">
+                <div class="row-day"><strong>Sáb</strong><span>24 oct</span></div>
+                <svg class="row-icon" aria-hidden="true"><use href="#w-sun"></use></svg>
+                <span class="row-condition">Despejado</span>
+                <span class="row-max">22°</span>
+                <div class="row-range"><span style="left: 26.7%; width: 60%"></span></div>
+                <span class="row-min">13°</span>
+                <span class="row-rain"><svg aria-hidden="true"><use href="#i-drop"></use></svg>15%</span>
+              </article>
+              <article class="forecast-row">
+                <div class="row-day"><strong>Dom</strong><span>25 oct</span></div>
+                <svg class="row-icon" aria-hidden="true"><use href="#w-storm"></use></svg>
+                <span class="row-condition">Tormenta</span>
+                <span class="row-max">19°</span>
+                <div class="row-range"><span style="left: 6.7%; width: 60%"></span></div>
+                <span class="row-min">10°</span>
+                <span class="row-rain"><svg aria-hidden="true"><use href="#i-drop"></use></svg>55%</span>
+              </article>
+              <article class="forecast-row">
+                <div class="row-day"><strong>Lun</strong><span>26 oct</span></div>
+                <svg class="row-icon" aria-hidden="true"><use href="#w-rain"></use></svg>
+                <span class="row-condition">Chubascos</span>
+                <span class="row-max">18°</span>
+                <div class="row-range"><span style="left: 0%; width: 60%"></span></div>
+                <span class="row-min">9°</span>
+                <span class="row-rain"><svg aria-hidden="true"><use href="#i-drop"></use></svg>40%</span>
+              </article>
+            </div>
+
+            <footer class="forecast-foot"><span>Lluvia más probable</span><span>Mié · <strong>65%</strong></span></footer>
+          </section>
+
+          <aside class="radar" aria-labelledby="radar-title">
+            <header class="radar-head">
+              <div>
+                <p class="radar-kicker">Radar de lluvia · lectura local</p>
+                <h2 id="radar-title">Jaén y alrededores</h2>
+              </div>
+              <p class="radar-meta"><strong>16:34</strong><br />Animación local</p>
+            </header>
+
+            <div class="radar-stage">
+              <svg class="radar-map" viewBox="0 0 640 560" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                <defs>
+                  <radialGradient id="aurora-rain-light">
+                    <stop offset="0" stop-color="#5ed0b3" stop-opacity=".72" />
+                    <stop offset="52%" stop-color="#6ed7b7" stop-opacity=".34" />
+                    <stop offset="100%" stop-color="#6ed7b7" stop-opacity="0" />
+                  </radialGradient>
+                  <radialGradient id="aurora-rain-mid">
+                    <stop offset="0" stop-color="#f0cb6f" stop-opacity=".8" />
+                    <stop offset="48%" stop-color="#a7d48d" stop-opacity=".35" />
+                    <stop offset="100%" stop-color="#a7d48d" stop-opacity="0" />
+                  </radialGradient>
+                  <radialGradient id="aurora-rain-heavy">
+                    <stop offset="0" stop-color="#ef7296" stop-opacity=".82" />
+                    <stop offset="48%" stop-color="#f0c276" stop-opacity=".34" />
+                    <stop offset="100%" stop-color="#f0c276" stop-opacity="0" />
+                  </radialGradient>
+                </defs>
+
+                <rect class="land" width="640" height="560" />
+
+                <path class="park" d="M-20 372c56-42 123-49 167-23 35 21 30 65 3 91-44 42-126 53-170 24z" />
+                <path class="park" d="M424 248c39-22 85-17 107 8 20 23 8 56-25 70-37 15-85 4-96-24-6-17 2-38 14-54z" />
+                <path class="river" d="M-30 466c84-39 145-24 211-4 90 27 137 17 201-16 67-35 157-42 302 4" />
+
+                <path class="road-major" d="M-25 137c104 3 159 45 223 99 57 48 116 75 198 85 92 11 168 46 256 107" />
+                <path class="road-major" d="M159 -24c35 77 38 148 27 218-16 103-3 170 63 249 34 41 49 81 53 141" />
+                <path class="road" d="M-10 296c65-14 117-42 173-40 64 3 103 47 167 52 70 6 128-36 191-53 48-13 91-12 139-1" />
+                <path class="road" d="M242 573c10-90 33-153 97-203 50-39 83-91 91-167 4-42 22-81 59-122" />
+                <path class="road" d="M386 562c-15-68-5-119 38-165 41-44 63-84 68-148" />
+
+                <g class="blocks">
+                  <rect x="259" y="194" width="76" height="45" rx="5" />
+                  <rect x="346" y="202" width="49" height="35" rx="5" />
+                  <rect x="269" y="250" width="55" height="31" rx="5" />
+                  <rect x="334" y="249" width="84" height="43" rx="5" />
+                  <rect x="230" y="312" width="61" height="38" rx="5" />
+                  <rect x="301" y="307" width="47" height="30" rx="5" />
+                  <rect x="360" y="313" width="76" height="47" rx="5" />
+                  <rect x="446" y="292" width="57" height="37" rx="5" />
+                  <rect x="183" y="250" width="44" height="29" rx="5" />
+                </g>
+
+                <g class="map-label">
+                  <text x="318" y="202" text-anchor="middle">JAÉN</text>
+                  <text x="318" y="342" text-anchor="middle">CENTRO</text>
+                  <text x="407" y="122">N-321</text>
+                  <text x="390" y="451">A-316</text>
+                </g>
+
+                <g class="rain">
+                  <ellipse cx="105" cy="230" rx="122" ry="62" fill="url(#aurora-rain-light)" />
+                  <ellipse cx="195" cy="276" rx="88" ry="48" fill="url(#aurora-rain-mid)" />
+                  <ellipse cx="75" cy="365" rx="88" ry="59" fill="url(#aurora-rain-light)" />
+                  <ellipse cx="246" cy="178" rx="62" ry="35" fill="url(#aurora-rain-heavy)" />
+                  <ellipse cx="436" cy="304" rx="92" ry="42" fill="url(#aurora-rain-mid)" />
+                  <ellipse cx="436" cy="304" rx="36" ry="17" fill="url(#aurora-rain-heavy)" />
+                  <ellipse cx="532" cy="358" rx="93" ry="42" fill="url(#aurora-rain-light)" />
+                </g>
+
+                <g class="rings">
+                  <circle cx="320" cy="280" r="88" />
+                  <circle cx="320" cy="280" r="158" />
+                  <circle cx="320" cy="280" r="228" />
+                  <path class="rings-axis" d="M320 42v476M76 280h488" />
+                </g>
+
+                <g transform="translate(320 280)">
+                  <circle class="home-halo" r="19" />
+                  <circle class="home-dot" r="4.5" />
+                  <text class="home-label" x="12" y="-12">BBDS</text>
+                </g>
+              </svg>
+
+              <div class="radar-sweep" aria-hidden="true"></div>
+              <p class="radar-status"><i></i>Sin lluvia en Jaén · ecos débiles</p>
+
+              <div class="radar-zoom" aria-label="Controles del radar">
+                <button type="button" aria-label="Alejar"><svg aria-hidden="true"><use href="#i-minus"></use></svg></button>
+                <span>1×</span>
+                <button type="button" aria-label="Acercar"><svg aria-hidden="true"><use href="#i-plus"></use></svg></button>
+              </div>
+
+              <span class="radar-scale"><span></span>10 km / 5 km</span>
+            </div>
+
+            <footer class="radar-foot">
+              <div class="radar-legend">
+                <div class="radar-legend-bar"></div>
+                <div class="radar-legend-labels"><span>Débil</span><span>Intensa</span></div>
+              </div>
+              <p class="radar-note"><strong>Lluvia débil en la comarca</strong>Hoy 10% · mapa ilustrativo</p>
+              <button class="radar-play" type="button" aria-label="Pausar animación del radar"><svg aria-hidden="true"><use href="#i-pause"></use></svg>Pausar</button>
+            </footer>
+          </aside>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

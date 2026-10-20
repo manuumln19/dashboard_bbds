@@ -1,0 +1,28 @@
+{
+  "id": "/",
+  "name": "BBDS · Casa",
+  "short_name": "BBDS",
+  "description": "BBDS: agenda, compra, tareas, limpieza, tiempo y galería de casa.",
+  "lang": "es",
+  "start_url": "/#home",
+  "scope": "/",
+  "display": "fullscreen",
+  "display_override": ["fullscreen", "standalone"],
+  "orientation": "landscape",
+  "background_color": "#f2eee4",
+  "theme_color": "#f2eee4",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
