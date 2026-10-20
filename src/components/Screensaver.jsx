@@ -41,17 +41,14 @@ export function Screensaver({ now, onClose }) {
       onPointerDown={onClose}
     >
       <div className="screensaver__photos" aria-hidden="true">
-        {GALLERY_PHOTOS.map((item, photoIndex) => (
-          <img
-            key={item.src}
-            src={item.src}
-            alt=""
-            className={`screensaver__photo${
-              photoIndex === index ? " is-active" : ""
-            }`}
-            draggable="false"
-          />
-        ))}
+        <img
+          key={photo.src}
+          src={photo.src}
+          alt=""
+          className="screensaver__photo"
+          draggable="false"
+          decoding="async"
+        />
       </div>
       <div className="screensaver__wash" aria-hidden="true" />
 

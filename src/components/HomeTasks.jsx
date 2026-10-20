@@ -1,13 +1,30 @@
 import { ArrowUpRight, ShoppingBasket, Sparkles } from "lucide-react";
 import { isLegacyDrawing } from "../lib/listItems";
 import { CheckMark } from "./CheckMark";
+import { TodoBadges } from "./TodoFields";
 
-export function HomeTasks({ items, onToggle, onOpen }) {
+function dueTimestamp(item) {
+  if (!item.dueOn) return Infinity;
+  const date = new Date(`${item.dueOn}T${item.dueAt || "23:59"}:00`);
+  const time = date.getTime();
+  return Number.isFinite(time) ? time : Infinity;
+}
+
+export function HomeTasks({
+  items,
+  now = new Date(),
+  people = [],
+  onToggle,
+  onOpen,
+}) {
   const shopping = items.filter((item) => item.listId === "shopping");
   const tasks = items.filter((item) => item.listId === "tasks");
   const shoppingOpen = shopping.filter((item) => !item.done).length;
   const shoppingDone = shopping.length - shoppingOpen;
-  const openTasks = tasks.filter((item) => !item.done).slice(0, 3);
+  const openTasks = tasks
+    .filter((item) => !item.done)
+    .sort((a, b) => dueTimestamp(a) - dueTimestamp(b))
+    .slice(0, 3);
   const taskOpen = tasks.filter((item) => !item.done).length;
   const progress = shopping.length
     ? Math.round((shoppingDone / shopping.length) * 100)
@@ -61,15 +78,18 @@ export function HomeTasks({ items, onToggle, onOpen }) {
                 aria-label={`Marcar como hecho: ${item.text}`}
               >
                 <CheckMark />
-                {isLegacyDrawing(item) ? (
-                  <img
-                    className="home-task__drawing"
-                    src={item.drawing}
-                    alt={item.text}
-                  />
-                ) : (
-                  <span>{item.text}</span>
-                )}
+                <span className="home-task__content">
+                  {isLegacyDrawing(item) ? (
+                    <img
+                      className="home-task__drawing"
+                      src={item.drawing}
+                      alt={item.text}
+                    />
+                  ) : (
+                    <span>{item.text}</span>
+                  )}
+                  <TodoBadges item={item} now={now} people={people} />
+                </span>
               </button>
             </li>
           ))}

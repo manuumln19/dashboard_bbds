@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { DEMO_MODE } from "../config";
-import { apiRequest } from "../lib/api";
+import { apiRequestWithMeta } from "../lib/api";
 import { createDemoSensorSnapshot } from "../lib/demo";
+import { reportFailure, reportSync } from "../lib/freshness";
 
 const REFRESH_MS = 60 * 1000;
 
@@ -38,19 +39,27 @@ export function useSensors(enabled = true) {
       }
 
       if (DEMO_MODE) {
-        setSnapshot(createDemoSensorSnapshot());
+        const at = new Date().toISOString();
+        setSnapshot({ ...createDemoSensorSnapshot(), updatedAt: at });
         setError(null);
         setLoading(false);
+        reportSync("sensors", { at });
         return;
       }
 
       if (!silent) setLoading(true);
       try {
-        const [latestPayload, dayPayload, weekPayload] = await Promise.all([
-          apiRequest("/api/sensors/latest"),
-          apiRequest("/api/sensors/history?hours=24&bucket=900"),
-          apiRequest("/api/sensors/history?hours=168&bucket=3600"),
+        const [latestResult, dayResult, weekResult] = await Promise.all([
+          apiRequestWithMeta("/api/sensors/latest"),
+          apiRequestWithMeta("/api/sensors/history?hours=24&bucket=900"),
+          apiRequestWithMeta("/api/sensors/history?hours=168&bucket=3600"),
         ]);
+        const latestPayload = latestResult.data;
+        const dayPayload = dayResult.data;
+        const weekPayload = weekResult.data;
+        const at =
+          latestResult.meta.cachedAt ||
+          new Date().toISOString();
 
         setSnapshot({
           latest: Array.isArray(latestPayload.readings)
@@ -62,15 +71,23 @@ export function useSensors(enabled = true) {
           history7: groupHistory(
             weekPayload && weekPayload.readings ? weekPayload.readings : []
           ),
-          updatedAt: new Date().toISOString(),
+          updatedAt: at,
         });
         setError(null);
+        reportSync("sensors", {
+          at,
+          cachedAt: latestResult.meta.offline ? at : null,
+          detail: latestResult.meta.offline
+            ? "Mostrando la última copia guardada"
+            : null,
+        });
       } catch (caught) {
-        setError(
+        const message =
           caught instanceof Error
             ? caught.message
-            : "No se pudieron leer los sensores"
-        );
+            : "No se pudieron leer los sensores";
+        setError(message);
+        reportFailure("sensors", message);
       } finally {
         setLoading(false);
       }

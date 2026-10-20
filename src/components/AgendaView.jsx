@@ -5,7 +5,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock3,
-  MapPin,
   X,
 } from "lucide-react";
 import {
@@ -19,6 +18,9 @@ import {
   startOfDay,
 } from "../lib/date";
 import { eventTone, eventsForDay, layoutDayEvents } from "../lib/agenda";
+import { formatFreshnessTime } from "../lib/freshness";
+import { CalendarSheet } from "./CalendarSheet";
+import { EventQR } from "./EventQR";
 
 const MODES = [
   { id: "day", label: "Hoy" },
@@ -104,6 +106,15 @@ function EventDetail({ event, onClose }) {
 
         <h2 id="event-title">{event.summary || "Sin título"}</h2>
 
+        {event.calendarName ? (
+          <span className={`event-sheet__calendar tone-${tone}`}>
+            {event.calendarName}
+            {event.personName && event.personName !== event.calendarName
+              ? ` · ${event.personName}`
+              : ""}
+          </span>
+        ) : null}
+
         <div className="event-sheet__meta">
           <span>
             <CalendarDays size={17} strokeWidth={1.8} aria-hidden="true" />
@@ -113,27 +124,34 @@ function EventDetail({ event, onClose }) {
             <Clock3 size={17} strokeWidth={1.8} aria-hidden="true" />
             {eventTimeLabel(event)}
           </span>
-          {event.location ? (
-            <span>
-              <MapPin size={17} strokeWidth={1.8} aria-hidden="true" />
-              {event.location}
-            </span>
-          ) : null}
         </div>
 
+        <EventQR location={event.location} />
+
         <p className="event-sheet__note">
-          La agenda de iCloud llega como calendario de solo lectura. Aquí puedes
-          consultar la cita, pero los cambios se hacen desde tu dispositivo.
+          Los calendarios se leen como solo lectura. Aquí puedes consultar la
+          cita, pero los cambios se hacen desde el móvil o el ordenador.
         </p>
       </article>
     </div>
   );
 }
 
-export function AgendaView({ events, now, configured = true, error }) {
+export function AgendaView({
+  events,
+  now,
+  configured = true,
+  error,
+  calendar,
+  people = [],
+}) {
   const [mode, setMode] = useState("week");
   const [anchor, setAnchor] = useState(() => startOfDay(now));
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [calendarsOpen, setCalendarsOpen] = useState(false);
+  const feeds = (calendar && calendar.feeds) || [];
+  const feedErrors = feeds.filter((feed) => feed.lastError);
+  const lastUpdated = calendar && calendar.lastUpdated;
   const count = modeDays(mode);
   const days = useMemo(
     () => Array.from({ length: count }, (_, index) => addDays(anchor, index)),
@@ -170,12 +188,20 @@ export function AgendaView({ events, now, configured = true, error }) {
     <section className="view agenda-view" aria-labelledby="agenda-title">
       <header className="agenda-view__head">
         <div>
-          <span className="eyebrow">iCloud · solo lectura</span>
+          <span className="eyebrow">Calendarios · solo lectura</span>
           <h1 id="agenda-title">Agenda</h1>
           <p>{range}</p>
         </div>
 
         <div className="agenda-view__controls">
+          <button
+            type="button"
+            className="agenda-calendars-button"
+            onClick={() => setCalendarsOpen(true)}
+          >
+            <CalendarDays size={15} strokeWidth={1.9} aria-hidden="true" />
+            Calendarios
+          </button>
           <div className="segmented" role="group" aria-label="Vista de agenda">
             {MODES.map((item) => (
               <button
@@ -220,9 +246,40 @@ export function AgendaView({ events, now, configured = true, error }) {
         </div>
       </header>
 
+      {feeds.length ? (
+        <div className="agenda-feed-bar" aria-label="Calendarios conectados">
+          {feeds.map((feed) => (
+            <span
+              key={feed.id}
+              className={`agenda-feed tone-${feed.color || "ink"}${
+                feed.lastError ? " is-error" : ""
+              }`}
+              title={feed.lastError || `${feed.eventCount || 0} eventos`}
+            >
+              <i aria-hidden="true" />
+              <strong>{feed.name}</strong>
+              {feed.eventCount || 0}
+            </span>
+          ))}
+          {lastUpdated ? (
+            <span className="agenda-freshness">
+              Actualizado {formatFreshnessTime(lastUpdated)}
+            </span>
+          ) : null}
+        </div>
+      ) : null}
+
       {error && configured ? (
         <div className="inline-alert" role="status">
           No se pudo actualizar la agenda: {error}. Se reintentará solo.
+        </div>
+      ) : null}
+
+      {feedErrors.length ? (
+        <div className="inline-alert" role="status">
+          Hay calendarios que no se pudieron leer:{" "}
+          {feedErrors.map((feed) => feed.name).join(", ")}. Se usará la última
+          copia disponible.
         </div>
       ) : null}
 
@@ -231,9 +288,16 @@ export function AgendaView({ events, now, configured = true, error }) {
           <CalendarOff size={48} strokeWidth={1.2} aria-hidden="true" />
           <h2>Calendario sin conectar</h2>
           <p>
-            Añade el enlace ICS de iCloud en el Worker para ver aquí las citas de
-            la casa.
+            Conecta la dirección iCal de Manu, Paco o Casa para ver aquí las
+            citas de la casa.
           </p>
+          <button
+            type="button"
+            className="feature-button"
+            onClick={() => setCalendarsOpen(true)}
+          >
+            Añadir calendario
+          </button>
         </div>
       ) : (
         <div className={`agenda-calendar agenda-calendar--${mode}`}>
@@ -263,13 +327,25 @@ export function AgendaView({ events, now, configured = true, error }) {
             {days.map((day) => {
               const items = eventsForDay(events, day);
               const allDay = items.filter((item) => item.allDay);
-              const timed = layoutDayEvents(items);
+              // Las citas que quedan fuera de la franja 06:00–23:00 no se
+              // aplastan contra el borde: pasan a la fila superior.
+              const outside = items.filter(
+                (item) =>
+                  !item.allDay &&
+                  (minutesOfDay(item.end) <= START_HOUR * 60 ||
+                    minutesOfDay(item.start) >= END_HOUR * 60)
+              );
+              const timed = layoutDayEvents(items).filter(
+                ({ start, end }) =>
+                  minutesOfDay(end) > START_HOUR * 60 &&
+                  minutesOfDay(start) < END_HOUR * 60
+              );
               const isToday = isSameDay(day, now);
               const nowTop = positionFor(now);
               const showNow =
                 isToday &&
                 minutesOfDay(now) >= START_HOUR * 60 &&
-                minutesOfDay(now) <= END_HOUR * 60;
+                minutesOfDay(now) < END_HOUR * 60;
 
               return (
                 <div
@@ -283,18 +359,36 @@ export function AgendaView({ events, now, configured = true, error }) {
                   </header>
 
                   <div className="agenda-all-day">
-                    {allDay.length ? (
-                      allDay.map(({ event }) => (
-                        <button
-                          key={event.id}
-                          type="button"
-                          className={`agenda-all-day__chip tone-${eventTone(event)}`}
-                          onClick={() => setSelectedEvent(event)}
-                          title={event.summary || "Sin título"}
-                        >
-                          {event.summary || "Sin título"}
-                        </button>
-                      ))
+                    {allDay.length || outside.length ? (
+                      <>
+                        {allDay.map(({ event }) => (
+                          <button
+                            key={event.id}
+                            type="button"
+                            className={`agenda-all-day__chip tone-${eventTone(event)}`}
+                            onClick={() => setSelectedEvent(event)}
+                            title={event.summary || "Sin título"}
+                          >
+                            {event.summary || "Sin título"}
+                          </button>
+                        ))}
+                        {outside.map(({ event }) => (
+                          <button
+                            key={`outside-${event.id}`}
+                            type="button"
+                            className={`agenda-all-day__chip agenda-all-day__chip--outside tone-${eventTone(
+                              event
+                            )}`}
+                            onClick={() => setSelectedEvent(event)}
+                            title={`${event.summary || "Sin título"} · ${formatEventTime(
+                              eventStartDate(event)
+                            )}`}
+                          >
+                            <span>{formatEventTime(eventStartDate(event))}</span>
+                            {event.summary || "Sin título"}
+                          </button>
+                        ))}
+                      </>
                     ) : (
                       <span className="agenda-all-day__empty">—</span>
                     )}
@@ -350,6 +444,15 @@ export function AgendaView({ events, now, configured = true, error }) {
         <EventDetail
           event={selectedEvent}
           onClose={() => setSelectedEvent(null)}
+        />
+      ) : null}
+
+      {calendar ? (
+        <CalendarSheet
+          open={calendarsOpen}
+          onClose={() => setCalendarsOpen(false)}
+          calendar={calendar}
+          people={people}
         />
       ) : null}
     </section>

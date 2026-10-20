@@ -29,6 +29,8 @@ export function HomeView({
         />
         <HomeTasks
           items={lists.items}
+          now={now}
+          people={lists.people}
           onToggle={lists.toggleItem}
           onOpen={onOpenLists}
         />

@@ -7,6 +7,7 @@ import {
 } from "./date";
 
 const TONES = ["pink", "mint", "amber", "lilac"];
+const ALL_TONES = new Set([...TONES, "ink"]);
 
 const TONE_RULES = [
   [/(médic|medic|salud|dentista|fisio|hospital|analítica|analitica)/, "mint"],
@@ -24,6 +25,9 @@ function stableHash(value) {
 }
 
 export function eventTone(event) {
+  if (event && ALL_TONES.has(event.calendarColor)) {
+    return event.calendarColor;
+  }
   const text = `${event && event.summary ? event.summary : ""}`.toLowerCase();
   const match = TONE_RULES.find(([pattern]) => pattern.test(text));
   if (match) return match[1];

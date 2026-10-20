@@ -1,4 +1,13 @@
-import { CalendarDays, DoorOpen, RotateCcw, SprayCan } from "lucide-react";
+import { useState } from "react";
+import {
+  CalendarDays,
+  Cloud,
+  DoorOpen,
+  Pencil,
+  RotateCcw,
+  SprayCan,
+} from "lucide-react";
+import { DEMO_MODE } from "../config";
 import {
   monthShort,
   weekDays,
@@ -6,9 +15,12 @@ import {
   weekdayLong,
 } from "../lib/cleaning";
 import { isSameDay } from "../lib/date";
+import { formatFreshnessTime } from "../lib/freshness";
 import { CheckMark } from "./CheckMark";
+import { CleaningEditor } from "./CleaningEditor";
 
 export function CleaningView({ now, cleaning }) {
+  const [editorOpen, setEditorOpen] = useState(false);
   const days = weekDays(now);
   const total = cleaning.totalCount || cleaning.tasks.length;
   const done = cleaning.doneCount;
@@ -49,8 +61,24 @@ export function CleaningView({ now, cleaning }) {
             <RotateCcw size={14} strokeWidth={1.9} aria-hidden="true" />
             Reiniciar semana
           </button>
+          <button
+            type="button"
+            className="cleaning-reset cleaning-edit"
+            onClick={() => setEditorOpen(true)}
+            title="Editar el cuadrante y las personas"
+          >
+            <Pencil size={14} strokeWidth={1.9} aria-hidden="true" />
+            Editar
+          </button>
         </div>
       </header>
+
+      {cleaning.error ? (
+        <div className="inline-alert" role="status">
+          No se pudo sincronizar la limpieza: {cleaning.error}. Se reintentará
+          solo.
+        </div>
+      ) : null}
 
       <div className="cleaning-board">
         {days.map((date, dayIndex) => {
@@ -122,11 +150,23 @@ export function CleaningView({ now, cleaning }) {
 
       <footer className="cleaning-foot">
         <span>
-          <SprayCan size={14} strokeWidth={1.8} aria-hidden="true" />
-          Los checks se guardan en este navegador.
+          <Cloud size={14} strokeWidth={1.8} aria-hidden="true" />
+          {DEMO_MODE
+            ? "Guardado en este navegador."
+            : "Guardado en la nube para Manu y Paco."}
         </span>
-        <span>La semana se reinicia sola el lunes.</span>
+        <span>
+          {cleaning.lastUpdated
+            ? `Actualizado a las ${formatFreshnessTime(cleaning.lastUpdated)}.`
+            : "La semana se reinicia sola el lunes."}
+        </span>
       </footer>
+
+      <CleaningEditor
+        open={editorOpen}
+        onClose={() => setEditorOpen(false)}
+        cleaning={cleaning}
+      />
     </section>
   );
 }

@@ -1,20 +1,17 @@
 import { addDays, capitalize, formatMonth, startOfWeek } from "./date";
 
-// El cuadrante vive en el navegador: es una rutina fija de la casa, no una
-// lista sincronizada. Cada tarea tiene un id estable para conservar los checks
-// aunque cambie el orden o se añada una tarea nueva en el futuro.
+// El cuadrante de demostración. En producción estas tareas viven en D1 y se
+// editan desde la propia pantalla de limpieza.
 export const CLEANING_PEOPLE = [
-  { id: "manuel", name: "Manuel", tone: "pink" },
-  { id: "paco", name: "Paco", tone: "mint" },
-  { id: "ana", name: "Ana", tone: "amber" },
-  { id: "lucia", name: "Lucía", tone: "lilac" },
+  { id: "manu", name: "Manu", tone: "pink", initials: "M" },
+  { id: "paco", name: "Paco", tone: "mint", initials: "P" },
 ];
 
 export const CLEANING_TASKS = [
   {
     id: "mon-cocina",
     day: 0,
-    personId: "manuel",
+    personId: "manu",
     area: "Cocina",
     title: "Encimera y vitro",
   },
@@ -28,77 +25,77 @@ export const CLEANING_TASKS = [
   {
     id: "tue-bano",
     day: 1,
-    personId: "ana",
+    personId: "paco",
     area: "Baño",
     title: "Baño principal",
   },
   {
     id: "tue-entrada",
     day: 1,
-    personId: "manuel",
+    personId: "manu",
     area: "Entrada",
     title: "Zapatos y paraguas",
   },
   {
     id: "wed-cocina",
     day: 2,
-    personId: "paco",
+    personId: "manu",
     area: "Cocina",
     title: "Fregadero y vitro",
   },
   {
-    id: "wed-dormitorios",
+    id: "wed-dormir",
     day: 2,
-    personId: "lucia",
-    area: "Dormitorios",
+    personId: "paco",
+    area: "Dormitorio",
     title: "Cambiar sábanas",
   },
   {
     id: "thu-salon",
     day: 3,
-    personId: "ana",
+    personId: "paco",
     area: "Salón",
     title: "Polvo y cojines",
   },
   {
     id: "thu-comedor",
     day: 3,
-    personId: "manuel",
+    personId: "manu",
     area: "Comedor",
     title: "Mesa y cristalera",
   },
   {
     id: "fri-bano",
     day: 4,
-    personId: "paco",
+    personId: "manu",
     area: "Baño",
     title: "Baño pequeño",
   },
   {
     id: "fri-cocina",
     day: 4,
-    personId: "lucia",
+    personId: "paco",
     area: "Cocina",
     title: "Nevera y despensa",
   },
   {
     id: "sat-terraza",
     day: 5,
-    personId: "manuel",
+    personId: "paco",
     area: "Terraza",
     title: "Barrer y ordenar",
   },
   {
     id: "sat-colada",
     day: 5,
-    personId: "ana",
+    personId: "manu",
     area: "Colada",
     title: "Lavadora y tender",
   },
   {
     id: "sun-pasillo",
     day: 6,
-    personId: "lucia",
+    personId: "manu",
     area: "Pasillo",
     title: "Repaso y espejos",
   },

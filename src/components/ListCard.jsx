@@ -1,7 +1,22 @@
 import { useState } from "react";
-import { Eraser, PenLine, Plus, X } from "lucide-react";
+import {
+  CalendarClock,
+  Check,
+  Eraser,
+  PenLine,
+  Plus,
+  X,
+} from "lucide-react";
 import { isLegacyDrawing } from "../lib/listItems";
 import { CheckMark } from "./CheckMark";
+import { TodoBadges, TodoMetaFields } from "./TodoFields";
+
+function dueTimestamp(item) {
+  if (!item.dueOn) return Infinity;
+  const date = new Date(`${item.dueOn}T${item.dueAt || "23:59"}:00`);
+  const time = date.getTime();
+  return Number.isFinite(time) ? time : Infinity;
+}
 
 export function ListCard({
   listId,
@@ -9,15 +24,37 @@ export function ListCard({
   subtitle,
   Icon,
   items,
+  people = [],
+  now = new Date(),
   onAdd,
   onToggle,
+  onUpdate,
   onRemove,
   onClear,
   onDraw,
 }) {
   const [text, setText] = useState("");
+  const [scheduleOpen, setScheduleOpen] = useState(false);
+  const [addMeta, setAddMeta] = useState({
+    dueOn: null,
+    dueAt: null,
+    personId: "",
+  });
+  const [editingMetaId, setEditingMetaId] = useState(null);
+  const [metaDraft, setMetaDraft] = useState({
+    dueOn: null,
+    dueAt: null,
+    personId: "",
+  });
+  const isTasks = listId === "tasks";
+
   const sorted = [...items].sort((a, b) => {
     if (Boolean(a.done) !== Boolean(b.done)) return a.done ? 1 : -1;
+    if (isTasks) {
+      const aDue = dueTimestamp(a);
+      const bDue = dueTimestamp(b);
+      if (aDue !== bDue) return aDue - bDue;
+    }
     return new Date(a.createdAt) - new Date(b.createdAt);
   });
   const openCount = items.filter((item) => !item.done).length;
@@ -28,8 +65,42 @@ export function ListCard({
     event.preventDefault();
     const value = text.trim();
     if (!value) return;
-    onAdd(listId, value);
+    const meta = isTasks
+      ? {
+          dueOn: addMeta.dueOn || null,
+          dueAt: addMeta.dueAt || null,
+          personId: addMeta.personId || null,
+        }
+      : {};
+    onAdd(listId, value, meta);
     setText("");
+  }
+
+  function openMeta(item) {
+    setEditingMetaId(item.id);
+    setMetaDraft({
+      dueOn: item.dueOn || null,
+      dueAt: item.dueAt || null,
+      personId: item.person ? item.person.id : "",
+    });
+  }
+
+  function closeMeta() {
+    setEditingMetaId(null);
+  }
+
+  function saveMeta(item) {
+    onUpdate(item, {
+      dueOn: metaDraft.dueOn || null,
+      dueAt: metaDraft.dueAt || null,
+      personId: metaDraft.personId || null,
+    });
+    setEditingMetaId(null);
+  }
+
+  function clearMeta(item) {
+    onUpdate(item, { dueOn: null, dueAt: null, personId: null });
+    setEditingMetaId(null);
   }
 
   return (
@@ -70,6 +141,18 @@ export function ListCard({
           autoComplete="off"
           enterKeyHint="done"
         />
+        {isTasks ? (
+          <button
+            type="button"
+            className={`list-panel__schedule${scheduleOpen ? " is-on" : ""}`}
+            onClick={() => setScheduleOpen((value) => !value)}
+            aria-label="Programar la tarea"
+            aria-pressed={scheduleOpen}
+            title="Fecha, hora y persona"
+          >
+            <CalendarClock size={19} strokeWidth={1.9} aria-hidden="true" />
+          </button>
+        ) : null}
         <button
           type="button"
           className="list-panel__ink"
@@ -89,40 +172,122 @@ export function ListCard({
         </button>
       </form>
 
+      {isTasks && scheduleOpen ? (
+        <div className="list-panel__add-meta">
+          <TodoMetaFields
+            dueOn={addMeta.dueOn}
+            dueAt={addMeta.dueAt}
+            personId={addMeta.personId}
+            people={people}
+            idPrefix={`add-${listId}`}
+            onChange={(patch) =>
+              setAddMeta((current) => ({ ...current, ...patch }))
+            }
+          />
+        </div>
+      ) : null}
+
       <div className="list-panel__body">
         {sorted.length ? (
           <ul className="task-list">
             {sorted.map((item) => (
-              <li
-                className={`task-row${item.done ? " is-done" : ""}`}
-                key={item.id}
-              >
-                <button
-                  type="button"
-                  className="task-row__main"
-                  onClick={() => onToggle(item)}
-                  aria-pressed={item.done}
-                  aria-label={`${item.done ? "Desmarcar" : "Marcar"}: ${item.text}`}
+              <li className="task-item" key={item.id}>
+                <div
+                  className={`task-row${item.done ? " is-done" : ""}${
+                    editingMetaId === item.id ? " is-editing" : ""
+                  }`}
                 >
-                  <CheckMark checked={item.done} />
-                  {isLegacyDrawing(item) ? (
-                    <img
-                      className="task-drawing"
-                      src={item.drawing}
-                      alt={item.text}
+                  <button
+                    type="button"
+                    className="task-row__main"
+                    onClick={() => onToggle(item)}
+                    aria-pressed={item.done}
+                    aria-label={`${item.done ? "Desmarcar" : "Marcar"}: ${
+                      item.text
+                    }`}
+                  >
+                    <CheckMark checked={item.done} />
+                    <span className="task-row__content">
+                      {isLegacyDrawing(item) ? (
+                        <img
+                          className="task-drawing"
+                          src={item.drawing}
+                          alt={item.text}
+                        />
+                      ) : (
+                        <span>{item.text}</span>
+                      )}
+                      {isTasks ? (
+                        <TodoBadges item={item} now={now} people={people} />
+                      ) : null}
+                    </span>
+                  </button>
+                  {isTasks ? (
+                    <button
+                      type="button"
+                      className={`task-row__meta${
+                        item.dueOn || item.person ? " is-set" : ""
+                      }`}
+                      onClick={() =>
+                        editingMetaId === item.id
+                          ? closeMeta()
+                          : openMeta(item)
+                      }
+                      aria-label={`Cambiar fecha y persona de ${item.text}`}
+                      aria-expanded={editingMetaId === item.id}
+                    >
+                      <CalendarClock
+                        size={16}
+                        strokeWidth={1.9}
+                        aria-hidden="true"
+                      />
+                    </button>
+                  ) : null}
+                  <button
+                    type="button"
+                    className="task-row__delete"
+                    onClick={() => onRemove(item)}
+                    aria-label={`Borrar: ${item.text}`}
+                  >
+                    <X size={17} strokeWidth={2} aria-hidden="true" />
+                  </button>
+                </div>
+
+                {isTasks && editingMetaId === item.id ? (
+                  <div className="task-row__meta-editor">
+                    <TodoMetaFields
+                      dueOn={metaDraft.dueOn}
+                      dueAt={metaDraft.dueAt}
+                      personId={metaDraft.personId}
+                      people={people}
+                      idPrefix={`task-${item.id}`}
+                      onChange={(patch) =>
+                        setMetaDraft((current) => ({
+                          ...current,
+                          ...patch,
+                        }))
+                      }
                     />
-                  ) : (
-                    <span>{item.text}</span>
-                  )}
-                </button>
-                <button
-                  type="button"
-                  className="task-row__delete"
-                  onClick={() => onRemove(item)}
-                  aria-label={`Borrar: ${item.text}`}
-                >
-                  <X size={17} strokeWidth={2} aria-hidden="true" />
-                </button>
+                    <div className="task-row__meta-actions">
+                      <button
+                        type="button"
+                        className="feature-mini-button"
+                        onClick={() => clearMeta(item)}
+                      >
+                        <X size={14} strokeWidth={2} aria-hidden="true" />
+                        Quitar
+                      </button>
+                      <button
+                        type="button"
+                        className="feature-button"
+                        onClick={() => saveMeta(item)}
+                      >
+                        <Check size={15} strokeWidth={2.2} aria-hidden="true" />
+                        Guardar
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
               </li>
             ))}
           </ul>

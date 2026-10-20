@@ -142,6 +142,73 @@ export function createDemoWeather(now = new Date()) {
   };
 }
 
+const DEMO_EVENT_META = {
+  "demo-e1": {
+    calendarId: "demo-manu",
+    calendarName: "Manu",
+    calendarColor: "pink",
+    personId: "manu",
+    personName: "Manu",
+    personTone: "pink",
+  },
+  "demo-e2": {
+    calendarId: "demo-paco",
+    calendarName: "Paco",
+    calendarColor: "mint",
+    personId: "paco",
+    personName: "Paco",
+    personTone: "mint",
+  },
+  "demo-e3": {
+    calendarId: "demo-casa",
+    calendarName: "Casa",
+    calendarColor: "amber",
+    personId: null,
+    personName: null,
+    personTone: null,
+  },
+  "demo-e4": {
+    calendarId: "demo-casa",
+    calendarName: "Casa",
+    calendarColor: "amber",
+    personId: null,
+    personName: null,
+    personTone: null,
+  },
+  "demo-e5": {
+    calendarId: "demo-manu",
+    calendarName: "Manu",
+    calendarColor: "pink",
+    personId: "manu",
+    personName: "Manu",
+    personTone: "pink",
+  },
+  "demo-e6": {
+    calendarId: "demo-paco",
+    calendarName: "Paco",
+    calendarColor: "mint",
+    personId: "paco",
+    personName: "Paco",
+    personTone: "mint",
+  },
+  "demo-e7": {
+    calendarId: "demo-manu",
+    calendarName: "Manu",
+    calendarColor: "pink",
+    personId: "manu",
+    personName: "Manu",
+    personTone: "pink",
+  },
+  "demo-e8": {
+    calendarId: "demo-casa",
+    calendarName: "Casa",
+    calendarColor: "amber",
+    personId: null,
+    personName: null,
+    personTone: null,
+  },
+};
+
 export function createDemoEvents(now = new Date()) {
   const firstStart = new Date(now.getTime() + 90 * 60000);
   const firstEnd = new Date(firstStart.getTime() + 60 * 60000);
@@ -214,11 +281,14 @@ export function createDemoEvents(now = new Date()) {
       allDay: false,
       location: "Mercado de Antón Martín",
     },
-  ];
+  ].map((event) => ({ ...event, ...(DEMO_EVENT_META[event.id] || {}) }));
 }
 
 export function createDemoLists(now = new Date()) {
   const created = now.toISOString();
+  const today = dateKey(now);
+  const tomorrow = dateKey(at(now, 1, 12));
+  const yesterday = dateKey(at(now, -1, 12));
   return [
     {
       id: "demo-s1",
@@ -253,6 +323,9 @@ export function createDemoLists(now = new Date()) {
       listId: "tasks",
       text: "Regar las plantas del salón",
       done: false,
+      dueOn: today,
+      dueAt: "18:00",
+      person: { id: "manu", name: "Manu", tone: "pink", initials: "M" },
       createdAt: created,
     },
     {
@@ -260,6 +333,9 @@ export function createDemoLists(now = new Date()) {
       listId: "tasks",
       text: "Llamar al seguro",
       done: false,
+      dueOn: tomorrow,
+      dueAt: "10:30",
+      person: { id: "paco", name: "Paco", tone: "mint", initials: "P" },
       createdAt: created,
     },
     {
@@ -267,6 +343,9 @@ export function createDemoLists(now = new Date()) {
       listId: "tasks",
       text: "Recoger el paquete en el portal",
       done: false,
+      dueOn: today,
+      dueAt: null,
+      person: { id: "paco", name: "Paco", tone: "mint", initials: "P" },
       createdAt: created,
     },
     {
@@ -274,6 +353,9 @@ export function createDemoLists(now = new Date()) {
       listId: "tasks",
       text: "Cambiar la bombilla del pasillo",
       done: true,
+      dueOn: yesterday,
+      dueAt: null,
+      person: { id: "manu", name: "Manu", tone: "pink", initials: "M" },
       createdAt: created,
     },
   ];

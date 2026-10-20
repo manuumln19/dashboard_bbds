@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>BBDS · capturas finales</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --paper: #f7f1e7;
+        --ink: #211b16;
+        --muted: #766b60;
+        --line: rgba(33, 27, 22, 0.12);
+        --rose: #b93b5b;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background:
+          radial-gradient(80% 60% at 10% 0%, #fbe3e4, transparent 60%),
+          radial-gradient(70% 60% at 95% 100%, #dff2e9, transparent 60%),
+          var(--paper);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      }
+      main {
+        max-width: 1440px;
+        margin: 0 auto;
+        padding: 48px 36px 80px;
+      }
+      header {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 28px;
+        padding-bottom: 22px;
+        border-bottom: 1px solid var(--line);
+      }
+      .eyebrow {
+        margin: 0 0 8px;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+      h1 {
+        margin: 0;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(42px, 6vw, 76px);
+        font-weight: 400;
+        letter-spacing: -0.04em;
+        line-height: 0.94;
+      }
+      .lede {
+        max-width: 380px;
+        margin: 0;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 22px;
+      }
+      figure {
+        margin: 0;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        background: rgba(255, 252, 247, 0.72);
+        box-shadow: 0 20px 60px -40px rgba(33, 27, 22, 0.45);
+      }
+      figure.wide { grid-column: 1 / -1; }
+      img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 12px;
+        border: 1px solid rgba(33, 27, 22, 0.08);
+      }
+      figcaption {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 12px 4px 2px;
+      }
+      figcaption strong {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 19px;
+        font-weight: 400;
+      }
+      figcaption span {
+        color: var(--muted);
+        font-size: 11px;
+        text-align: right;
+      }
+      .tag {
+        color: var(--rose);
+        font-size: 10px;
+        font-weight: 750;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      @media (max-width: 900px) {
+        main { padding: 28px 16px 48px; }
+        header { display: block; }
+        .lede { margin-top: 16px; }
+        .grid { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <p class="eyebrow">BBDS · 20 de octubre de 2026</p>
+          <h1>Capturas finales</h1>
+        </div>
+        <p class="lede">
+          La pantalla completa, a 1280 × 800. Datos de demostración para que se
+          vean todas las funciones sin depender de la red ni de la base local.
+        </p>
+      </header>
+
+      <div class="grid">
+        <figure class="wide">
+          <img src="home-dia.png" alt="Pantalla de Hoy en modo día" />
+          <figcaption>
+            <strong>Hoy, modo día</strong>
+            <span class="tag">tiempo · agenda · tareas</span>
+          </figcaption>
+        </figure>
+
+        <figure>
+          <img src="agenda-semana.png" alt="Agenda semanal con varios calendarios" />
+          <figcaption>
+            <strong>Agenda semanal</strong>
+            <span>varios feeds, color y persona</span>
+          </figcaption>
+        </figure>
+
+        <figure>
+          <img src="evento-qr.png" alt="Ficha de un evento con QR de ubicación" />
+          <figcaption>
+            <strong>Detalle con QR</strong>
+            <span>la ubicación, en el móvil</span>
+          </figcaption>
+        </figure>
+
+        <figure>
+          <img src="calendarios.png" alt="Gestor de calendarios" />
+          <figcaption>
+            <strong>Calendarios</strong>
+            <span>añadir, pausar y sincronizar</span>
+          </figcaption>
+        </figure>
+
+        <figure>
+          <img src="listas.png" alt="Listas de compra y tareas" />
+          <figcaption>
+            <strong>Listas</strong>
+            <span>compra y tareas con personas</span>
+          </figcaption>
+        </figure>
+
+        <figure>
+          <img src="tarea-fecha-hora.png" alt="Editor de fecha, hora y persona de una tarea" />
+          <figcaption>
+            <strong>Tarea con fecha y hora</strong>
+            <span>edición en línea</span>
+          </figcaption>
+        </figure>
+
+        <figure>
+          <img src="libreta.png" alt="Libreta manuscrita con OCR local" />
+          <figcaption>
+            <strong>Libreta manuscrita</strong>
+            <span>OCR local, texto editable</span>
+          </figcaption>
+        </figure>
+
+        <figure class="wide">
+          <img src="limpieza.png" alt="Cuadrante semanal de limpieza" />
+          <figcaption>
+            <strong>Limpieza de la semana</strong>
+            <span class="tag">Manu · Paco · D1</span>
+          </figcaption>
+        </figure>
+
+        <figure>
+          <img src="editor-limpieza.png" alt="Editor del cuadrante de limpieza" />
+          <figcaption>
+            <strong>Editor de limpieza</strong>
+            <span>tareas, zonas y personas</span>
+          </figcaption>
+        </figure>
+
+        <figure>
+          <img src="panel-pruebas.png" alt="Panel de pruebas del kiosco" />
+          <figcaption>
+            <strong>Panel de pruebas</strong>
+            <span>hora, idle y red simulados</span>
+          </figcaption>
+        </figure>
+
+        <figure>
+          <img src="estado-datos.png" alt="Detalle del estado de las fuentes de datos" />
+          <figcaption>
+            <strong>Estado de los datos</strong>
+            <span>frescura por fuente</span>
+          </figcaption>
+        </figure>
+
+        <figure>
+          <img src="sin-conexion.png" alt="Aviso de copia guardada sin conexión" />
+          <figcaption>
+            <strong>Sin conexión</strong>
+            <span>última copia, sin pantalla en blanco</span>
+          </figcaption>
+        </figure>
+
+        <figure>
+          <img src="diagnostico.png" alt="Diagnóstico del WebView" />
+          <figcaption>
+            <strong>Diagnóstico</strong>
+            <span>red, caché y service worker</span>
+          </figcaption>
+        </figure>
+
+        <figure>
+          <img src="compatibilidad.png" alt="Comprobación de compatibilidad del WebView" />
+          <figcaption>
+            <strong>Compatibilidad</strong>
+            <span>APIs del WebView real</span>
+          </figcaption>
+        </figure>
+
+        <figure>
+          <img src="home-noche.png" alt="Pantalla de Hoy en modo noche" />
+          <figcaption>
+            <strong>Hoy, modo noche</strong>
+            <span>la misma casa, en tinta oscura</span>
+          </figcaption>
+        </figure>
+      </div>
+    </main>
+  </body>
+</html>

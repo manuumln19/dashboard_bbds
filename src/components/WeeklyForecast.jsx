@@ -1,32 +1,25 @@
-import { Droplets } from "lucide-react";
-import {
-  capitalize,
-  isSameDay,
-  parseAllDay,
-} from "../lib/date";
+import { capitalize, isSameDay, parseAllDay } from "../lib/date";
 import { weatherLabel } from "../lib/weather";
 import { WeatherGlyph } from "./WeatherGlyph";
 
-function dayName(date) {
-  return capitalize(
-    new Intl.DateTimeFormat("es-ES", { weekday: "short" })
-      .format(date)
-      .replace(".", "")
-  );
-}
+const WEEKDAY = new Intl.DateTimeFormat("es-ES", { weekday: "short" });
+const DAY = new Intl.DateTimeFormat("es-ES", { day: "numeric" });
+const MONTH = new Intl.DateTimeFormat("es-ES", { month: "short" });
 
-function dayNumber(date) {
-  return new Intl.DateTimeFormat("es-ES", { day: "numeric" }).format(date);
+function dayName(date) {
+  return capitalize(WEEKDAY.format(date).replace(".", ""));
 }
 
 function monthName(date) {
-  return new Intl.DateTimeFormat("es-ES", { month: "short" })
-    .format(date)
-    .replace(".", "");
+  return MONTH.format(date).replace(".", "");
 }
 
-function isRainy(code) {
-  return Number(code) >= 51;
+function Drop() {
+  return (
+    <svg viewBox="0 0 12 12" aria-hidden="true">
+      <path d="M6 1.4C4.6 3.4 3.1 5.1 3.1 7a2.9 2.9 0 0 0 5.8 0C8.9 5.1 7.4 3.4 6 1.4Z" />
+    </svg>
+  );
 }
 
 export function WeeklyForecast({ days = [], now }) {
@@ -42,86 +35,91 @@ export function WeeklyForecast({ days = [], now }) {
       Number(b.precipitationProbability || 0) -
       Number(a.precipitationProbability || 0)
   )[0];
+  const firstDay = validDays.length ? parseAllDay(validDays[0].date) : null;
+  const lastDay = validDays.length
+    ? parseAllDay(validDays[validDays.length - 1].date)
+    : null;
 
   return (
-    <article className="card weekly-card" aria-labelledby="weekly-title">
-      <header className="weekly-card__head">
-        <div>
-          <span className="eyebrow">Previsión</span>
-          <h2 id="weekly-title">Siete días</h2>
-        </div>
-        <span className="weekly-card__legend">Máx / mín</span>
+    <article className="forecast" aria-labelledby="forecast-title">
+      <header className="forecast-head">
+        <h2 id="forecast-title">Previsión</h2>
+        <p>
+          Siete días ·{" "}
+          {firstDay && lastDay
+            ? `${firstDay.getDate()}—${lastDay.getDate()} ${monthName(lastDay)}`
+            : "—"}
+          <br />
+          Temperatura °C · escala {Math.round(coldest)}—{Math.round(warmest)}
+        </p>
       </header>
 
       {validDays.length ? (
-        <div className="week-grid">
+        <div className="forecast-rows">
           {validDays.map((day) => {
             const date = parseAllDay(day.date);
             const today = isSameDay(date, now);
             const min = Number(day.min);
             const max = Number(day.max);
             const left = ((min - coldest) / span) * 100;
-            const width = Math.max(9, ((max - min) / span) * 100);
-            const rainy = isRainy(day.weatherCode);
+            const width = Math.max(5, ((max - min) / span) * 100);
             return (
-              <div
-                className={`week-day${today ? " is-today" : ""}${
-                  rainy ? " is-rainy" : ""
-                }`}
+              <article
+                className={`forecast-row${today ? " is-today" : ""}`}
                 key={day.date}
                 title={weatherLabel(day.weatherCode)}
               >
-                <div className="week-day__head">
-                  <span>{today ? "Hoy" : dayName(date)}</span>
-                  <small>
-                    {dayNumber(date)} {monthName(date)}
-                  </small>
+                <div className="row-day">
+                  <strong>{today ? "Hoy" : dayName(date)}</strong>
+                  <span>
+                    {DAY.format(date)} {monthName(date)}
+                  </span>
                 </div>
                 <WeatherGlyph
                   code={day.weatherCode}
                   isDay
-                  size={glyphSize(day.weatherCode)}
-                  strokeWidth={1.25}
-                  className="week-day__glyph"
+                  size={28}
+                  strokeWidth={1.4}
+                  className="row-icon"
                 />
-                <strong className="week-day__max">{Math.round(max)}°</strong>
-                <span className="week-day__min">{Math.round(min)}°</span>
-                <div className="week-day__range" aria-hidden="true">
+                <span className="row-condition">
+                  {weatherLabel(day.weatherCode)}
+                </span>
+                <span className="row-max">{Math.round(max)}°</span>
+                <div className="row-range" aria-hidden="true">
                   <span style={{ left: `${left}%`, width: `${width}%` }} />
                 </div>
-                <span className="week-day__rain">
-                  <Droplets size={11} strokeWidth={2} aria-hidden="true" />
+                <span className="row-min">{Math.round(min)}°</span>
+                <span className="row-rain">
+                  <Drop />
                   {Math.round(day.precipitationProbability || 0)}%
                 </span>
-              </div>
+              </article>
             );
           })}
         </div>
       ) : (
-        <div className="weekly-card__empty">
+        <div className="forecast-empty">
           <strong>Sin previsión todavía</strong>
           <span>Se actualizará cuando llegue el tiempo.</span>
         </div>
       )}
 
       {wettest ? (
-        <footer className="weekly-card__foot">
-          <span className="weekly-card__foot-label">Lluvia más probable</span>
-          <strong>
+        <footer className="forecast-foot">
+          <span>Lluvia más probable</span>
+          <span>
             {Number(wettest.precipitationProbability || 0) > 20
-              ? `${dayName(parseAllDay(wettest.date))} · ${Math.round(
-                  wettest.precipitationProbability
-                )}%`
+              ? `${dayName(parseAllDay(wettest.date))} · `
               : "Semana tranquila"}
-          </strong>
+            <strong>
+              {Number(wettest.precipitationProbability || 0) > 20
+                ? `${Math.round(wettest.precipitationProbability)}%`
+                : ""}
+            </strong>
+          </span>
         </footer>
       ) : null}
     </article>
   );
-}
-
-// Los días de lluvia se dibujan un poco más pequeños para dar aire a la
-// columna sin cambiar la retícula.
-function glyphSize(code) {
-  return isRainy(code) ? 27 : 31;
 }

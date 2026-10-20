@@ -41,6 +41,16 @@ export const SCREENSAVER_IDLE_MINUTES = Math.max(
 );
 export const SCREENSAVER_IDLE_MS = SCREENSAVER_IDLE_MINUTES * 60 * 1000;
 
+// Recarga nocturna y vuelta a Hoy tras un rato sin tocar la pantalla.
+export const NIGHTLY_RELOAD_HOUR = Math.max(
+  0,
+  Math.min(23, Math.round(asNumber(env.VITE_NIGHTLY_RELOAD_HOUR, 3)))
+);
+export const IDLE_RETURN_MINUTES = Math.max(
+  0,
+  asNumber(env.VITE_IDLE_RETURN_MINUTES, 10)
+);
+
 // Cambia estos ids para que coincidan con el campo "room" que envía cada ESP32.
 // Puedes añadir o quitar habitaciones: la interfaz se adapta sola.
 export const ROOMS = [

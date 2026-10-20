@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Cloud, ListChecks, ShoppingBasket } from "lucide-react";
 import { DEMO_MODE } from "../config";
+import { formatFreshnessTime } from "../lib/freshness";
 import { HandwritingSheet } from "./HandwritingSheet";
 import { ListCard } from "./ListCard";
 
@@ -9,7 +10,7 @@ const INK_LISTS = {
   tasks: "Tareas",
 };
 
-export function ListsView({ lists }) {
+export function ListsView({ lists, now = new Date() }) {
   const [inkListId, setInkListId] = useState(null);
   const openCount = lists.items.filter((item) => !item.done).length;
 
@@ -38,7 +39,11 @@ export function ListsView({ lists }) {
           </div>
           <span className="lists-head__sync">
             <Cloud size={15} strokeWidth={1.8} aria-hidden="true" />
-            {DEMO_MODE ? "Guardado en este navegador" : "Sincronizado entre dispositivos"}
+            {DEMO_MODE
+              ? "Guardado en este navegador"
+              : lists.lastUpdated
+                ? `Sincronizado a las ${formatFreshnessTime(lists.lastUpdated)}`
+                : "Sincronizando…"}
           </span>
         </div>
       </header>
@@ -57,8 +62,11 @@ export function ListsView({ lists }) {
           subtitle="Para la nevera y el súper"
           Icon={ShoppingBasket}
           items={lists.byList("shopping")}
+          people={lists.people}
+          now={now}
           onAdd={lists.addItem}
           onToggle={lists.toggleItem}
+          onUpdate={lists.updateItem}
           onRemove={lists.removeItem}
           onClear={lists.clearDone}
           onDraw={setInkListId}
@@ -69,8 +77,11 @@ export function ListsView({ lists }) {
           subtitle="Cosas pequeñas de la casa"
           Icon={ListChecks}
           items={lists.byList("tasks")}
+          people={lists.people}
+          now={now}
           onAdd={lists.addItem}
           onToggle={lists.toggleItem}
+          onUpdate={lists.updateItem}
           onRemove={lists.removeItem}
           onClear={lists.clearDone}
           onDraw={setInkListId}

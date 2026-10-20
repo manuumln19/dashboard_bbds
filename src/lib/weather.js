@@ -1,4 +1,5 @@
 import { LOCATION } from "../config";
+import { isDemoOffline } from "./demoControls";
 
 const WEATHER_LABELS = {
   0: "Despejado",
@@ -50,6 +51,10 @@ export function weatherIconName(code, isDay = true) {
 }
 
 export async function fetchWeather() {
+  if (isDemoOffline()) {
+    throw new Error("Sin conexión (modo de prueba)");
+  }
+
   const params = new URLSearchParams({
     latitude: String(LOCATION.latitude),
     longitude: String(LOCATION.longitude),
@@ -105,20 +110,26 @@ export async function fetchWeather() {
   }));
 
   return {
-    current: {
-      time: current.time,
-      temperature: current.temperature_2m,
-      apparentTemperature: current.apparent_temperature,
-      humidity: current.relative_humidity_2m,
-      isDay: current.is_day === 1,
-      precipitation: current.precipitation,
-      weatherCode: current.weather_code,
-      windSpeed: current.wind_speed_10m,
+    data: {
+      current: {
+        time: current.time,
+        temperature: current.temperature_2m,
+        apparentTemperature: current.apparent_temperature,
+        humidity: current.relative_humidity_2m,
+        isDay: current.is_day === 1,
+        precipitation: current.precipitation,
+        weatherCode: current.weather_code,
+        windSpeed: current.wind_speed_10m,
+      },
+      today: days[0] || null,
+      days,
+      hourly: hours,
+      updatedAt: new Date().toISOString(),
     },
-    today: days[0] || null,
-    days,
-    hourly: hours,
-    updatedAt: new Date().toISOString(),
+    meta: {
+      cachedAt: response.headers.get("x-bbds-cached-at"),
+      offline: response.headers.get("x-bbds-offline") === "1",
+    },
   };
 }
 

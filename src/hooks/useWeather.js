@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { DEMO_MODE, LOCATION } from "../config";
 import { createDemoWeather } from "../lib/demo";
+import { reportFailure, reportSync } from "../lib/freshness";
 import { fetchWeather } from "../lib/weather";
 
 const CACHE_KEY = `bbds.weather.v2:${LOCATION.latitude}:${LOCATION.longitude}`;
@@ -13,7 +14,7 @@ function readCache() {
     const parsed = JSON.parse(raw);
     if (!parsed || !parsed.data || !parsed.savedAt) return null;
     if (Date.now() - parsed.savedAt > 24 * 60 * 60 * 1000) return null;
-    return parsed.data;
+    return parsed;
   } catch {
     return null;
   }
@@ -31,29 +32,49 @@ function saveCache(data) {
 }
 
 export function useWeather() {
+  const cached = DEMO_MODE ? null : readCache();
   const [weather, setWeather] = useState(() =>
-    DEMO_MODE ? createDemoWeather() : readCache()
+    DEMO_MODE ? createDemoWeather() : cached ? cached.data : null
+  );
+  const [lastUpdated, setLastUpdated] = useState(() =>
+    DEMO_MODE
+      ? new Date().toISOString()
+      : cached
+        ? new Date(cached.savedAt).toISOString()
+        : null
   );
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(!weather);
 
   const refresh = useCallback(async (silent = false) => {
     if (DEMO_MODE) {
-      setWeather(createDemoWeather());
+      const next = createDemoWeather();
+      const at = new Date().toISOString();
+      setWeather(next);
+      setLastUpdated(at);
       setError(null);
       setLoading(false);
+      reportSync("weather", { at });
       return;
     }
     if (!silent) setLoading(true);
     try {
-      const next = await fetchWeather();
-      setWeather(next);
+      const { data, meta } = await fetchWeather();
+      const at = meta.cachedAt || new Date().toISOString();
+      setWeather(data);
+      setLastUpdated(at);
       setError(null);
-      saveCache(next);
+      saveCache(data);
+      reportSync("weather", {
+        at,
+        cachedAt: meta.offline ? at : null,
+        detail: meta.offline ? "Mostrando la última copia guardada" : null,
+      });
     } catch (caught) {
-      setError(
-        caught instanceof Error ? caught.message : "No se pudo cargar el tiempo"
-      );
+      const message =
+        caught instanceof Error ? caught.message : "No se pudo cargar el tiempo";
+      setError(message);
+      reportFailure("weather", message);
     } finally {
       setLoading(false);
     }
@@ -76,5 +97,5 @@ export function useWeather() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refresh]);
 
-  return { weather, error, loading, refresh };
+  return { weather, error, loading, lastUpdated, refresh };
 }
