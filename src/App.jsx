@@ -67,6 +67,11 @@ const ClimateView = lazy(() =>
     default: module.ClimateView,
   }))
 );
+const EnergyView = lazy(() =>
+  import("./components/EnergyView").then((module) => ({
+    default: module.EnergyView,
+  }))
+);
 
 const VALID_VIEWS = new Set([
   "home",
@@ -74,6 +79,7 @@ const VALID_VIEWS = new Set([
   "lists",
   "cleaning",
   "weather",
+  "energy",
   ...(CLIMATE_ENABLED ? ["climate"] : []),
 ]);
 
@@ -276,6 +282,7 @@ export default function App() {
               lists={lists}
               onOpenAgenda={() => setView("agenda")}
               onOpenLists={() => setView("lists")}
+              onOpenEnergy={() => setView("energy")}
             />
           ) : null}
 
@@ -304,6 +311,8 @@ export default function App() {
               loading={weather.loading}
             />
           ) : null}
+
+          {view === "energy" ? <EnergyView now={now} /> : null}
 
           {CLIMATE_ENABLED && view === "climate" ? (
             <ClimateView

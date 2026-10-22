@@ -28,10 +28,19 @@ export function AgendaCard({ events, now, configured = true, error, onOpen }) {
     addDays(startOfDay(now), 1),
     addDays(startOfDay(now), 2),
   ];
+  const today = startOfDay(now).getTime();
   const groups = groupEventsByDay(events, days)
     .map((group) => ({
       ...group,
-      items: group.items.slice(0, 2),
+      items: group.items
+        .filter(({ allDay, end }) => {
+          // «Lo que viene» no debe listar clases o comidas que ya han
+          // terminado. Los eventos de todo el día siguen vigentes hasta
+          // que acaba la jornada.
+          if (group.day.getTime() !== today) return true;
+          return allDay || end > now;
+        })
+        .slice(0, 2),
     }))
     .filter((group) => group.items.length)
     .slice(0, 3);

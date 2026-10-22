@@ -1,4 +1,11 @@
 import { ROOMS } from "../config";
+import {
+  HOUR_MS,
+  addDaysKey,
+  madridDateKey,
+  madridHour,
+  zonedDateTimeToUtc,
+} from "./energy.js";
 
 function pad(value) {
   return String(value).padStart(2, "0");
@@ -402,6 +409,59 @@ function historyFor(now, hours, stepMinutes, span) {
   });
 
   return result;
+}
+
+// Precios ficticios con la forma típica del PVPC: valle de madrugada, pico
+// de mañana, bajada solar al mediodía y pico de noche. Sirven solo para
+// probar la pantalla; la interfaz los marca siempre como demo.
+function demoElectricityPrice(dayOffset, hour) {
+  const time = hour;
+  const morning = 0.075 * Math.exp(-Math.pow(time - 8.5, 2) / 7);
+  const evening = 0.105 * Math.exp(-Math.pow(time - 20, 2) / 9);
+  const midday = -0.045 * Math.exp(-Math.pow(time - 14, 2) / 10);
+  const night = -0.028 * Math.exp(-Math.pow(time - 4, 2) / 12);
+  const wobble = 0.008 * Math.sin((time + dayOffset * 4.3) * 1.9);
+  const price = 0.105 + morning + evening + midday + night + wobble;
+  return Math.round(Math.max(0.035, price) * 10000) / 10000;
+}
+
+function demoElectricityDay(dayKey, dayOffset) {
+  const start = zonedDateTimeToUtc(dayKey, 0);
+  const end = zonedDateTimeToUtc(addDaysKey(dayKey, 1), 0);
+  const hours = [];
+  for (let stamp = start.getTime(); stamp < end.getTime(); stamp += HOUR_MS) {
+    const date = new Date(stamp);
+    hours.push({
+      start: date.toISOString(),
+      price: demoElectricityPrice(dayOffset, madridHour(date)),
+    });
+  }
+  return { date: dayKey, hours };
+}
+
+export function createDemoElectricity(now = new Date()) {
+  const todayKey = madridDateKey(now);
+  const at = now.toISOString();
+  return {
+    source: {
+      id: "demo-pvpc",
+      label: "Demo local · PVPC simulado",
+      priceType: "pvpc",
+      note:
+        "Precios ficticios para probar la pantalla. No son precios reales ni sirven para facturar.",
+      url: null,
+      demo: true,
+    },
+    days: [
+      demoElectricityDay(todayKey, 0),
+      demoElectricityDay(addDaysKey(todayKey, 1), 1),
+    ],
+    updatedAt: at,
+    fetchedAt: at,
+    stale: false,
+    timezone: "Europe/Madrid",
+    demo: true,
+  };
 }
 
 export function createDemoSensorSnapshot(now = new Date()) {

@@ -18,6 +18,15 @@ const CALENDAR_STALE_MS = 20 * 60 * 1000;
 // La caché es por feed y ventana: dos calendarios no se pisan entre sí.
 const calendarCache = new Map();
 
+const ELECTRICITY_CACHE_MS = 10 * 60 * 1000;
+const ELECTRICITY_MAX_DAYS = 4;
+const REE_PVPC_URL =
+  "https://apidatos.ree.es/es/datos/mercados/precios-mercados-tiempo-real";
+const ESIOS_PVPC_URL = "https://api.esios.ree.es/indicators/1001";
+const PVPC_NOTE =
+  "PVPC 2.0 TD (Península). Incluye peajes y cargos; no incluye IEE ni IVA.";
+let electricityCache = null;
+
 class HttpError extends Error {
   constructor(status, message, code = null) {
     super(message);
@@ -293,6 +302,274 @@ function normalizeDrawing(value) {
     throw new HttpError(413, "El dibujo es demasiado grande");
   }
   return candidate;
+}
+
+const madridDayFormatter = new Intl.DateTimeFormat("en-GB", {
+  timeZone: "Europe/Madrid",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+function madridDateKey(date) {
+  const parts = madridDayFormatter.formatToParts(date);
+  const values = {};
+  parts.forEach((part) => {
+    if (part.type !== "literal") values[part.type] = part.value;
+  });
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
+function addDaysToDateKey(key, days) {
+  const [year, month, day] = String(key).split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
+function isoDateOrNull(value) {
+  if (!value) return null;
+  const date = new Date(value);
+  return Number.isFinite(date.getTime()) ? date.toISOString() : null;
+}
+
+function roundPrice(value) {
+  return Math.round(value * 100000) / 100000;
+}
+
+// Convierte valores de PVPC en €/MWh a horas en €/kWh, sin duplicados y
+// agrupadas por día local de Madrid. Así el cliente no tiene que adivinar
+// cómo repartir un cambio de hora.
+function groupPvpcValues(values) {
+  const hoursByStart = new Map();
+
+  values.forEach((entry) => {
+    const stamp = Date.parse(entry.datetime_utc || entry.datetime);
+    const rawPrice = Number(entry.value);
+    if (!Number.isFinite(stamp) || !Number.isFinite(rawPrice)) return;
+    const price = rawPrice / 1000;
+    // Un PVPC doméstico no debería salir de este rango; si la fuente cambia
+    // de unidad o devuelve un error, es mejor no pintar una barbaridad.
+    if (price < -0.5 || price > 3) return;
+    const start = new Date(stamp).toISOString();
+    if (!hoursByStart.has(start)) {
+      hoursByStart.set(start, { start, price: roundPrice(price) });
+    }
+  });
+
+  const grouped = new Map();
+  hoursByStart.forEach((hour) => {
+    const date = madridDateKey(new Date(hour.start));
+    if (!grouped.has(date)) grouped.set(date, []);
+    grouped.get(date).push(hour);
+  });
+
+  const days = Array.from(grouped.keys())
+    .sort()
+    .slice(-ELECTRICITY_MAX_DAYS)
+    .map((date) => ({
+      date,
+      hours: grouped.get(date).sort((a, b) => a.start.localeCompare(b.start)),
+    }));
+
+  return { days, count: hoursByStart.size };
+}
+
+export function parseReeElectricity(payload, fetchedAt = new Date()) {
+  const included = payload && Array.isArray(payload.included) ? payload.included : [];
+  let series = null;
+  for (let index = 0; index < included.length; index += 1) {
+    const entry = included[index];
+    if (String(entry.id) === "1001" || String(entry.type).toUpperCase() === "PVPC") {
+      series = entry;
+      break;
+    }
+  }
+  if (!series || !series.attributes || !Array.isArray(series.attributes.values)) {
+    throw new Error("La respuesta de REE no incluye la serie PVPC 1001");
+  }
+
+  const result = groupPvpcValues(series.attributes.values);
+  if (!result.days.length) {
+    throw new Error("La respuesta de REE no contiene horas PVPC válidas");
+  }
+
+  return {
+    days: result.days,
+    updatedAt:
+      isoDateOrNull(series.attributes["last-update"]) ||
+      isoDateOrNull(
+        payload.data &&
+          payload.data.attributes &&
+          payload.data.attributes["last-update"]
+      ) ||
+      fetchedAt.toISOString(),
+  };
+}
+
+export function parseEsiosElectricity(payload, fetchedAt = new Date()) {
+  const indicator = payload && payload.indicator ? payload.indicator : payload;
+  const values =
+    indicator && Array.isArray(indicator.values) ? indicator.values : [];
+  if (!values.length) {
+    throw new Error("La respuesta de ESIOS no contiene valores PVPC");
+  }
+
+  // La serie 1001 incluye varias zonas. La Península es 8741; si la fuente
+  // no trae geos, se aceptan todos los valores.
+  const peninsula = values.filter(
+    (entry) =>
+      Number(entry.geo_id) === 8741 || /pen[ií]nsula/i.test(entry.geo_name || "")
+  );
+  const chosen = peninsula.length ? peninsula : values;
+  const result = groupPvpcValues(chosen);
+  if (!result.days.length) {
+    throw new Error("La respuesta de ESIOS no contiene horas PVPC válidas");
+  }
+
+  return {
+    days: result.days,
+    updatedAt:
+      isoDateOrNull(indicator.values_updated_at) || fetchedAt.toISOString(),
+  };
+}
+
+function electricitySource(id) {
+  return {
+    id,
+    label:
+      id === "ree-pvpc"
+        ? "REE · PVPC 2.0 TD"
+        : "ESIOS · PVPC 2.0 TD",
+    priceType: "pvpc",
+    note: PVPC_NOTE,
+    url:
+      id === "ree-pvpc"
+        ? "https://www.ree.es/es/apidatos"
+        : "https://www.esios.ree.es/es/1001",
+    demo: false,
+  };
+}
+
+function filterElectricityDays(days, minKey, maxKey) {
+  return days.filter((day) => day.date >= minKey && day.date <= maxKey);
+}
+
+async function fetchElectricityJson(url, headers, timeout = 12000) {
+  const response = await fetch(url, {
+    headers,
+    signal: AbortSignal.timeout(timeout),
+  });
+  if (!response.ok) {
+    throw new Error(`La fuente de precios respondió ${response.status}`);
+  }
+  return response.json();
+}
+
+async function fetchElectricityPrices(env, now = new Date()) {
+  const fetchedAt = new Date();
+  const todayKey = madridDateKey(now);
+  const minKey = addDaysToDateKey(todayKey, -1);
+  const maxKey = addDaysToDateKey(todayKey, 1);
+  const errors = [];
+
+  try {
+    const url = new URL(REE_PVPC_URL);
+    url.searchParams.set("start_date", `${minKey}T00:00`);
+    url.searchParams.set("end_date", `${maxKey}T23:59`);
+    url.searchParams.set("time_trunc", "hour");
+    url.searchParams.set("lang", "es");
+    const payload = await fetchElectricityJson(url.toString(), {
+      Accept: "application/json",
+      "User-Agent": "BBDSDashboard/1.0",
+    });
+    const parsed = parseReeElectricity(payload, fetchedAt);
+    const days = filterElectricityDays(parsed.days, minKey, maxKey);
+    if (!days.length) throw new Error("REE no devolvió días en la ventana pedida");
+    return {
+      source: electricitySource("ree-pvpc"),
+      days,
+      updatedAt: parsed.updatedAt,
+      fetchedAt: fetchedAt.toISOString(),
+      stale: false,
+      timezone: "Europe/Madrid",
+    };
+  } catch (error) {
+    errors.push(`REE: ${error instanceof Error ? error.message : "error"}`);
+  }
+
+  try {
+    const headers = {
+      Accept: "application/json",
+      "User-Agent": "BBDSDashboard/1.0",
+    };
+    if (env.ESIOS_TOKEN) headers["X-API-KEY"] = env.ESIOS_TOKEN;
+    const payload = await fetchElectricityJson(
+      ESIOS_PVPC_URL,
+      headers,
+      15000
+    );
+    const parsed = parseEsiosElectricity(payload, fetchedAt);
+    const days = filterElectricityDays(parsed.days, minKey, maxKey);
+    if (!days.length) {
+      throw new Error("ESIOS no devolvió días en la ventana pedida");
+    }
+    return {
+      source: electricitySource("esios-pvpc"),
+      days,
+      updatedAt: parsed.updatedAt,
+      fetchedAt: fetchedAt.toISOString(),
+      stale: false,
+      timezone: "Europe/Madrid",
+    };
+  } catch (error) {
+    errors.push(`ESIOS: ${error instanceof Error ? error.message : "error"}`);
+  }
+
+  throw new Error(errors.join(" · "));
+}
+
+async function handleElectricity(request, env) {
+  requireDashboard(request, env);
+  if (request.method !== "GET") {
+    throw new HttpError(405, "Método no permitido");
+  }
+
+  if (electricityCache && electricityCache.expiresAt > Date.now()) {
+    return json(electricityCache.payload, 200, {
+      "Cache-Control": "private, max-age=60",
+    });
+  }
+
+  try {
+    const payload = await fetchElectricityPrices(env);
+    electricityCache = {
+      payload,
+      expiresAt: Date.now() + ELECTRICITY_CACHE_MS,
+    };
+    return json(payload, 200, {
+      "Cache-Control": "private, max-age=60",
+    });
+  } catch (error) {
+    console.error("BBDS electricity error", error);
+    if (electricityCache) {
+      return json(
+        {
+          ...electricityCache.payload,
+          stale: true,
+          warning:
+            "No se pudo actualizar el precio. Se muestran los últimos datos guardados.",
+        },
+        200,
+        { "Cache-Control": "no-store" }
+      );
+    }
+    throw new HttpError(
+      502,
+      "No se pudieron consultar los precios PVPC. Inténtalo de nuevo más tarde.",
+      "electricity_fetch_failed"
+    );
+  }
 }
 
 async function handleSensors(request, env, url) {
@@ -1456,7 +1733,13 @@ async function route(request, env, url) {
       sensorProtected: Boolean(env.SENSOR_TOKEN),
       cleaning: true,
       calendars: true,
+      electricity: true,
+      electricitySource: "PVPC 2.0 TD",
     });
+  }
+
+  if (url.pathname === "/api/electricity" && request.method === "GET") {
+    return handleElectricity(request, env);
   }
 
   if (

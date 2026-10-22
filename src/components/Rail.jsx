@@ -10,6 +10,7 @@ import {
   SprayCan,
   Wifi,
   WifiOff,
+  Zap,
 } from "lucide-react";
 import { CLIMATE_ENABLED } from "../config";
 import { formatClock } from "../lib/date";
@@ -21,6 +22,7 @@ const TABS = [
   { id: "lists", label: "Listas", Icon: ListChecks },
   { id: "cleaning", label: "Limpieza", Icon: SprayCan },
   { id: "weather", label: "Tiempo", Icon: CloudSun },
+  { id: "energy", label: "Energía", Icon: Zap },
   ...(CLIMATE_ENABLED
     ? [{ id: "climate", label: "Casa", Icon: Droplets }]
     : []),

@@ -44,6 +44,7 @@ const SOURCE_LABELS = {
   lists: "Listas",
   cleaning: "Limpieza",
   calendar: "Agenda",
+  electricity: "Energía",
 };
 
 function isSamePreset(date, preset) {

@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "BBDS: dashboard doméstico para pantalla táctil con agenda, listas, limpieza, tiempo y galería.",
+  "description": "BBDS: dashboard doméstico para pantalla táctil con agenda, listas, limpieza, tiempo, energía y galería.",
   "engines": {
     "node": ">=22.12.0"
   },
@@ -17,6 +17,7 @@
     "db:migrate": "wrangler d1 migrations apply bbds-db --remote",
     "sensors:simulate": "node scripts/simulate-sensors.mjs",
     "check:webview": "node scripts/check-webview.mjs",
+    "check:energy": "node scripts/check-energy.mjs",
     "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {

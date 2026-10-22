@@ -788,6 +788,21 @@ body {
   min-height: 0;
 }
 
+.home-stack {
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+  grid-column: 1;
+  grid-row: 2;
+  grid-template-rows: minmax(0, 1fr) 140px;
+  gap: 16px;
+}
+
+.home-stack .agenda-preview {
+  grid-column: auto;
+  grid-row: auto;
+}
+
 .home-hero {
   position: relative;
   display: flex;

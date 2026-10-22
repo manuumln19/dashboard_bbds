@@ -1,23 +1,24 @@
 # BBDS
 
-Dashboard doméstico editorial para una pantalla táctil de pared. Papel, tinta y cristal suave: reloj, tiempo exterior con radar, varios calendarios ICS, compra, tareas con fecha y persona, limpieza semanal, clima interior opcional, galería de fotos, modo noche y copia sin conexión.
+Dashboard doméstico editorial para una pantalla táctil de pared. Papel, tinta y cristal suave: reloj, tiempo exterior con radar, varios calendarios ICS, compra, tareas con fecha y persona, limpieza semanal, clima interior opcional, PVPC y recomendaciones de consumo, galería de fotos, modo noche y copia sin conexión.
 
 Pensado para **1280 × 800** en horizontal. En pantallas más estrechas el rail y las tarjetas se adaptan, pero esa es la medida de referencia.
 
 ## Qué incluye
 
-- **Hoy**: reloj y fecha grandes, tiempo actual con previsión por horas, próximo evento con cuenta atrás, agenda de los próximos días y resumen de compra y tareas. Inicio no muestra clima interior.
+- **Hoy**: reloj y fecha grandes, tiempo actual con previsión por horas, próximo evento con cuenta atrás, agenda de los próximos días —sin eventos ya terminados—, resumen de compra y tareas y una tarjeta compacta de energía con el precio PVPC vigente y la mejor franja de cada aparato. Inicio no muestra clima interior.
 - **Agenda**: varios calendarios ICS de solo lectura con vistas **Hoy**, **3 días** y **Semana**. Cada feed tiene nombre, persona y color; se añaden, pausan o borran desde **Calendarios**, sin tocar código. Los eventos fuera de la rejilla 06:00–23:00 aparecen como fichas con hora en la fila de todo el día. La ficha de un evento incluye un QR con su ubicación.
 - **Listas**: compra y tareas con contadores grandes, progreso y entrada rápida siempre visible. Las tareas admiten fecha, hora y persona, muestran su estado con etiquetas y se ordenan por vencimiento; se pueden programar en línea sin salir de la lista. El texto es el flujo principal; la libreta manuscrita con OCR local queda como acción secundaria.
 - **Limpieza**: cuadrante semanal de Manu y Paco con dos tareas por día, zona y persona asignadas. El cuadrante y las personas viven en D1 y se editan desde la propia pantalla; cada check se guarda por semana y **Reiniciar semana** vuelve a dejar el tablero limpio.
 - **Tiempo**: temperatura exterior, sensación térmica, icono del cielo, humedad, viento, lluvia, UV, salida y puesta de sol, previsión de siete días y radar de lluvia local con zoom y pausa. El radar actual es una animación ilustrativa local, pensada como base para conectar una fuente real más adelante.
+- **Energía**: PVPC 2.0 TD hora a hora, precio vigente, mínimo, máximo y media del día, bandas barata/media/cara, gráfico de 24 h con horas pasadas atenuadas y pestañas **Hoy**/**Mañana**. La tarjeta de recomendaciones calcula la mejor franja completa para la lavadora o el termo eléctrico, con duración, consumo y margen configurables; compara con empezar lo antes posible y muestra el ahorro estimado en euros y porcentaje. Incluye fuente, vigencia, impuestos estimados y método de cálculo en una hoja de detalle.
 - **Casa**: temperatura y humedad por habitación, histórico de 24 h y 7 días, tendencia, riesgo de moho, batería/presión del sensor y consejos de ventilación. Solo aparece con `VITE_CLIMATE_ENABLED=true`.
 - **Galería**: salvapantallas de fotos tras unos minutos sin actividad y botón de apertura manual en el rail. Las fotos son locales; se puede volver tocando la pantalla, con `Esc` o con las flechas.
 - **Modo noche**: variante de tinta oscura del mismo diseño, automática por horario y con atenuación manual temporal.
-- **Sin conexión y frescura**: un service worker guarda el shell y la última respuesta buena de tiempo, listas, limpieza y agenda. Si una fuente falla, el dashboard sigue mostrando la copia anterior y un aviso indica cuándo se actualizó por última vez. La recarga nocturna y la vuelta a **Hoy** tras inactividad mantienen el kiosco fresco.
+- **Sin conexión y frescura**: un service worker guarda el shell y la última respuesta buena de tiempo, listas, limpieza, agenda y energía. Si una fuente falla, el dashboard sigue mostrando la copia anterior y un aviso indica cuándo se actualizó por última vez. La vista **Energía** conserva además su propia copia en `localStorage` y marca como «sin confirmar» cualquier dato que no cubra la hora actual. La recarga nocturna y la vuelta a **Hoy** tras inactividad mantienen el kiosco fresco.
 - **Panel de pruebas y diagnóstico**: `D`, pulsación larga en el reloj del rail o `?demo` abren hora simulada, idle, red, datos antiguos y accesos rápidos. `Shift+I` o `?diag` muestran estado de red, service worker, cachés, almacenamiento y compatibilidad del WebView.
-- **Deep links**: `#home`, `#agenda`, `#lists`, `#cleaning`, `#weather` y, con clima activado, `#climate`.
-- **Demo navegable** sin backend (`npm run dev:demo`), con listas, limpieza y calendarios locales.
+- **Deep links**: `#home`, `#agenda`, `#lists`, `#cleaning`, `#weather`, `#energy` y, con clima activado, `#climate`.
+- **Demo navegable** sin backend (`npm run dev:demo`), con listas, limpieza, calendarios y precios PVPC simulados que se identifican como demo.
 
 ## Capturas
 
@@ -25,11 +26,15 @@ Todas están tomadas a 1280 × 800. La carpeta completa está en [`docs/screensh
 
 | Hoy | Agenda semanal |
 | --- | --- |
-| ![Hoy con el tiempo y la agenda](docs/screenshots/home-dia.png) | ![Agenda semanal con varios calendarios](docs/screenshots/agenda-semana.png) |
+| ![Hoy con tiempo, agenda, energía y pendientes](docs/screenshots/home-dia.png) | ![Agenda semanal con varios calendarios](docs/screenshots/agenda-semana.png) |
 
 | Listas y tareas | Limpieza |
 | --- | --- |
 | ![Listas con tareas fechadas y personas](docs/screenshots/listas.png) | ![Cuadrante semanal de Manu y Paco](docs/screenshots/limpieza.png) |
+
+| Energía | Modo noche |
+| --- | --- |
+| ![PVPC por horas y recomendaciones de consumo](docs/screenshots/energia.png) | ![Hoy en modo noche, con la tarjeta de energía](docs/screenshots/home-noche.png) |
 
 | Panel de pruebas | Sin conexión |
 | --- | --- |
@@ -48,7 +53,7 @@ npm install
 npm run dev:demo
 ```
 
-Abre `http://127.0.0.1:5173`. En modo demo los datos son de ejemplo: las listas y la limpieza se guardan en local y el tiempo se genera localmente; el calendario y los sensores no necesitan Worker. El tiempo de demo no hace peticiones a Open-Meteo, y el radar y las fotos de la galería son recursos locales.
+Abre `http://127.0.0.1:5173`. En modo demo los datos son de ejemplo: las listas y la limpieza se guardan en local, el tiempo se genera localmente y la energía usa precios PVPC ficticios claramente marcados. El calendario y los sensores no necesitan Worker. El tiempo de demo no hace peticiones a Open-Meteo, y el radar y las fotos de la galería son recursos locales.
 
 ### Tu calendario real en la demo
 
@@ -117,15 +122,32 @@ Rutas principales: `GET /api/cleaning?week=YYYY-MM-DD`, `PATCH /api/cleaning/che
 
 `src/lib/gallery.js` importa cuatro fotos locales de `src/assets/gallery/`; `Screensaver` las muestra en bucle cada 12 segundos sin hacer peticiones de red. Para usar fotos propias, sustituye los archivos y actualiza esa lista. El salvapantallas se abre tras el tiempo de inactividad configurado y también desde el botón de galería del rail.
 
+## Energía, PVPC y recomendaciones
+
+La vista **Energía** (`#energy`) trabaja solo con **PVPC 2.0 TD (Península)**, el precio regulado de un hogar acogido al mercado regulado. No mezcla ese precio con el mercado mayorista ni con una tarifa libre: el precio de la energía incluye peajes y cargos, pero **no incluye IEE ni IVA**. La hoja **Fuente y cálculo** detalla la fuente, la hora de publicación, la consulta, los días disponibles y las limitaciones.
+
+Los precios se piden al Worker en `GET /api/electricity`. El Worker intenta primero la serie PVPC `1001` de REE (`apidatos`) y, si falla, recurre a ESIOS (`indicators/1001`, Península). Guarda la respuesta 10 minutos en memoria, devuelve `stale: true` con el último dato si las dos fuentes fallan y evita mezclar series. El cliente refresca cada 30 minutos, al volver a la pestaña y al recuperar conexión; conserva una copia en `localStorage` (`bbds.electricity.v1`) y no presenta una copia antigua como si cubriera la hora actual.
+
+La tarjeta de recomendaciones:
+
+- Trabaja con horas enteras y consecutivas, en `Europe/Madrid`. Un día de cambio de hora puede tener 23 o 25 horas y la etiqueta de la franja añade la duración real cuando el reloj de pared no coincide.
+- Exige que la franja cubra **todo el programa** (duración configurada) y no propone huecos incompletos.
+- Si el programa empieza en la hora actual, solo lo permite cuando quedan al menos 30 minutos; cuenta esa hora completa a su precio y no prorratea minutos.
+- Ordena las opciones por coste y elimina las que se solapan. La referencia «lo antes posible» usa la primera franja viable para calcular el ahorro.
+- Reparte el consumo por igual entre las horas del programa porque no hay un perfil real de potencia. Es una estimación, no una lectura del contador.
+- Estima IEE (5,11 %) e IVA (21 %) solo sobre el término de energía cuando la fuente es PVPC. No incluye término de potencia, alquiler del contador ni otros cargos fijos. La factura real puede diferir.
+
+Configuración disponible por electrodoméstico: duración, consumo total (o por hora en el termo) y margen para mover la franja (ahora, 2 h, 4 h, 8 h o todo el día). Se guarda en `localStorage` (`bbds.energy.settings.v1`) y la tarjeta de Inicio reutiliza esa misma configuración. Si hoy ya no cabe un programa completo, el resumen de Inicio muestra la mejor franja de mañana marcada como **mañana**. En demo, `src/lib/demo.js` genera precios ficticios con la etiqueta **Demo**; nunca se muestran como precios reales.
+
 ## Sin conexión, frescura y diagnóstico
 
 En producción, `public/sw.js` guarda el shell de la app y la última respuesta buena de las rutas same-origin (`/api/...`) y de Open-Meteo. Las peticiones usan red primero y, si fallan, caen a la copia guardada. El service worker solo se registra en el build de producción, no en `npm run dev`; para probarlo hay que servir `dist` con `npm run preview` desde `localhost` o HTTPS.
 
-La franja de estado resume la frescura de cuatro fuentes: tiempo, listas, limpieza y agenda. Si una falla, se sigue viendo el último dato y el aviso explica cuándo se actualizó. **Estado** abre el detalle por fuente; cada tarjeta de la agenda también puede mostrar su propio error de feed sin tumbar los demás.
+La franja de estado global resume la frescura de cuatro fuentes: tiempo, listas, limpieza y agenda. **Energía** mantiene su propio aviso de vigencia y copia local tanto en Inicio como en su vista, porque el precio se consulta al arrancar y se refresca cada 30 minutos. Si una fuente falla, se sigue viendo el último dato y el aviso explica cuándo se actualizó. **Estado** abre el detalle por fuente; cada tarjeta de la agenda también puede mostrar su propio error de feed sin tumbar los demás.
 
 El panel de pruebas (`D`, pulsación larga en el reloj del rail o `?demo`) permite simular **sin conexión**, forzar **datos de hace 2 h**, cambiar la hora y el idle o abrir el diagnóstico. El diagnóstico (`Shift+I` o `?diag`) muestra red, visibilidad, service worker, cachés, almacenamiento y una comprobación de APIs/CSS del WebView; el botón **Copiar diagnóstico** genera un JSON para pegar en un informe.
 
-`npm run check:webview` revisa el build contra el objetivo Chrome 64 de `vite.config.js` y avisa de sintaxis o CSS que puedan degradarse en un WebView antiguo. Los avisos del chunk opcional de OCR y de `color-mix()`, `dvh`, `backdrop-filter` o flex `gap` son esperados: la app funciona y el efecto visual se degrada en navegadores muy antiguos.
+`npm run check:webview` revisa el build contra el objetivo Chrome 64 de `vite.config.js` y avisa de sintaxis o CSS que puedan degradarse en un WebView antiguo. Los avisos del chunk opcional de OCR y de `color-mix()`, `dvh`, `backdrop-filter` o flex `gap` son esperados: la app funciona y el efecto visual se degrada en navegadores muy antiguos. `npm run check:energy` comprueba sin red los cálculos de PVPC: formatos, franjas completas, huecos, ahorro, impuestos, días de 23/25 horas y los parseadores de REE y ESIOS.
 
 ## Configuración del frontend
 
@@ -167,10 +189,11 @@ Copia `.dev.vars.example` a `.dev.vars`:
 ```env
 SENSOR_TOKEN=dev-sensor-token
 DASHBOARD_TOKEN=
+ESIOS_TOKEN=
 ICLOUD_ICS_URL=
 ```
 
-`.dev.vars` está ignorado por Git.
+`.dev.vars` está ignorado por Git. `ESIOS_TOKEN` es opcional: REE es la fuente principal y ESIOS el respaldo, pero una clave de ESIOS evita límites de uso y permite consultas filtradas si algún día hacen falta.
 
 ### Calendarios ICS
 
@@ -230,7 +253,8 @@ X-Sensor-Token: dev-sensor-token
 
 | Método | Ruta | Descripción |
 | --- | --- | --- |
-| `GET` | `/api/health` | Estado y si calendarios, tokens, limpieza y personas están disponibles. |
+| `GET` | `/api/health` | Estado y si calendarios, tokens, limpieza, personas y energía están disponibles. |
+| `GET` | `/api/electricity` | PVPC 2.0 TD por horas, con fuente, publicación, consulta y marca de copia. |
 | `POST` | `/api/sensors` | Lectura de un sensor. Requiere `X-Sensor-Token` si está configurado. |
 | `GET` | `/api/sensors/latest` | Última lectura por habitación. |
 | `GET` | `/api/sensors/history?hours=24&bucket=900` | Histórico agregado. |
@@ -253,6 +277,8 @@ X-Sensor-Token: dev-sensor-token
 | `DELETE` | `/api/calendars/:id` | Borra el feed. |
 | `POST` | `/api/calendars/:id/sync?days=14` | Fuerza la lectura del ICS y guarda el resultado. |
 | `GET` | `/api/calendar?days=21` | Eventos ICS agregados de todos los feeds activos, con errores por feed. |
+
+`GET /api/electricity` devuelve `source` (`id`, `label`, `priceType`, `note`, `url`), `days` con `{ date, hours: [{ start, price }] }` en €/kWh, `updatedAt` (publicación de la fuente), `fetchedAt` (consulta), `stale`, `timezone` y, si procede, `warning`. Las horas se agrupan por día de Madrid; `start` es un instante ISO con offset para que los cambios de hora no dependan de la posición en la lista.
 
 Si configuras `DASHBOARD_TOKEN`, las rutas de lectura, listas, personas, limpieza y calendarios requieren `Authorization: Bearer <token>`; el calendario también. El POST de sensores usa `X-Sensor-Token` (o Bearer). Las respuestas que pueden variar con el token incluyen `Vary: Authorization`.
 
@@ -279,11 +305,13 @@ Si configuras `DASHBOARD_TOKEN`, las rutas de lectura, listas, personas, limpiez
    npx wrangler secret put SENSOR_TOKEN
    # Opcional, solo para sembrar el primer calendario:
    npx wrangler secret put ICLOUD_ICS_URL
+   # Opcional: respaldo ESIOS de PVPC:
+   npx wrangler secret put ESIOS_TOKEN
    # Opcional:
    npx wrangler secret put DASHBOARD_TOKEN
    ```
 
-   Si usas `DASHBOARD_TOKEN`, define también `VITE_DASHBOARD_TOKEN` en el entorno de build. Si no configuras `ICLOUD_ICS_URL`, añade los calendarios desde **Agenda → Calendarios** después del primer despliegue; no hace falta volver a compilar.
+   Si usas `DASHBOARD_TOKEN`, define también `VITE_DASHBOARD_TOKEN` en el entorno de build. Si no configuras `ICLOUD_ICS_URL`, añade los calendarios desde **Agenda → Calendarios** después del primer despliegue; no hace falta volver a compilar. `ESIOS_TOKEN` no es necesario para que funcione la vista de energía: REE es la fuente principal y ESIOS el respaldo.
 
 5. Compila y despliega:
 
@@ -312,7 +340,7 @@ Si configuras `DASHBOARD_TOKEN`, las rutas de lectura, listas, personas, limpiez
 - Añade el dashboard a la pantalla de inicio o instálalo si tu navegador lo permite; el manifest ya declara orientación horizontal y modo `fullscreen`.
 - Usa pantalla fijada, mantenimiento despierto y bloqueo de sueño del dispositivo.
 - El build apunta a Chrome 64 (`vite.config.js`) y no genera variantes legacy. `npm run check:webview` revisa sintaxis y CSS del bundle; el diagnóstico muestra además qué APIs detecta el WebView en tiempo de ejecución. Si actualizas el dispositivo, vuelve a pasar las dos comprobaciones.
-- En producción el service worker guarda el shell y la última copia de tiempo, listas, limpieza y agenda. La primera carga necesita red (o una visita anterior con el service worker ya instalado); después el dashboard arranca sin conexión y avisa de la antigüedad del dato. El service worker requiere HTTPS o `localhost`.
+- En producción el service worker guarda el shell y la última copia de tiempo, listas, limpieza, agenda y energía. La primera carga necesita red (o una visita anterior con el service worker ya instalado); después el dashboard arranca sin conexión y avisa de la antigüedad del dato. El service worker requiere HTTPS o `localhost`.
 - `VITE_NIGHTLY_RELOAD_HOUR=3` recarga la página una vez al día y `VITE_IDLE_RETURN_MINUTES=10` vuelve a **Hoy** tras un rato sin tocar la pantalla. La vuelta a Hoy se desactiva con `0`; la recarga nocturna no se programa en demo.
 - El OCR local necesita WebAssembly y un procesador razonablemente moderno. La primera descarga (~70 MB) puede tardar; en una tableta lenta el reconocimiento de una línea puede tardar varios segundos. Si el WebView no puede con ONNX Runtime, la libreta sigue permitiendo corregir el texto a mano.
 - El salvapantallas no bloquea el dispositivo: solo cubre la interfaz y se cierra al tocar. No lo uses como bloqueo de seguridad.
@@ -322,20 +350,21 @@ Si configuras `DASHBOARD_TOKEN`, las rutas de lectura, listas, personas, limpiez
 
 ```text
 src/
-  components/       vistas, tiempo/radar, limpieza, galería, agenda, listas, clima,
-                    libreta manuscrita, hojas de calendario y panel de diagnóstico
-  hooks/            reloj, tiempo, limpieza, inactividad, sensores, calendario,
-                    listas y kiosco (recarga nocturna, vuelta a Hoy, gestos demo)
-  lib/              API, clima, agenda, ICS, OCR, limpieza, galería, demo,
-                    frescura, controles demo, compatibilidad y utilidades
+  components/       vistas, tiempo/radar, energía/PVPC, limpieza, galería,
+                    agenda, listas, clima, libreta manuscrita, hojas y diagnóstico
+  hooks/            reloj, tiempo, energía, limpieza, inactividad, sensores,
+                    calendario, listas y kiosco (recarga, vuelta a Hoy, gestos demo)
+  lib/              API, clima, agenda, energía/PVPC, ICS, OCR, limpieza,
+                    galería, demo, frescura, controles demo y utilidades
   assets/gallery/   fotos locales del salvapantallas
   config.js         lugar, modo noche, agenda, clima, idle, recarga y kiosco
   styles.css        tema papel/tinta BBDS y reglas responsive
   views.css         estilos de tiempo, radar, limpieza y galería
-  features.css      estilos de las funciones nuevas y hojas de edición
+  features.css      estilos de las funciones nuevas, energía y hojas de edición
   almanaque.css     detalles editoriales del rediseño
 worker/
-  index.js          Worker: API, D1, personas, limpieza, calendarios ICS y assets
+  index.js          Worker: API, D1, personas, limpieza, calendarios ICS,
+                    PVPC/ESIOS y assets
 migrations/
   0001_init.sql
   0002_list_drawings.sql
@@ -345,6 +374,7 @@ migrations/
 scripts/
   simulate-sensors.mjs
   check-webview.mjs
+  check-energy.mjs
 docs/screenshots/   capturas finales de la interfaz a 1280 × 800
 design/             estudios visuales estáticos A/B/C (no forman parte del build)
 public/
@@ -367,6 +397,7 @@ Los tres estudios visuales viven en `design/` y se abren directamente en el nave
 | `npm run dev:demo` | Demo sin Worker, con datos de ejemplo. |
 | `npm run build` | Build de producción en `dist` (sin variantes legacy). |
 | `npm run check:webview` | Revisa el build contra Chrome 64 y avisa de sintaxis/CSS problemáticos. |
+| `npm run check:energy` | Verifica formatos, franjas, ahorro, impuestos, cambios de hora y parseadores PVPC. |
 | `npm run preview` | Sirve `dist` con Vite; aquí sí se registra el service worker. |
 | `npm run api` | `wrangler dev` en `127.0.0.1:8787`. |
 | `npm run db:migrate:local` | Aplica migraciones D1 locales. |
@@ -379,6 +410,8 @@ Los tres estudios visuales viven en `design/` y se abren directamente en el nave
 - El OCR es local y aproximado. TrOCR small está entrenado con letras inglesas y puede fallar con palabras cortas, tildes o ñ; el texto editable es parte del flujo, no un extra. No se indexa ni se envía a la nube.
 - Las notas manuscritas antiguas siguen guardadas como imagen; las nuevas se guardan como texto.
 - El radar es una animación ilustrativa local: sirve para validar la interfaz, no para consultar lluvia real. La conexión con una fuente meteorológica real queda como siguiente paso.
+- **Energía** usa PVPC 2.0 TD (Península), no el precio mayorista. El coste mostrado es el término de energía con peajes y cargos; IEE e IVA son estimaciones y el término de potencia queda fuera. No sirve para facturar ni sustituye a la comercializadora.
+- Las recomendaciones reparten el consumo por igual entre las horas del programa porque no hay un perfil real de potencia. Son una ayuda para decidir, no un sistema de control que encienda el electrodoméstico.
 - La limpieza y las tareas viven en D1 en producción y en `localStorage` en demo. Los checks de limpieza se agrupan por semana, pero no hay cuentas separadas: la pantalla es de la casa.
 - Las fotos del salvapantallas son de demostración (Unsplash) y están empaquetadas en la app. Sustitúyelas por fotos propias antes de usar el marco en producción.
 - El token del dashboard no sustituye a autenticación real; usa Cloudflare Access si la URL es pública.

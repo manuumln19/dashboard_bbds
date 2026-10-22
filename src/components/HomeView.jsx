@@ -1,5 +1,6 @@
 import { AgendaCard } from "./AgendaCard";
 import { HeroCard } from "./HeroCard";
+import { HomeEnergyCard } from "./HomeEnergyCard";
 import { HomeTasks } from "./HomeTasks";
 import { NextEventCard } from "./NextEventCard";
 
@@ -10,6 +11,7 @@ export function HomeView({
   lists,
   onOpenAgenda,
   onOpenLists,
+  onOpenEnergy,
 }) {
   return (
     <section className="view home-view" aria-label="Resumen de hoy">
@@ -20,13 +22,16 @@ export function HomeView({
           now={now}
           onOpen={onOpenAgenda}
         />
-        <AgendaCard
-          events={calendar.events}
-          now={now}
-          configured={calendar.configured}
-          error={calendar.error}
-          onOpen={onOpenAgenda}
-        />
+        <div className="home-stack">
+          <AgendaCard
+            events={calendar.events}
+            now={now}
+            configured={calendar.configured}
+            error={calendar.error}
+            onOpen={onOpenAgenda}
+          />
+          <HomeEnergyCard now={now} onOpen={onOpenEnergy} />
+        </div>
         <HomeTasks
           items={lists.items}
           now={now}
