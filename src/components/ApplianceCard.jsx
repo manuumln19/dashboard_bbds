@@ -272,7 +272,7 @@ export function ApplianceCard({
             onChange={(value) => updateConfig({ durationHours: value })}
           />
           <span className="appliance-config__hint">
-            El programa completo, no solo una hora
+            Programa completo
           </span>
         </div>
 
@@ -290,7 +290,7 @@ export function ApplianceCard({
             onChange={(value) => updateConfig({ consumption: value })}
           />
           <span className="appliance-config__hint">
-            Total estimado: {numberText(totalKwh)} kWh
+            Total: {numberText(totalKwh)} kWh
           </span>
         </div>
 
@@ -362,13 +362,6 @@ export function ApplianceCard({
           </p>
         )}
       </div>
-
-      <p className="appliance-note">
-        Estimación con el consumo repartido por igual durante el programa.
-        Coste de energía con peajes y cargos; no incluye el término de
-        potencia. Los impuestos son una estimación (IEE 5,11 % + IVA 21 %) y
-        pueden cambiar.
-      </p>
     </article>
   );
 }

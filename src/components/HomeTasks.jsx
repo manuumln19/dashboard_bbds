@@ -24,7 +24,7 @@ export function HomeTasks({
   const openTasks = tasks
     .filter((item) => !item.done)
     .sort((a, b) => dueTimestamp(a) - dueTimestamp(b))
-    .slice(0, 3);
+    .slice(0, 4);
   const taskOpen = tasks.filter((item) => !item.done).length;
   const progress = shopping.length
     ? Math.round((shoppingDone / shopping.length) * 100)

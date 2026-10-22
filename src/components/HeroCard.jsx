@@ -1,6 +1,6 @@
 import {
+  CalendarDays,
   Droplets,
-  MapPin,
   Sparkles,
   Sun,
   Thermometer,
@@ -54,7 +54,7 @@ export function HeroCard({ now, weather }) {
           {greeting} · {capitalize(LOCATION.name)}
         </span>
         <span className="home-hero__place">
-          <MapPin size={13} strokeWidth={1.9} aria-hidden="true" />
+          <CalendarDays size={14} strokeWidth={1.9} aria-hidden="true" />
           {formatLongDate(now)}
         </span>
       </header>
