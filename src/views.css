@@ -1,5 +1,5 @@
 /* ==========================================================================
-   BBDS · tiempo exterior, radar, limpieza y galería
+   BBDS · tiempo exterior, limpieza y fotos
    Se carga después de styles.css para conservar el tema papel/tinta.
    ========================================================================== */
 
@@ -113,8 +113,7 @@
   text-transform: uppercase;
 }
 
-
-/* El tiempo y el radar viven ahora en almanaque.css. */
+/* El tiempo vive ahora en almanaque.css y las próximas horas en features.css. */
 
 /* Limpieza --------------------------------------------------------------- */
 
@@ -467,7 +466,6 @@
   gap: 5px;
 }
 
-
 /* Ajustes de las nuevas vistas en pantallas estrechas -------------------- */
 
 @media (max-width: 1180px) {
@@ -539,8 +537,7 @@
   }
 
   .weather-now,
-  .weekly-card,
-  .radar-panel {
+  .weekly-card {
     grid-column: 1;
     grid-row: auto;
     min-height: 240px;
@@ -552,14 +549,6 @@
 
   .weekly-card {
     min-height: 330px;
-  }
-
-  .radar-panel {
-    min-height: 500px;
-  }
-
-  .radar-stage {
-    min-height: 340px;
   }
 
   .cleaning-view {
@@ -661,20 +650,6 @@
     gap: 2px;
   }
 
-  .radar-panel {
-    min-height: 460px;
-    padding: 14px;
-  }
-
-  .radar-panel__head h2 {
-    font-size: 21px;
-  }
-
-  .radar-panel__foot {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
   .cleaning-row {
     grid-template-columns: 1fr auto;
     grid-template-rows: auto auto;
@@ -747,9 +722,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .radar-cell,
-  .radar-sweep,
-  .radar-home__halo,
   .screensaver__photo {
     animation: none;
     transition: none;

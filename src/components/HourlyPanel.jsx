@@ -29,12 +29,10 @@ export function HourlyPanel({ weather, now }) {
   }
 
   return (
-    <aside className="radar hourly" aria-labelledby="hourly-title">
-      <header className="radar-head">
-        <div>
-          <p className="radar-kicker">Próximas horas · Open-Meteo</p>
-          <h2 id="hourly-title">{LOCATION.name}, hora a hora</h2>
-        </div>
+    <aside className="card hourly" aria-labelledby="hourly-title">
+      <header className="hourly-head">
+        <p className="hourly-kicker">Próximas horas · Open-Meteo</p>
+        <h2 id="hourly-title">{LOCATION.name}, hora a hora</h2>
       </header>
 
       <p className={`hourly-summary${rainy ? " is-rain" : ""}`}>
@@ -53,16 +51,19 @@ export function HourlyPanel({ weather, now }) {
                 <WeatherGlyph code={hour.weatherCode} isDay={hour.isDay} size={17} strokeWidth={1.6} />
               </span>
               <span className="hourly-temp">
-                <i
-                  aria-hidden="true"
-                  style={{
-                    width: `${Number.isFinite(temperature) ? 18 + ((temperature - low) / span) * 82 : 0}%`,
-                  }}
-                />
+                <span className="hourly-track" aria-hidden="true">
+                  <i
+                    style={{
+                      width: `${Number.isFinite(temperature) ? 12 + ((temperature - low) / span) * 88 : 0}%`,
+                    }}
+                  />
+                </span>
                 <strong>{round(temperature)}°</strong>
               </span>
               <span className="hourly-rain" aria-label={`Lluvia ${round(chance)}%`}>
-                <i aria-hidden="true" style={{ width: `${Math.min(100, chance)}%` }} />
+                <span className="hourly-track" aria-hidden="true">
+                  <i style={{ width: `${Math.max(2, Math.min(100, chance))}%` }} />
+                </span>
                 <small>{round(chance)}%</small>
               </span>
             </li>

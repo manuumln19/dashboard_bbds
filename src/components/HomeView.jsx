@@ -1,44 +1,49 @@
-import { AgendaCard } from "./AgendaCard";
-import { HeroCard } from "./HeroCard";
-import { HomeEnergyCard } from "./HomeEnergyCard";
-import { HomeTasks } from "./HomeTasks";
-import { NextEventCard } from "./NextEventCard";
+import { useElectricity } from "../hooks/useElectricity";
+import { TodayNext } from "./TodayNext";
+import { TodayNow } from "./TodayNow";
+import { TodayPower } from "./TodayPower";
+import { TodayShopping } from "./TodayShopping";
+import { TodayTimeline } from "./TodayTimeline";
 
+// Hoy responde, en este orden: qué hora y qué tiempo hace, qué es lo
+// siguiente que hay que saber y qué pasa hoy en casa.
 export function HomeView({
   now,
   weather,
   calendar,
   lists,
+  cleaning,
   onOpenAgenda,
   onOpenLists,
   onOpenEnergy,
+  onOpenWeather,
 }) {
+  const electricity = useElectricity();
+
   return (
     <section className="view home-view" aria-label="Resumen de hoy">
-      <div className="home-board">
-        <HeroCard now={now} weather={weather.weather} />
-        <NextEventCard
+      <div className="today-board">
+        <TodayNow now={now} weather={weather.weather} onOpenWeather={onOpenWeather} />
+        <TodayNext
+          now={now}
           events={calendar.events}
-          now={now}
-          onOpen={onOpenAgenda}
+          weather={weather.weather}
+          electricity={electricity}
+          cleaning={cleaning}
+          onOpenAgenda={onOpenAgenda}
         />
-        <div className="home-stack">
-          <AgendaCard
-            events={calendar.events}
-            now={now}
-            configured={calendar.configured}
-            error={calendar.error}
-            onOpen={onOpenAgenda}
-          />
-          <HomeEnergyCard now={now} onOpen={onOpenEnergy} />
+        <TodayTimeline
+          now={now}
+          events={calendar.events}
+          lists={lists}
+          cleaning={cleaning}
+          onOpenAgenda={onOpenAgenda}
+          onOpenLists={onOpenLists}
+        />
+        <div className="today-side">
+          <TodayShopping lists={lists} onOpenLists={onOpenLists} />
+          <TodayPower electricity={electricity} now={now} onOpenEnergy={onOpenEnergy} />
         </div>
-        <HomeTasks
-          items={lists.items}
-          now={now}
-          people={lists.people}
-          onToggle={lists.toggleItem}
-          onOpen={onOpenLists}
-        />
       </div>
     </section>
   );

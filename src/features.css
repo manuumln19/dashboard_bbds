@@ -1872,22 +1872,6 @@
 
 /* Home: pendientes con fecha --------------------------------------------- */
 
-.home-task__content {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.home-task__content .todo-badges {
-  gap: 3px;
-}
-
-.home-task__content .todo-badge {
-  min-height: 16px;
-  font-size: 7.5px;
-}
-
 /* Ajustes para pantallas estrechas --------------------------------------- */
 
 @media (max-width: 900px) {
@@ -3267,232 +3251,6 @@
 
 /* Energía en Inicio ------------------------------------------------------- */
 
-.home-energy {
-  display: flex;
-  min-width: 0;
-  min-height: 0;
-  flex-direction: column;
-  overflow: hidden;
-  padding: 12px 20px 11px;
-}
-
-.home-energy__head {
-  display: flex;
-  flex: none;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.home-energy__title {
-  min-width: 0;
-}
-
-.home-energy__title h2 {
-  margin: 2px 0 0;
-  color: var(--ink);
-  font-family: var(--font-serif);
-  font-size: 22px;
-  font-weight: 400;
-  letter-spacing: -0.025em;
-  line-height: 1;
-}
-
-.home-energy__tools {
-  display: flex;
-  flex: none;
-  align-items: center;
-  gap: 7px;
-  padding-top: 1px;
-}
-
-.home-energy__tools .text-button {
-  min-height: 22px;
-  font-size: 7px;
-}
-
-.home-energy__empty {
-  display: flex;
-  flex: 1;
-  min-height: 0;
-  align-items: center;
-  gap: 12px;
-  padding-top: 6px;
-}
-
-.home-energy__empty-icon {
-  display: grid;
-  width: 34px;
-  height: 34px;
-  flex: none;
-  place-items: center;
-  border: 1px solid rgba(187, 122, 32, 0.16);
-  border-radius: 11px;
-  background: var(--amber-soft);
-  color: var(--amber);
-}
-
-.home-energy__empty div {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.home-energy__empty strong {
-  color: var(--text);
-  font-size: 10.5px;
-  font-weight: 650;
-  line-height: 1.2;
-}
-
-.home-energy__empty span:not(.home-energy__empty-icon) {
-  color: var(--muted);
-  font-family: var(--font-mono);
-  font-size: 7.5px;
-  line-height: 1.3;
-}
-
-.home-energy__empty .energy-button {
-  margin-left: auto;
-}
-
-.home-energy__body {
-  display: grid;
-  flex: 1;
-  min-height: 0;
-  grid-template-columns: 174px minmax(0, 1fr);
-  gap: 16px;
-  margin-top: 5px;
-}
-
-.home-energy__now {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  justify-content: center;
-  gap: 1px;
-}
-
-.home-energy__now-label {
-  overflow: hidden;
-  color: var(--muted);
-  font-family: var(--font-mono);
-  font-size: 7px;
-  letter-spacing: 0.045em;
-  line-height: 1.1;
-  text-overflow: ellipsis;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.home-energy__now > strong {
-  color: var(--ink);
-  font-family: var(--font-serif);
-  font-size: 35px;
-  font-variant-numeric: lining-nums tabular-nums;
-  font-weight: 400;
-  letter-spacing: -0.045em;
-  line-height: 0.88;
-  white-space: nowrap;
-}
-
-.home-energy__now > strong small {
-  margin-left: 4px;
-  color: var(--muted);
-  font-family: var(--font-mono);
-  font-size: 7.5px;
-  font-weight: 400;
-  letter-spacing: 0;
-}
-
-.home-energy__now > strong.is-empty {
-  color: var(--faint);
-}
-
-.home-energy__now-meta {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  gap: 6px;
-  margin-top: 3px;
-  overflow: hidden;
-  color: var(--faint);
-  font-family: var(--font-mono);
-  font-size: 6.8px;
-  white-space: nowrap;
-}
-
-.home-energy__now-meta .energy-band {
-  flex: none;
-  padding: 2px 6px;
-  font-size: 6.5px;
-}
-
-.home-energy__apps {
-  display: grid;
-  min-width: 0;
-  min-height: 0;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-auto-rows: minmax(0, 1fr);
-  column-gap: 18px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.home-energy__apps li {
-  display: grid;
-  min-width: 0;
-  grid-template-columns: 13px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 6px;
-}
-
-.home-energy__apps li:nth-child(even) {
-  padding-left: 18px;
-  border-left: 1px solid var(--line);
-}
-
-.home-energy__apps li svg {
-  color: var(--accent);
-  opacity: 0.76;
-}
-
-.home-energy__app-name {
-  overflow: hidden;
-  color: var(--text);
-  font-size: 9.5px;
-  font-weight: 650;
-  letter-spacing: -0.01em;
-  line-height: 1.1;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.home-energy__app-when {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 4px;
-  color: var(--muted);
-  font-family: var(--font-mono);
-  font-size: 8px;
-  letter-spacing: -0.01em;
-  white-space: nowrap;
-}
-
-.home-energy__app-when small {
-  color: var(--amber);
-  font-size: 6px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.home-energy__app-when.is-empty {
-  color: var(--faint);
-}
-
 @media (max-width: 1180px) {
   .energy-layout {
     grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
@@ -3516,23 +3274,6 @@
 
   .appliance-config__hint {
     font-size: 5.8px;
-  }
-
-  .home-energy__body {
-    grid-template-columns: 158px minmax(0, 1fr);
-    gap: 12px;
-  }
-
-  .home-energy__now > strong {
-    font-size: 31px;
-  }
-
-  .home-energy__apps {
-    column-gap: 12px;
-  }
-
-  .home-energy__apps li:nth-child(even) {
-    padding-left: 12px;
   }
 }
 
@@ -3561,58 +3302,6 @@
   }
 }
 
-@media (max-width: 960px) {
-  .home-stack {
-    grid-column: 1;
-    grid-row: auto;
-    grid-template-rows: auto auto;
-    gap: 16px;
-  }
-
-  .home-stack .agenda-preview {
-    grid-column: auto;
-    grid-row: auto;
-    min-height: 320px;
-  }
-
-  .home-energy {
-    min-height: 140px;
-  }
-}
-
-@media (max-width: 680px) {
-  .home-energy {
-    min-height: 196px;
-    padding: 14px 16px 12px;
-  }
-
-  .home-energy__body {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto minmax(0, 1fr);
-    gap: 8px;
-  }
-
-  .home-energy__now {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 2px 10px;
-  }
-
-  .home-energy__now-label {
-    grid-column: 1 / -1;
-  }
-
-  .home-energy__now-meta {
-    grid-column: 1 / -1;
-    margin-top: 1px;
-  }
-
-  .home-energy__tools .energy-flag {
-    display: none;
-  }
-}
-
 /* ==========================================================================
    Legibilidad, materiales y zonas táctiles
    Capa final: unifica las superficies, sube el tamaño mínimo de la letra y
@@ -3627,7 +3316,6 @@
 .agenda-calendar,
 .cleaning-board,
 .energy-card,
-.home-hero,
 .weather-now,
 .room-card {
   border-color: var(--line);
@@ -3647,7 +3335,6 @@
 .app.is-night .agenda-calendar,
 .app.is-night .cleaning-board,
 .app.is-night .energy-card,
-.app.is-night .home-hero,
 .app.is-night .weather-now,
 .app.is-night .room-card {
   border-color: var(--line);
@@ -3724,148 +3411,11 @@
 
 /* Inicio: saludo y tiempo ------------------------------------------------ */
 
-.home-hero__place {
-  gap: 6px;
-  font-size: 10px;
-}
-
-.home-hero__weather-meta {
-  gap: 4px;
-}
-
-.home-hero__weather-meta strong {
-  font-size: 12px;
-}
-
-.home-hero__weather-meta > span {
-  font-size: 10.5px;
-}
-
-.home-hero__wind {
-  gap: 5px;
-  font-size: 10px;
-}
-
-.weather-advice__icon {
-  width: 32px;
-  height: 32px;
-}
-
-.weather-advice strong {
-  font-size: 11.5px;
-}
-
-.weather-advice span:last-child {
-  font-size: 10.5px;
-  line-height: 1.3;
-}
-
-.hour-strip__item {
-  width: 43px;
-  padding-left: 8px;
-}
-
-.hour-strip__item span {
-  font-size: 9.5px;
-}
-
-.hour-strip__item strong {
-  font-size: 14px;
-}
-
 /* Inicio: pendientes ----------------------------------------------------- */
-
-.home-tasks__count-pill {
-  padding: 6px 9px;
-  font-size: 9.5px;
-}
-
-.home-tasks__number span {
-  font-size: 9.5px;
-}
-
-.home-tasks__shopping-title {
-  font-size: 11.5px;
-}
-
-.home-tasks__shopping-copy small {
-  font-size: 9.5px;
-  line-height: 1.2;
-}
-
-.home-tasks__list-head {
-  padding: 8px 0;
-  font-size: 9.5px;
-}
-
-.home-task-list {
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--line-strong) transparent;
-}
-
-.home-task {
-  min-height: 50px;
-  padding: 8px 2px;
-  font-size: 12.5px;
-}
-
-.home-task__content .todo-badge {
-  min-height: 21px;
-  padding: 2px 7px;
-  font-size: 9.5px;
-}
-
-.home-tasks__link {
-  min-height: 40px;
-  font-size: 10px;
-}
 
 /* Inicio: próximo evento ------------------------------------------------- */
 
-.next-event__day,
-.next-event__foot {
-  font-size: 9px;
-}
-
 /* Inicio: agenda --------------------------------------------------------- */
-
-.home-stack .agenda-preview {
-  padding-bottom: 10px;
-}
-
-.agenda-preview__head {
-  padding-bottom: 8px;
-}
-
-.agenda-preview__day strong {
-  font-size: 20px;
-}
-
-.agenda-preview__day span,
-.agenda-preview__row time {
-  font-size: 10px;
-}
-
-.agenda-preview__group {
-  padding: 7px 0;
-}
-
-.agenda-preview__group:first-child {
-  padding-top: 2px;
-}
-
-.agenda-preview__row {
-  min-height: 34px;
-}
-
-.agenda-preview__row strong {
-  font-size: 12.5px;
-}
-
-.agenda-preview__row > div > span {
-  font-size: 10px;
-}
 
 /* Agenda ---------------------------------------------------------------- */
 
@@ -4205,31 +3755,54 @@
 
 /* Próximas horas (antes radar) ------------------------------------------ */
 
-.radar-kicker {
-  font-size: 9.5px;
+.hourly {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  grid-column: 2;
+  grid-row: 1 / 3;
+  flex-direction: column;
+  padding: 18px 20px 14px;
 }
 
-.hourly {
-  padding-bottom: 12px;
+.hourly-head {
+  margin-bottom: 10px;
+}
+
+.hourly-kicker {
+  margin: 0;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.hourly-head h2 {
+  margin: 4px 0 0;
+  color: var(--text);
+  font-family: var(--font-serif);
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1;
 }
 
 .hourly-summary {
   display: flex;
   align-items: center;
   gap: 7px;
-  margin: 0 18px 10px;
+  margin: 0 0 10px;
   padding: 9px 11px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.05);
-  color: #e9dfd2;
-  font-size: 12px;
+  background: var(--surface-3);
+  color: var(--text);
+  font-size: 13px;
 }
 
 .hourly-summary.is-rain {
-  border-color: rgba(120, 170, 235, 0.45);
-  background: rgba(90, 140, 220, 0.16);
-  color: #fbf5ec;
+  background: var(--lilac-soft);
+  color: var(--lilac);
 }
 
 .hourly-list {
@@ -4239,73 +3812,84 @@
   flex-direction: column;
   justify-content: space-between;
   margin: 0;
-  padding: 0 18px;
+  padding: 0;
   list-style: none;
 }
 
 .hourly-list li {
   display: grid;
-  grid-template-columns: 40px 22px minmax(0, 1.2fr) minmax(0, 1fr);
+  grid-template-columns: 44px 22px minmax(0, 1.3fr) minmax(0, 1fr);
   align-items: center;
   gap: 10px;
-  color: #e9dfd2;
 }
 
 .hourly-time {
-  color: #b9aa9d;
+  color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
 
 .hourly-glyph {
   display: grid;
   place-items: center;
-  color: #f0cb8f;
+  color: var(--amber);
 }
 
 .hourly-temp,
 .hourly-rain {
-  position: relative;
   display: flex;
+  min-width: 0;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
 }
 
-.hourly-temp i,
-.hourly-rain i {
-  height: 5px;
-  flex: none;
+.hourly-track {
+  display: block;
+  height: 6px;
+  flex: 1;
+  overflow: hidden;
   border-radius: 999px;
+  background: var(--surface-3);
+}
+
+.hourly-track i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
 }
 
 .hourly-temp i {
-  max-width: calc(100% - 34px);
   background: linear-gradient(90deg, #e6c46f, #ef8a6f);
 }
 
-.hourly-temp strong {
-  color: #fbf5ec;
-  font-family: var(--font-serif);
-  font-size: 17px;
-  font-weight: 400;
+.hourly-rain i {
+  background: var(--lilac);
+  opacity: 0.75;
 }
 
-.hourly-rain i {
-  max-width: calc(100% - 34px);
-  min-width: 2px;
-  background: rgba(130, 175, 235, 0.75);
+.hourly-temp strong {
+  width: 34px;
+  flex: none;
+  color: var(--text);
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 400;
+  text-align: right;
 }
 
 .hourly-rain small {
-  color: #b9aa9d;
+  width: 36px;
+  flex: none;
+  color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 11px;
   font-variant-numeric: tabular-nums;
+  text-align: right;
 }
 
 .hourly-list li.is-rain .hourly-rain small {
-  color: #a9c8f5;
+  color: var(--lilac);
 }
 
 /* Energía ---------------------------------------------------------------- */
@@ -4520,47 +4104,6 @@
   font-size: 9.5px;
 }
 
-.home-energy__tools .text-button {
-  min-height: 34px;
-  font-size: 9px;
-}
-
-.home-energy__empty strong {
-  font-size: 11.5px;
-}
-
-.home-energy__empty span:not(.home-energy__empty-icon) {
-  font-size: 9px;
-}
-
-.home-energy__now-label {
-  font-size: 9px;
-}
-
-.home-energy__now > strong small {
-  font-size: 9px;
-}
-
-.home-energy__now-meta {
-  font-size: 9px;
-}
-
-.home-energy__now-meta .energy-band {
-  font-size: 9px;
-}
-
-.home-energy__app-name {
-  font-size: 10.5px;
-}
-
-.home-energy__app-when {
-  font-size: 9px;
-}
-
-.home-energy__app-when small {
-  font-size: 9px;
-}
-
 /* Hojas de detalle ------------------------------------------------------- */
 
 .event-sheet__calendar {
@@ -4595,19 +4138,9 @@
 }
 
 @media (max-width: 1180px) {
-  .home-hero__clock {
-    font-size: 100px;
-  }
 
   /* A este ancho la tarjeta de inicio solo deja ver dos días completos.
      El tercero quedaría cortado y con scroll: mejor no mostrarlo. */
-  .home-stack .agenda-preview__group:nth-child(3) {
-    display: none;
-  }
-
-  .weather-advice span:last-child {
-    white-space: normal;
-  }
 
   /* «Todo el día» necesita más ancho que el resto de márgenes; con cinco
      columnas iguales se salía de la tarjeta en 1024. */
@@ -4656,10 +4189,6 @@
     grid-template-rows: minmax(300px, auto) minmax(0, 1fr);
   }
 
-  .home-hero__clock {
-    font-size: 98px;
-  }
-
   .cleaning-row {
     grid-template-columns: 120px minmax(0, 1fr) 52px;
   }
@@ -4706,4 +4235,523 @@
   flex-wrap: wrap;
   gap: 7px;
   margin-top: 8px;
+}
+
+/* Hoy (rediseño) -----------------------------------------------------------
+   Arriba: hora y tiempo + «Lo siguiente». Abajo: la línea de tiempo de hoy y
+   mañana, y la compra con la luz. Ningún texto por debajo de 11 px: se lee
+   a un par de metros. */
+
+.today-board {
+  display: grid;
+  flex: 1;
+  min-height: 0;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 16px;
+}
+
+.today-board .card {
+  min-width: 0;
+  min-height: 0;
+}
+
+.today-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.today-card__head h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--text);
+  font-family: var(--font-serif);
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.today-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 36px;
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.today-count {
+  display: inline-grid;
+  min-width: 24px;
+  height: 24px;
+  place-items: center;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--surface-3);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0;
+}
+
+/* Hora y tiempo */
+
+.today-now {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 22px 14px;
+}
+
+.today-now__head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.today-now__head span:first-child {
+  color: var(--accent);
+}
+
+.today-now__main {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+}
+
+.today-now__clock {
+  color: var(--text);
+  font-family: var(--font-serif);
+  font-size: 104px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.05em;
+  line-height: 0.82;
+}
+
+.today-now__weather {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: center;
+  gap: 4px 12px;
+  padding: 8px 0 8px 22px;
+  border: 0;
+  border-left: 1px solid var(--line);
+  border-radius: 0;
+  background: none;
+  color: var(--accent);
+  text-align: left;
+}
+
+.today-now__temp {
+  color: var(--text);
+  font-family: var(--font-serif);
+  font-size: 54px;
+  line-height: 1;
+}
+
+.today-now__sky {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.today-now__sky strong {
+  color: var(--text);
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.today-now__sky span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.today-now__hours {
+  display: flex;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 0 0;
+  border-top: 1px solid var(--line);
+  list-style: none;
+}
+
+.today-now__hours li {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 6px 0;
+  border-radius: 12px;
+  background: var(--surface-3);
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.today-now__hours strong {
+  color: var(--text);
+  font-family: var(--font-serif);
+  font-size: 19px;
+  font-weight: 400;
+}
+
+/* Lo siguiente */
+
+.today-next {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px 20px;
+  border-color: var(--tone-soft);
+  background: var(--tone-soft);
+}
+
+.today-next__lead {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  text-align: left;
+}
+
+.today-next__kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--tone);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.today-next__title {
+  color: var(--text);
+  font-family: var(--font-serif);
+  font-size: 34px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.02;
+}
+
+.today-next__detail {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.today-next__rest {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: auto 0 0;
+  padding: 12px 0 0;
+  border-top: 1px solid var(--line);
+  list-style: none;
+}
+
+.today-next__rest li {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.today-next__rest li svg {
+  flex: none;
+  color: var(--tone);
+}
+
+.today-next__rest strong {
+  color: var(--text);
+  font-weight: 500;
+}
+
+/* Hoy y mañana */
+
+.today-timeline {
+  display: flex;
+  flex-direction: column;
+  padding: 16px 20px 12px;
+}
+
+.today-timeline__days {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+
+.today-day h3 {
+  margin: 0 0 4px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.today-day ul {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.today-entry {
+  display: grid;
+  width: 100%;
+  min-height: 46px;
+  grid-template-columns: 92px 26px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px 6px 10px;
+  border: 0;
+  border-left: 3px solid var(--tone);
+  border-radius: 0;
+  background: none;
+  color: var(--text);
+  text-align: left;
+}
+
+.today-day li + li .today-entry {
+  border-top: 1px solid var(--line);
+}
+
+.today-entry__time {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.today-entry__mark {
+  display: grid;
+  place-items: center;
+  color: var(--tone);
+}
+
+.today-entry__title {
+  overflow: hidden;
+  font-size: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.today-entry__meta {
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--tone-soft);
+  color: var(--tone);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.today-entry.is-done .today-entry__title {
+  color: var(--faint);
+  text-decoration: line-through;
+}
+
+.today-entry.is-overdue .today-entry__time {
+  color: var(--accent);
+}
+
+.today-day__empty {
+  margin: 0;
+  padding: 8px 10px;
+  color: var(--faint);
+  font-size: 14px;
+}
+
+.today-timeline__more {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 7px;
+  min-height: 36px;
+  margin-top: 6px;
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* Compra y luz */
+
+.today-side {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.today-shopping {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  padding: 16px 20px 14px;
+}
+
+.today-shopping__list {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.today-shopping__list button {
+  display: flex;
+  width: 100%;
+  min-height: 40px;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 2px;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font-size: 16px;
+  text-align: left;
+}
+
+.today-shopping__list li + li button {
+  border-top: 1px solid var(--line);
+}
+
+.today-shopping__list button.is-done span {
+  color: var(--faint);
+  text-decoration: line-through;
+}
+
+.today-shopping__drawing {
+  max-height: 30px;
+}
+
+.today-shopping__more button {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.today-shopping__empty {
+  flex: 1;
+  margin: 0;
+  color: var(--faint);
+  font-size: 14px;
+}
+
+.today-shopping__add {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.today-shopping__add input {
+  min-width: 0;
+  height: 44px;
+  flex: 1;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  font-size: 15px;
+  outline: none;
+}
+
+.today-shopping__add input:focus {
+  border-color: var(--accent);
+}
+
+.today-shopping__add button {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 14px;
+  background: var(--accent);
+  color: #fffaf2;
+}
+
+.today-shopping__add button:disabled {
+  opacity: 0.35;
+}
+
+.today-power {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 10px;
+  min-height: 58px;
+  padding: 0 18px;
+  color: var(--amber);
+  text-align: left;
+}
+
+.today-power__label {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.today-power strong {
+  margin-left: auto;
+  color: var(--text);
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-weight: 400;
+}
+
+.today-power strong small {
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 12px;
+}
+
+.today-power > svg:last-child {
+  color: var(--muted);
+}
+
+/* En Hoy el reloj grande ya está en la tarjeta: el del rail sobra. */
+.app--home .rail__clock {
+  display: none;
 }

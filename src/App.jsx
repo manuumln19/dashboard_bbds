@@ -338,9 +338,11 @@ export default function App() {
               weather={weather}
               calendar={calendar}
               lists={lists}
+              cleaning={cleaning}
               onOpenAgenda={() => setView("agenda")}
               onOpenLists={() => setView("lists")}
               onOpenEnergy={() => setView("energy")}
+              onOpenWeather={() => setView("weather")}
             />
           ) : null}
 
