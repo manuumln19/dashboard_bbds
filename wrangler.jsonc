@@ -16,7 +16,7 @@
     {
       "binding": "DB",
       "database_name": "bbds-db",
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "868d51fa-3b8e-4ecc-a45b-9bf13b5274f9",
       "migrations_dir": "migrations"
     }
   ]
