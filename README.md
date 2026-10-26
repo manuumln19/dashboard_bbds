@@ -337,6 +337,17 @@ Si configuras `DASHBOARD_TOKEN`, las rutas de lectura, listas, personas, limpiez
 
 ## Kiosco en pared
 
+### Marco Frameo (Android 6, RK3126)
+
+`kiosk/` contiene una app Android mínima (`net.bbds.kiosk`): un WebView a pantalla completa que se registra como pantalla de inicio, mantiene la pantalla encendida y reintenta la carga si el Wi‑Fi aún no está listo.
+
+- Compilar (JDK 17+ y SDK con build-tools ≥ 35 y platform 34): `powershell -File kiosk/build.ps1` → `kiosk/build/bbds-kiosk.apk`.
+- Instalar: `adb install -r kiosk/build/bbds-kiosk.apk`.
+- Cambiar la URL: `adb shell am start -n net.bbds.kiosk/.MainActivity --es url https://…`. Añade `--ez debug true` para depurar con `chrome://inspect`.
+- Hacerlo pantalla de inicio: desactiva Frameo (`adb shell su -c "pm disable net.frameo.frame"`; se revierte con `pm enable`).
+- Salir del kiosco: mantén tres dedos quietos 2 s y se abren los Ajustes de Android.
+- El WebView de fábrica (44) no sirve: el marco necesita el WebView 106 de LineageOS en `/system/app/webview` con sus librerías extraídas en `lib/arm/`.
+
 - Añade el dashboard a la pantalla de inicio o instálalo si tu navegador lo permite; el manifest ya declara orientación horizontal y modo `fullscreen`.
 - Usa pantalla fijada, mantenimiento despierto y bloqueo de sueño del dispositivo.
 - El build apunta a Chrome 64 (`vite.config.js`) y no genera variantes legacy. `npm run check:webview` revisa sintaxis y CSS del bundle; el diagnóstico muestra además qué APIs detecta el WebView en tiempo de ejecución. Si actualizas el dispositivo, vuelve a pasar las dos comprobaciones.
