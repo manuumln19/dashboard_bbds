@@ -103,9 +103,10 @@ public class MainActivity extends Activity {
         super.onWindowFocusChanged(focus);
         if (focus) {
             getWindow().getDecorView().setSystemUiVisibility(
+                // Sin flags LAYOUT_* ni tema Fullscreen: con ellos Android no
+                // encoge la ventana al abrir el teclado y tapa lo que se escribe.
                 View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | View.SYSTEM_UI_FLAG_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
         }
     }
 

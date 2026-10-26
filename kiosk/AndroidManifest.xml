@@ -9,8 +9,9 @@
         <activity android:name=".MainActivity"
             android:launchMode="singleTask"
             android:screenOrientation="sensorLandscape"
+            android:windowSoftInputMode="adjustResize|stateHidden"
             android:configChanges="orientation|screenSize|keyboardHidden|keyboard|navigation"
-            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen">
+            android:theme="@android:style/Theme.Black.NoTitleBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
