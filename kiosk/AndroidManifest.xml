@@ -4,6 +4,8 @@
     <uses-sdk android:minSdkVersion="23" android:targetSdkVersion="23" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <application android:label="BBDS" android:hardwareAccelerated="true"
         android:usesCleartextTraffic="true">
         <activity android:name=".MainActivity"

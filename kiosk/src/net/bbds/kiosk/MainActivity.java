@@ -4,12 +4,14 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
@@ -25,6 +27,7 @@ public class MainActivity extends Activity {
     static final long RETRY_MS = 15000;
 
     private WebView web;
+    private WifiManager.WifiLock wifiLock;
     private final Handler handler = new Handler();
     private final Runnable retry = new Runnable() {
         @Override public void run() { if (web != null) web.loadUrl(savedUrl()); }
@@ -40,6 +43,14 @@ public class MainActivity extends Activity {
         super.onCreate(state);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        // Sin esto el marco apagaba el Wi-Fi en reposo y el dashboard (y ADB)
+        // se quedaban sin red.
+        WifiManager wifi = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+        if (wifi != null) {
+            wifiLock = wifi.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, "bbds-kiosk");
+            wifiLock.setReferenceCounted(false);
+            wifiLock.acquire();
+        }
         applyIntent(getIntent());
 
         web = new WebView(this);
@@ -51,6 +62,7 @@ public class MainActivity extends Activity {
         s.setSupportZoom(false);
         s.setBuiltInZoomControls(false);
         web.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        web.addJavascriptInterface(new Bridge(), "BBDSKiosk");
         web.setWebViewClient(new WebViewClient() {
             @Override
             public void onReceivedError(WebView v, WebResourceRequest req, WebResourceError err) {
@@ -76,6 +88,23 @@ public class MainActivity extends Activity {
         if (url == null || !(url.startsWith("https://") || url.startsWith("http://"))) return false;
         prefs().edit().putString("url", url).apply();
         return true;
+    }
+
+    // Puente para la web (window.BBDSKiosk). El modo noche del dashboard baja
+    // el brillo real de la pantalla, no solo los colores.
+    private class Bridge {
+        @JavascriptInterface
+        public void setBrightness(final float level) {
+            runOnUiThread(new Runnable() {
+                @Override public void run() {
+                    WindowManager.LayoutParams params = getWindow().getAttributes();
+                    params.screenBrightness = level < 0
+                        ? WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
+                        : Math.max(0.01f, Math.min(1f, level));
+                    getWindow().setAttributes(params);
+                }
+            });
+        }
     }
 
     private SharedPreferences prefs() { return getSharedPreferences("kiosk", MODE_PRIVATE); }
@@ -131,6 +160,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onDestroy() {
         handler.removeCallbacksAndMessages(null);
+        if (wifiLock != null && wifiLock.isHeld()) wifiLock.release();
         web.destroy();
         super.onDestroy();
     }

@@ -18,7 +18,7 @@ New-Item -ItemType Directory -Force "$out\classes", "$out\dex" | Out-Null
 $ErrorActionPreference = 'Continue'
 function Step($what) { if ($LASTEXITCODE -ne 0) { throw "Falló: $what" } }
 
-& $javac --release 8 -nowarn -Xlint:-deprecation -cp $jar -d "$out\classes" (Get-ChildItem -Recurse "$here\src" -Filter *.java).FullName 2>&1 | Out-Host; Step javac
+& $javac --release 8 -nowarn -XDsuppressNotes -cp $jar -d "$out\classes" (Get-ChildItem -Recurse "$here\src" -Filter *.java).FullName 2>&1 | Out-Host; Step javac
 & "$bt\d8.bat" --min-api 23 --lib $jar --output "$out\dex" (Get-ChildItem -Recurse "$out\classes" -Filter *.class).FullName; Step d8
 & "$bt\aapt2.exe" link -o "$out\base.apk" -I $jar --manifest "$here\AndroidManifest.xml"; Step aapt2
 Push-Location "$out\dex"; & "$jdk\jar.exe" uf ..\base.apk classes.dex; Pop-Location; Step jar
