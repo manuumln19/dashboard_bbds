@@ -4,3 +4,5 @@ DASHBOARD_TOKEN=
 ESIOS_TOKEN=
 # Opcional: solo siembra el primer calendario en una instalación antigua.
 ICLOUD_ICS_URL=
+# Opcional: álbum compartido de iCloud si no se elige desde la app.
+ICLOUD_ALBUM_URL=

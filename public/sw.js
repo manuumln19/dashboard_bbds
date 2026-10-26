@@ -2,7 +2,7 @@
  * Guarda el shell de la app y la última respuesta buena de cada fuente.
  * Cuando la red falla, la pantalla arranca con esa copia y avisa con la hora.
  */
-const VERSION = "bbds-v1";
+const VERSION = "bbds-v2";
 const SHELL_CACHE = `${VERSION}-shell`;
 const RUNTIME_CACHE = `${VERSION}-runtime`;
 const OFFLINE_URL = "/index.html";
@@ -40,6 +40,9 @@ function isCacheable(request) {
   const url = new URL(request.url);
   if (!isSameOrigin(url)) return isWeather(url);
   if (url.pathname === "/sw.js") return false;
+  // Las fotos del salvapantallas son grandes y no cambian: las guarda la caché
+  // HTTP del navegador (immutable) sin el límite de 8 s de la API.
+  if (/^\/api\/photos\/(?!album$)[^/]+$/.test(url.pathname)) return false;
   return true;
 }
 

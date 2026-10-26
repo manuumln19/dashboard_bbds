@@ -14,6 +14,7 @@ import {
   SCREENSAVER_IDLE_MS,
 } from "./config";
 import { formatClock } from "./lib/date";
+import { timeZoneMismatch } from "./lib/timezone";
 import {
   getDemoControls,
   setDemoOffline,
@@ -32,6 +33,7 @@ import {
 import { useLists } from "./hooks/useLists";
 import { useNightMode } from "./hooks/useNightMode";
 import { useNow } from "./hooks/useNow";
+import { usePhotos } from "./hooks/usePhotos";
 import { useSensors } from "./hooks/useSensors";
 import { useWakeLock } from "./hooks/useWakeLock";
 import { useWeather } from "./hooks/useWeather";
@@ -108,7 +110,9 @@ export default function App() {
   );
   const [timeOffset, setTimeOffset] = useState(0);
   const [idleMs, setIdleMs] = useState(SCREENSAVER_IDLE_MS);
-  const [demoOpen, setDemoOpen] = useState(() => readQueryFlag("demo"));
+  const [demoOpen, setDemoOpen] = useState(
+    () => DEMO_MODE && readQueryFlag("demo")
+  );
   const [diagOpen, setDiagOpen] = useState(() => readQueryFlag("diag"));
   const demoControls = useSyncExternalStore(
     subscribeDemoControls,
@@ -116,7 +120,7 @@ export default function App() {
     getDemoControls
   );
   const effectiveOnline = online && !demoControls.offline;
-  const now = useNow(15000, timeOffset);
+  const now = useNow(60000, timeOffset);
   const weather = useWeather();
   const calendar = useCalendar();
   const sensors = useSensors(CLIMATE_ENABLED);
@@ -128,6 +132,22 @@ export default function App() {
   const dataHealth = useDataHealth(effectiveOnline, now, {
     climateEnabled: CLIMATE_ENABLED,
   });
+  const zoneIssue = DEMO_MODE ? null : timeZoneMismatch(now);
+  const health = zoneIssue
+    ? {
+        ...dataHealth,
+        issues: [
+          ...dataHealth.issues,
+          {
+            id: "timezone",
+            label: "Hora del aparato",
+            detail: `Está en ${zoneIssue.device || "otra zona"} y no en ${
+              zoneIssue.expected
+            }: la hora y la agenda salen desplazadas. Cámbialo en Ajustes de Android → Fecha y hora.`,
+          },
+        ],
+      }
+    : dataHealth;
 
   const setView = useCallback((nextView) => {
     if (!VALID_VIEWS.has(nextView)) return;
@@ -153,10 +173,16 @@ export default function App() {
     setDiagOpen(true);
   }, []);
 
-  useDemoGestures({ onOpen: openDemo, onDiagnostics: openDiagnostics });
+  // Fuera de la demo, el gesto del reloj abre el diagnóstico: el panel de
+  // pruebas (hora simulada, sin conexión…) solo confunde en la pantalla real.
+  useDemoGestures({
+    onOpen: DEMO_MODE ? openDemo : openDiagnostics,
+    onDiagnostics: openDiagnostics,
+  });
 
   const clock = formatClock(now);
   const screensaverOpen = galleryOpen || idle;
+  const photos = usePhotos(screensaverOpen);
 
   const closeScreensaver = useCallback(() => {
     setGalleryOpen(false);
@@ -172,6 +198,14 @@ export default function App() {
   useEffect(() => {
     document.title = `${clock} · BBDS`;
   }, [clock]);
+
+  // En el kiosco del marco, el modo noche baja también el brillo real de la
+  // pantalla; con el salvapantallas nocturno (solo hora) aún más.
+  useEffect(() => {
+    const kiosk = window.BBDSKiosk;
+    if (!kiosk || typeof kiosk.setBrightness !== "function") return;
+    kiosk.setBrightness(!isNight ? -1 : screensaverOpen ? 0.03 : 0.12);
+  }, [isNight, screensaverOpen]);
 
   // Una vista por tarea para no bloquear la pantalla mientras se compila.
   useEffect(() => {
@@ -286,7 +320,7 @@ export default function App() {
 
       <StatusBanner
         online={effectiveOnline}
-        health={dataHealth}
+        health={health}
         onOpenDiagnostics={openDiagnostics}
       />
 
@@ -354,11 +388,16 @@ export default function App() {
       <div className="screen-dim" aria-hidden="true" />
 
       {screensaverOpen ? (
-        <Screensaver now={now} onClose={closeScreensaver} />
+        <Screensaver
+          now={now}
+          onClose={closeScreensaver}
+          isNight={isNight}
+          photos={photos}
+        />
       ) : null}
 
       <DemoPanel
-        open={demoOpen}
+        open={DEMO_MODE && demoOpen}
         onClose={() => setDemoOpen(false)}
         timeOffset={timeOffset}
         onTimeOffset={setTimeOffset}

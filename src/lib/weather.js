@@ -134,35 +134,57 @@ export async function fetchWeather() {
   };
 }
 
+// Open-Meteo devuelve las horas en LOCATION.timezone y sin desfase
+// ("2026-10-26T19:00"). `new Date()` las leería en la zona del aparato, que en
+// el marco no tiene por qué ser la misma, así que se comparan como texto.
+function locationHourKey(now) {
+  const parts = {};
+  dateFormat(
+    {
+      timeZone: LOCATION.timezone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      hourCycle: "h23",
+    },
+    "en-GB"
+  )
+    .formatToParts(now)
+    .forEach((part) => {
+      parts[part.type] = part.value;
+    });
+  return `${parts.year}-${parts.month}-${parts.day}T${parts.hour}`;
+}
+
+export function hourLabel(hour) {
+  return String(hour && hour.time ? hour.time : "").slice(11, 16);
+}
+
 export function nextHours(weather, now = new Date(), count = 6) {
   const hours = weather && Array.isArray(weather.hourly) ? weather.hourly : [];
   if (!hours.length) return [];
-  const currentTime = now.getTime();
-  const upcoming = hours.filter((hour) => {
-    const time = new Date(hour.time).getTime();
-    return Number.isFinite(time) && time >= currentTime - 30 * 60000;
-  });
+  const key = locationHourKey(now);
+  const upcoming = hours.filter((hour) => String(hour.time).slice(0, 13) >= key);
   return (upcoming.length ? upcoming : hours).slice(0, count);
+}
+
+export function isRainyHour(hour) {
+  return (
+    Number(hour.precipitationProbability) >= 45 ||
+    Number(hour.precipitation) >= 0.2
+  );
 }
 
 export function getWeatherAdvice(weather, now = new Date()) {
   const current = weather ? weather.current : null;
   const today = weather ? weather.today : null;
   const hours = nextHours(weather, now, 8);
-  const rainy = hours.find(
-    (hour) =>
-      Number(hour.precipitationProbability) >= 45 ||
-      Number(hour.precipitation) >= 0.2
-  );
+  const rainy = hours.find(isRainyHour);
 
   if (rainy) {
-    const hour = new Date(rainy.time);
-    const label = Number.isFinite(hour.getTime())
-      ? `sobre las ${dateFormat({
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
-        }).format(hour)}`
+    const label = hourLabel(rainy)
+      ? `sobre las ${hourLabel(rainy)}`
       : "en las próximas horas";
     return {
       icon: "umbrella",

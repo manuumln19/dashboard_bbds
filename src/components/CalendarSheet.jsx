@@ -592,6 +592,12 @@ export function CalendarSheet({ open, onClose, calendar, people }) {
               secreta en formato iCal. En iCloud: Compartir calendario →
               Calendario público → copiar el enlace .ics.
             </p>
+            <p className="feature-hint">
+              <Link2 size={14} strokeWidth={1.8} aria-hidden="true" />
+              Para no teclear la URL en la pantalla, abre {window.location.host}{" "}
+              en el PC o el móvil y pégala allí: los calendarios se guardan en
+              BBDS y la pantalla los recoge sola.
+            </p>
           </section>
         </div>
 

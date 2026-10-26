@@ -26,12 +26,27 @@ export function useLists() {
   const [loading, setLoading] = useState(!DEMO_MODE);
   const [lastUpdated, setLastUpdated] = useState(null);
   const pending = useRef(0);
+  const lastSnapshot = useRef({ key: null, at: 0 });
 
   const applySnapshot = useCallback((payload, meta) => {
-    setItems(Array.isArray(payload.items) ? payload.items : []);
-    if (Array.isArray(payload.people)) setPeople(payload.people);
+    const nextItems = Array.isArray(payload.items) ? payload.items : [];
+    const nextPeople = Array.isArray(payload.people) ? payload.people : null;
     const at = (meta && meta.cachedAt) || new Date().toISOString();
-    setLastUpdated(at);
+    // El sondeo cada 20 s casi nunca trae cambios. Guardar arrays nuevos
+    // repintaba toda la app (en el marco, ~150 ms cada vez): solo se aplica
+    // si cambia algo, y la hora de sincronización como mucho una vez al minuto.
+    const key = JSON.stringify([nextItems, nextPeople]);
+    const changed = key !== lastSnapshot.current.key;
+    const stamp = Date.parse(at) || Date.now();
+    if (changed) {
+      setItems(nextItems);
+      if (nextPeople) setPeople(nextPeople);
+    }
+    if (changed || stamp - lastSnapshot.current.at >= 60000) {
+      setLastUpdated(at);
+      lastSnapshot.current.at = stamp;
+    }
+    lastSnapshot.current.key = key;
     reportSync("lists", {
       at,
       cachedAt: meta && meta.offline ? at : null,
@@ -134,6 +149,8 @@ export function useLists() {
     }
 
     pending.current += 1;
+    // Tras una escritura local, la próxima respuesta del servidor se aplica siempre.
+    lastSnapshot.current.key = null;
     try {
       const payload = await apiRequest("/api/lists", {
         method: "POST",
@@ -176,6 +193,7 @@ export function useLists() {
 
     if (DEMO_MODE) return;
     pending.current += 1;
+    lastSnapshot.current.key = null;
     try {
       const payload = await apiRequest(
         `/api/lists/${encodeURIComponent(item.id)}`,
@@ -215,6 +233,7 @@ export function useLists() {
 
     if (DEMO_MODE) return;
     pending.current += 1;
+    lastSnapshot.current.key = null;
     try {
       const payload = await apiRequest(
         `/api/lists/${encodeURIComponent(item.id)}`,
@@ -246,6 +265,7 @@ export function useLists() {
 
     if (DEMO_MODE) return;
     pending.current += 1;
+    lastSnapshot.current.key = null;
     try {
       await apiRequest(`/api/lists/${encodeURIComponent(item.id)}`, {
         method: "DELETE",
@@ -269,6 +289,7 @@ export function useLists() {
 
     if (DEMO_MODE) return;
     pending.current += 1;
+    lastSnapshot.current.key = null;
     let failed = false;
     try {
       await apiRequest(

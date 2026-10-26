@@ -40,7 +40,8 @@ export function createDemoWeather(now = new Date()) {
     const isHourDay = hour >= 7 && hour < 20;
     const rainChance = index >= 9 && index <= 13 ? 45 + (index % 3) * 10 : 10;
     return {
-      time: time.toISOString(),
+      // Mismo formato que Open-Meteo: hora local sin desfase.
+      time: `${dateKey(time)}T${String(hour).padStart(2, "0")}:00`,
       temperature: Math.round((17 + Math.sin((hour - 6) / 24 * Math.PI * 2) * 4) * 10) / 10,
       apparentTemperature: Math.round((16 + Math.sin((hour - 6) / 24 * Math.PI * 2) * 4) * 10) / 10,
       precipitation: rainChance >= 45 ? 0.3 : 0,

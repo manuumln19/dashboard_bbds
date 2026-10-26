@@ -8,7 +8,7 @@ import {
   formatLongDate,
 } from "../lib/date";
 import { weatherLabel } from "../lib/weather";
-import { RadarPanel } from "./RadarPanel";
+import { HourlyPanel } from "./HourlyPanel";
 import { WeatherGlyph } from "./WeatherGlyph";
 import { WeeklyForecast } from "./WeeklyForecast";
 import { dateFormat } from "../lib/intl";
@@ -271,7 +271,7 @@ export function WeatherView({ now, weather, error, loading }) {
 
         <WeeklyForecast days={days} now={now} />
 
-        <RadarPanel now={now} today={today} isDemo={isDemo} />
+        <HourlyPanel weather={weather} now={now} />
       </div>
     </section>
   );

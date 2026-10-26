@@ -4203,49 +4203,109 @@
   font-size: 9.5px;
 }
 
-/* Radar ----------------------------------------------------------------- */
+/* Próximas horas (antes radar) ------------------------------------------ */
 
 .radar-kicker {
   font-size: 9.5px;
 }
 
-.radar-meta {
-  font-size: 9px;
+.hourly {
+  padding-bottom: 12px;
 }
 
-.radar-status {
-  font-size: 9.5px;
+.hourly-summary {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 18px 10px;
+  padding: 9px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #e9dfd2;
+  font-size: 12px;
 }
 
-.radar-scale {
-  font-size: 9px;
+.hourly-summary.is-rain {
+  border-color: rgba(120, 170, 235, 0.45);
+  background: rgba(90, 140, 220, 0.16);
+  color: #fbf5ec;
 }
 
-.radar-zoom button {
-  width: 44px;
-  height: 44px;
+.hourly-list {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  justify-content: space-between;
+  margin: 0;
+  padding: 0 18px;
+  list-style: none;
 }
 
-.radar-zoom span {
-  font-size: 9px;
+.hourly-list li {
+  display: grid;
+  grid-template-columns: 40px 22px minmax(0, 1.2fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  color: #e9dfd2;
 }
 
-.radar-legend {
-  width: 100px;
+.hourly-time {
+  color: #b9aa9d;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
 }
 
-.radar-legend-labels {
-  font-size: 9px;
+.hourly-glyph {
+  display: grid;
+  place-items: center;
+  color: #f0cb8f;
 }
 
-.radar-note {
-  font-size: 9px;
+.hourly-temp,
+.hourly-rain {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 7px;
 }
 
-.radar-play {
-  min-height: 44px;
-  padding: 0 14px;
-  font-size: 9px;
+.hourly-temp i,
+.hourly-rain i {
+  height: 5px;
+  flex: none;
+  border-radius: 999px;
+}
+
+.hourly-temp i {
+  max-width: calc(100% - 34px);
+  background: linear-gradient(90deg, #e6c46f, #ef8a6f);
+}
+
+.hourly-temp strong {
+  color: #fbf5ec;
+  font-family: var(--font-serif);
+  font-size: 17px;
+  font-weight: 400;
+}
+
+.hourly-rain i {
+  max-width: calc(100% - 34px);
+  min-width: 2px;
+  background: rgba(130, 175, 235, 0.75);
+}
+
+.hourly-rain small {
+  color: #b9aa9d;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.hourly-list li.is-rain .hourly-rain small {
+  color: #a9c8f5;
 }
 
 /* Energía ---------------------------------------------------------------- */
@@ -4607,11 +4667,10 @@
 
 /* Modo ligero (html.is-lite, ver main.jsx) ---------------------------------
    En el marco Frameo (RK3126, 1 GB) cada capa con blend o animación continua
-   obliga a recomponer toda la pantalla: el radar bajaba Tiempo a ~20 FPS. */
+   obliga a recomponer toda la pantalla. */
 
 .is-lite .ambient::before,
-.is-lite .ambient__grain,
-.is-lite .radar-sweep {
+.is-lite .ambient__grain {
   display: none;
 }
 
@@ -4619,4 +4678,32 @@
 .is-lite .screensaver,
 .is-lite .screensaver__photo {
   animation: none;
+}
+
+/* El desenfoque de fondo de las hojas recalcula toda la pantalla en cada
+   fotograma; en el marco abrir una hoja se notaba a saltos. */
+.is-lite * {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+.is-lite .ink-overlay {
+  background: rgba(18, 16, 13, 0.78);
+}
+
+/* Álbum de fotos del salvapantallas --------------------------------------- */
+
+.photo-sheet {
+  cursor: default;
+}
+
+.photo-sheet__form {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.photo-sheet__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 8px;
 }

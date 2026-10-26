@@ -22,6 +22,8 @@ import {
   formatFreshnessAge,
   formatFreshnessTime,
 } from "../lib/freshness";
+import { deviceTimeZone, timeZoneMismatch } from "../lib/timezone";
+import { DEMO_MODE, LOCATION } from "../config";
 
 const TIME_PRESETS = [
   { label: "Ahora", value: null },
@@ -375,6 +377,14 @@ export function Diagnostics({ open, onClose, data, onOpenDemo }) {
     ["Sin conexión simulado", data && data.demoOffline ? "Sí" : "No"],
     ["Hora mostrada", formatClock(now)],
     ["Hora real", formatClock(new Date())],
+    [
+      "Zona horaria",
+      `${deviceTimeZone() || "—"}${timeZoneMismatch() ? ` (se esperaba ${LOCATION.timezone})` : ""}`,
+    ],
+    [
+      "Modo ligero",
+      document.documentElement.classList.contains("is-lite") ? "Activo" : "No",
+    ],
     ["Compilación", document.lastModified || "—"],
     [
       "Service worker",
@@ -572,14 +582,16 @@ export function Diagnostics({ open, onClose, data, onOpenDemo }) {
               )}
               {copied ? "Copiado" : "Copiar diagnóstico"}
             </button>
-            <button
-              type="button"
-              className="demo-action demo-action--accent"
-              onClick={onOpenDemo}
-            >
-              <FlaskConical size={15} strokeWidth={1.9} aria-hidden="true" />
-              Panel de pruebas
-            </button>
+            {DEMO_MODE ? (
+              <button
+                type="button"
+                className="demo-action demo-action--accent"
+                onClick={onOpenDemo}
+              >
+                <FlaskConical size={15} strokeWidth={1.9} aria-hidden="true" />
+                Panel de pruebas
+              </button>
+            ) : null}
           </div>
         </div>
 

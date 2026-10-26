@@ -1712,13 +1712,266 @@ async function handleCalendar(request, env, url) {
   );
 }
 
-async function route(request, env, url) {
+// --- Fotos: álbum compartido de iCloud --------------------------------------
+// El salvapantallas muestra un álbum compartido con «Sitio web público»
+// activado. El enlace se guarda en app_meta (o ICLOUD_ALBUM_URL como respaldo).
+// Las URLs de Apple caducan, así que las imágenes pasan por /api/photos/:id.
+
+const PHOTO_ALBUM_KEY = "photos.album_url";
+const PHOTO_ALBUM_TTL_MS = 20 * 60 * 1000;
+const PHOTO_MAX = 300;
+// La pantalla es de 1280 × 800: basta con la versión más pequeña que la cubra.
+const PHOTO_TARGET_PX = 1280;
+const PHOTO_ID_RE = /^[A-Za-z0-9_-]{8,64}$/;
+const BASE62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+let photoAlbumCache = null;
+
+function albumToken(value) {
+  const text = String(value || "").trim();
+  if (!text) return "";
+  let token = text;
+  if (/^https?:\/\//i.test(text)) {
+    let parsed;
+    try {
+      parsed = new URL(text);
+    } catch {
+      return "";
+    }
+    if (!/(^|\.)icloud\.com$/i.test(parsed.hostname)) return "";
+    if (!/\/sharedalbum\//i.test(parsed.pathname)) return "";
+    token = parsed.hash.replace(/^#/, "").split(";")[0];
+  }
+  return /^[A-Za-z0-9]{10,40}$/.test(token) ? token : "";
+}
+
+function albumHost(token) {
+  const digits = token[0] === "A" ? token.slice(1, 2) : token.slice(1, 3);
+  let partition = 0;
+  for (const char of digits) partition = partition * 62 + BASE62.indexOf(char);
+  return `p${String(partition).padStart(2, "0")}-sharedstreams.icloud.com`;
+}
+
+async function icloudPost(state, path, body) {
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const response = await fetch(`https://${state.host}/${state.token}/sharedstreams/${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain", Accept: "application/json" },
+      body: JSON.stringify(body),
+    });
+    // iCloud responde 330 con el servidor que corresponde al álbum.
+    if (response.status === 330) {
+      const payload = await response.json().catch(() => ({}));
+      const host = response.headers.get("x-apple-mme-host") || payload["X-Apple-MMe-Host"];
+      if (!host) break;
+      state.host = host;
+      continue;
+    }
+    if (response.status === 404) {
+      throw new HttpError(404, "El álbum no existe o no tiene el sitio web público activado", "album_not_found");
+    }
+    if (!response.ok) {
+      throw new HttpError(502, `iCloud respondió ${response.status}`, "album_fetch_failed");
+    }
+    return response.json();
+  }
+  throw new HttpError(502, "iCloud no indicó dónde está el álbum", "album_fetch_failed");
+}
+
+function pickDerivative(derivatives) {
+  const options = Object.values(derivatives || {}).filter(
+    (item) => item && item.checksum && Number(item.width) > 0 && Number(item.height) > 0
+  );
+  if (!options.length) return null;
+  options.sort((a, b) => Math.max(a.width, a.height) - Math.max(b.width, b.height));
+  return (
+    options.find((item) => Math.max(Number(item.width), Number(item.height)) >= PHOTO_TARGET_PX) ||
+    options[options.length - 1]
+  );
+}
+
+async function loadAlbum(token, { force = false } = {}) {
+  const now = Date.now();
+  if (
+    !force &&
+    photoAlbumCache &&
+    photoAlbumCache.token === token &&
+    now - photoAlbumCache.fetchedAt < PHOTO_ALBUM_TTL_MS
+  ) {
+    return photoAlbumCache;
+  }
+
+  const state = { token, host: albumHost(token) };
+  const stream = await icloudPost(state, "webstream", { streamCtag: null });
+  const photos = [];
+  for (const item of Array.isArray(stream.photos) ? stream.photos : []) {
+    if (item.mediaAssetType === "video") continue;
+    const derivative = pickDerivative(item.derivatives);
+    if (!derivative || !PHOTO_ID_RE.test(String(item.photoGuid || ""))) continue;
+    photos.push({
+      id: item.photoGuid,
+      checksum: derivative.checksum,
+      width: Number(derivative.width),
+      height: Number(derivative.height),
+      caption: String(item.caption || "").trim().slice(0, 160),
+      takenAt: item.dateCreated || item.batchDateCreated || null,
+    });
+  }
+  photos.sort((a, b) => String(b.takenAt || "").localeCompare(String(a.takenAt || "")));
+  photos.splice(PHOTO_MAX);
+
+  const urls = new Map();
+  for (let index = 0; index < photos.length; index += 25) {
+    const batch = photos.slice(index, index + 25).map((photo) => photo.id);
+    const assets = await icloudPost(state, "webasseturls", { photoGuids: batch });
+    for (const [checksum, asset] of Object.entries(assets.items || {})) {
+      if (asset && asset.url_location && asset.url_path) {
+        urls.set(checksum, `https://${asset.url_location}${asset.url_path}`);
+      }
+    }
+  }
+
+  photoAlbumCache = {
+    token,
+    fetchedAt: now,
+    name: String(stream.streamName || "").trim() || "Álbum compartido",
+    owner: [stream.userFirstName, stream.userLastName].filter(Boolean).join(" "),
+    photos: photos.filter((photo) => urls.has(photo.checksum)),
+    urls,
+  };
+  return photoAlbumCache;
+}
+
+async function albumSetting(env) {
+  const row = await env.DB.prepare("SELECT value FROM app_meta WHERE key = ?")
+    .bind(PHOTO_ALBUM_KEY)
+    .first();
+  const stored = row ? row.value : "";
+  if (stored) return { url: stored, source: "app" };
+  if (env.ICLOUD_ALBUM_URL) return { url: env.ICLOUD_ALBUM_URL, source: "env" };
+  return null;
+}
+
+async function photosPayload(env, { force = false } = {}) {
+  const setting = await albumSetting(env);
+  const token = setting ? albumToken(setting.url) : "";
+  if (!token) {
+    return { configured: false, source: setting ? setting.source : null, photos: [] };
+  }
+  try {
+    const album = await loadAlbum(token, { force });
+    return {
+      configured: true,
+      source: setting.source,
+      album: { name: album.name, owner: album.owner },
+      photos: album.photos.map(({ id, width, height, caption, takenAt }) => ({
+        id,
+        width,
+        height,
+        caption,
+        takenAt,
+      })),
+      updatedAt: new Date(album.fetchedAt).toISOString(),
+    };
+  } catch (error) {
+    if (!(error instanceof HttpError)) throw error;
+    return {
+      configured: true,
+      source: setting.source,
+      photos: [],
+      error: error.message,
+    };
+  }
+}
+
+async function handlePhotoImage(request, env, id, ctx) {
+  // Sin token: un <img> no puede enviar cabeceras. Solo se sirven fotos del
+  // álbum configurado, y los ids de iCloud no se pueden adivinar.
+  const setting = await albumSetting(env);
+  const token = setting ? albumToken(setting.url) : "";
+  if (!token) throw new HttpError(404, "No hay álbum configurado");
+
+  let album = await loadAlbum(token);
+  let photo = album.photos.find((item) => item.id === id);
+  if (!photo) {
+    album = await loadAlbum(token, { force: true });
+    photo = album.photos.find((item) => item.id === id);
+  }
+  if (!photo) throw new HttpError(404, "Esa foto ya no está en el álbum");
+
+  const cacheKey = new Request(`https://photos.bbds.cache/${photo.checksum}`);
+  const cache = caches.default;
+  const cached = await cache.match(cacheKey);
+  if (cached) return cached;
+
+  let upstream = await fetch(album.urls.get(photo.checksum));
+  if (upstream.status === 403 || upstream.status === 404) {
+    // URL caducada: se piden de nuevo al álbum.
+    album = await loadAlbum(token, { force: true });
+    const url = album.urls.get(photo.checksum);
+    if (url) upstream = await fetch(url);
+  }
+  if (!upstream.ok) throw new HttpError(502, "iCloud no entregó la foto");
+
+  const response = new Response(upstream.body, {
+    status: 200,
+    headers: {
+      "Content-Type": upstream.headers.get("content-type") || "image/jpeg",
+      "Cache-Control": "public, max-age=604800, immutable",
+    },
+  });
+  ctx.waitUntil(cache.put(cacheKey, response.clone()));
+  return response;
+}
+
+async function handlePhotos(request, env, url, ctx) {
+  const imageMatch = url.pathname.match(/^\/api\/photos\/([A-Za-z0-9_-]+)$/);
+  if (imageMatch && imageMatch[1] !== "album" && request.method === "GET") {
+    if (!PHOTO_ID_RE.test(imageMatch[1])) throw new HttpError(404, "Foto no encontrada");
+    return handlePhotoImage(request, env, imageMatch[1], ctx);
+  }
+
+  requireDashboard(request, env);
+
+  if (url.pathname === "/api/photos" && request.method === "GET") {
+    return json(await photosPayload(env, { force: url.searchParams.has("refresh") }));
+  }
+
+  if (url.pathname === "/api/photos/album" && request.method === "PUT") {
+    const body = await readJson(request);
+    const token = albumToken(body.url);
+    if (!token) {
+      throw new HttpError(
+        400,
+        "Pega el enlace público del álbum (https://www.icloud.com/sharedalbum/#…)",
+        "invalid_album"
+      );
+    }
+    // Se comprueba antes de guardar para avisar al momento si no es público.
+    await loadAlbum(token, { force: true });
+    await env.DB.prepare(
+      "INSERT INTO app_meta (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value"
+    )
+      .bind(PHOTO_ALBUM_KEY, `https://www.icloud.com/sharedalbum/#${token}`)
+      .run();
+    return json(await photosPayload(env));
+  }
+
+  if (url.pathname === "/api/photos/album" && request.method === "DELETE") {
+    await env.DB.prepare("DELETE FROM app_meta WHERE key = ?").bind(PHOTO_ALBUM_KEY).run();
+    photoAlbumCache = null;
+    return json(await photosPayload(env));
+  }
+
+  throw new HttpError(405, "Método no permitido");
+}
+
+async function route(request, env, url, ctx) {
   if (request.method === "OPTIONS") {
     return new Response(null, {
       status: 204,
       headers: {
-        Allow: "GET, POST, PATCH, DELETE, OPTIONS",
-        "Access-Control-Allow-Methods": "GET, POST, PATCH, DELETE, OPTIONS",
+        Allow: "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
         "Access-Control-Allow-Headers":
           "Content-Type, Authorization, X-Sensor-Token",
       },
@@ -1786,11 +2039,15 @@ async function route(request, env, url) {
     return handleCalendar(request, env, url);
   }
 
+  if (url.pathname === "/api/photos" || /^\/api\/photos\/[A-Za-z0-9_-]+$/.test(url.pathname)) {
+    return handlePhotos(request, env, url, ctx);
+  }
+
   throw new HttpError(404, "Ruta de API no encontrada");
 }
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
     if (!url.pathname.startsWith("/api/")) {
@@ -1798,7 +2055,7 @@ export default {
     }
 
     try {
-      return await route(request, env, url);
+      return await route(request, env, url, ctx);
     } catch (error) {
       if (error instanceof HttpError) {
         return json(

@@ -16,10 +16,10 @@ let snapshotCache = null;
 let snapshotVersion = -1;
 let snapshotForceStale = null;
 
-function emit() {
+function emit({ quiet = false } = {}) {
   version += 1;
   snapshotCache = null;
-  listeners.forEach((listener) => listener());
+  if (!quiet) listeners.forEach((listener) => listener());
 }
 
 export function subscribeFreshness(listener) {
@@ -47,8 +47,16 @@ export function reportSync(
     !cachedAt && (!state.lastGoodAt || at > state.lastGoodAt)
       ? at
       : state.lastGoodAt;
+  // Los avisos van por minutos: un sondeo que solo renueva la hora dentro del
+  // mismo minuto no necesita repintar toda la app (en el marco, ~150 ms).
+  const quiet =
+    previous.ok === true &&
+    (previous.detail || null) === (detail || null) &&
+    (previous.cachedAt || null) === nextSources[source].cachedAt &&
+    String(previous.at || "").slice(0, 16) === String(at).slice(0, 16) &&
+    String(state.lastGoodAt || "").slice(0, 16) === String(lastGoodAt || "").slice(0, 16);
   state = { sources: nextSources, lastGoodAt };
-  emit();
+  emit({ quiet });
 }
 
 export function reportFailure(source, detail = "No se pudo actualizar") {

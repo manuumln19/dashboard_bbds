@@ -1,6 +1,6 @@
 # BBDS
 
-Dashboard doméstico editorial para una pantalla táctil de pared. Papel, tinta y cristal suave: reloj, tiempo exterior con radar, varios calendarios ICS, compra, tareas con fecha y persona, limpieza semanal, clima interior opcional, PVPC y recomendaciones de consumo, galería de fotos, modo noche y copia sin conexión.
+Dashboard doméstico editorial para una pantalla táctil de pared. Papel, tinta y cristal suave: reloj, tiempo exterior con previsión hora a hora, varios calendarios ICS, compra, tareas con fecha y persona, limpieza semanal, clima interior opcional, PVPC y recomendaciones de consumo, fotos de un álbum compartido de iCloud, modo noche y copia sin conexión.
 
 Pensado para **1280 × 800** en horizontal. En pantallas más estrechas el rail y las tarjetas se adaptan, pero esa es la medida de referencia.
 
@@ -10,13 +10,13 @@ Pensado para **1280 × 800** en horizontal. En pantallas más estrechas el rail 
 - **Agenda**: varios calendarios ICS de solo lectura con vistas **Hoy**, **3 días** y **Semana**. Cada feed tiene nombre, persona y color; se añaden, pausan o borran desde **Calendarios**, sin tocar código. Los eventos fuera de la rejilla 06:00–23:00 aparecen como fichas con hora en la fila de todo el día. La ficha de un evento incluye un QR con su ubicación.
 - **Listas**: compra y tareas con contadores grandes, progreso y entrada rápida siempre visible. Las tareas admiten fecha, hora y persona, muestran su estado con etiquetas y se ordenan por vencimiento; se pueden programar en línea sin salir de la lista. El texto es el flujo principal; la libreta manuscrita con OCR local queda como acción secundaria.
 - **Limpieza**: cuadrante semanal de Manu y Paco con dos tareas por día, zona y persona asignadas. El cuadrante y las personas viven en D1 y se editan desde la propia pantalla; cada check se guarda por semana y **Reiniciar semana** vuelve a dejar el tablero limpio.
-- **Tiempo**: temperatura exterior, sensación térmica, icono del cielo, humedad, viento, lluvia, UV, salida y puesta de sol, previsión de siete días y radar de lluvia local con zoom y pausa. El radar actual es una animación ilustrativa local, pensada como base para conectar una fuente real más adelante.
+- **Tiempo**: temperatura exterior, sensación térmica, icono del cielo, humedad, viento, lluvia, UV, salida y puesta de sol, previsión de siete días y panel **Próximas horas** (temperatura y probabilidad de lluvia de las 12 horas siguientes, con aviso de cuándo empieza a llover).
 - **Energía**: PVPC 2.0 TD hora a hora, precio vigente, mínimo, máximo y media del día, bandas barata/media/cara, gráfico de 24 h con horas pasadas atenuadas y pestañas **Hoy**/**Mañana**. La tarjeta de recomendaciones calcula la mejor franja completa para la lavadora o el termo eléctrico, con duración, consumo y margen configurables; compara con empezar lo antes posible y muestra el ahorro estimado en euros y porcentaje. Incluye fuente, vigencia, impuestos estimados y método de cálculo en una hoja de detalle.
 - **Casa**: temperatura y humedad por habitación, histórico de 24 h y 7 días, tendencia, riesgo de moho, batería/presión del sensor y consejos de ventilación. Solo aparece con `VITE_CLIMATE_ENABLED=true`.
-- **Galería**: salvapantallas de fotos tras unos minutos sin actividad y botón de apertura manual en el rail. Las fotos son locales; se puede volver tocando la pantalla, con `Esc` o con las flechas.
+- **Fotos**: salvapantallas con las fotos de un álbum compartido de iCloud, tras unos minutos sin actividad o desde el botón del rail. De noche solo muestra la hora, tenue. Se vuelve tocando la pantalla, con `Esc` o con las flechas.
 - **Modo noche**: variante de tinta oscura del mismo diseño, automática por horario y con atenuación manual temporal.
 - **Sin conexión y frescura**: un service worker guarda el shell y la última respuesta buena de tiempo, listas, limpieza, agenda y energía. Si una fuente falla, el dashboard sigue mostrando la copia anterior y un aviso indica cuándo se actualizó por última vez. La vista **Energía** conserva además su propia copia en `localStorage` y marca como «sin confirmar» cualquier dato que no cubra la hora actual. La recarga nocturna y la vuelta a **Hoy** tras inactividad mantienen el kiosco fresco.
-- **Panel de pruebas y diagnóstico**: `D`, pulsación larga en el reloj del rail o `?demo` abren hora simulada, idle, red, datos antiguos y accesos rápidos. `Shift+I` o `?diag` muestran estado de red, service worker, cachés, almacenamiento y compatibilidad del WebView.
+- **Panel de pruebas y diagnóstico**: en modo demo, `D`, pulsación larga en el reloj del rail o `?demo` abren hora simulada, idle, red, datos antiguos y accesos rápidos. En producción esos gestos abren el diagnóstico. `Shift+I` o `?diag` muestran estado de red, service worker, cachés, almacenamiento y compatibilidad del WebView.
 - **Deep links**: `#home`, `#agenda`, `#lists`, `#cleaning`, `#weather`, `#energy` y, con clima activado, `#climate`.
 - **Demo navegable** sin backend (`npm run dev:demo`), con listas, limpieza, calendarios y precios PVPC simulados que se identifican como demo.
 
@@ -53,7 +53,7 @@ npm install
 npm run dev:demo
 ```
 
-Abre `http://127.0.0.1:5173`. En modo demo los datos son de ejemplo: las listas y la limpieza se guardan en local, el tiempo se genera localmente y la energía usa precios PVPC ficticios claramente marcados. El calendario y los sensores no necesitan Worker. El tiempo de demo no hace peticiones a Open-Meteo, y el radar y las fotos de la galería son recursos locales.
+Abre `http://127.0.0.1:5173`. En modo demo los datos son de ejemplo: las listas y la limpieza se guardan en local, el tiempo se genera localmente y la energía usa precios PVPC ficticios claramente marcados. El calendario y los sensores no necesitan Worker. El tiempo de demo no hace peticiones a Open-Meteo, y y las fotos del salvapantallas son de ejemplo y van empaquetadas.
 
 ### Tu calendario real en la demo
 
@@ -116,11 +116,11 @@ En demo, las personas, las tareas y los checks se guardan en `localStorage` (`bb
 
 Rutas principales: `GET /api/cleaning?week=YYYY-MM-DD`, `PATCH /api/cleaning/checks`, `POST /api/cleaning/reset` y el CRUD de `/api/cleaning/tasks`.
 
-## Tiempo, radar y galería
+## Tiempo y fotos
 
-`WeatherView` compone las condiciones actuales, la previsión de siete días y el radar. En demo, `src/lib/demo.js` genera el tiempo localmente. `RadarPanel` es una animación SVG sintética: no descarga teselas, mapas ni datos de lluvia. Sus controles de zoom y pausa son reales, pero la precipitación es ilustrativa. Para conectar un radar en vivo, sustituye el contenido del escenario manteniendo la cabecera, los controles y el pie como interfaz.
+`WeatherView` compone las condiciones actuales, la previsión de siete días y `HourlyPanel` (las próximas 12 horas de Open-Meteo). Open-Meteo devuelve las horas en `VITE_TIMEZONE` sin desfase; `src/lib/weather.js` las compara como texto para no depender de la zona horaria del aparato.
 
-`src/lib/gallery.js` importa cuatro fotos locales de `src/assets/gallery/`; `Screensaver` las muestra en bucle cada 12 segundos sin hacer peticiones de red. Para usar fotos propias, sustituye los archivos y actualiza esa lista. El salvapantallas se abre tras el tiempo de inactividad configurado y también desde el botón de galería del rail.
+El salvapantallas lee un **álbum compartido de iCloud** con «Sitio web público» activado. El enlace se elige desde el propio salvapantallas (botón del engranaje) y se guarda en D1 (`app_meta`); `ICLOUD_ALBUM_URL` sirve de respaldo. El Worker lee el álbum, elige la versión de cada foto más pequeña que cubre 1280 px y la sirve desde `/api/photos/:id` con caché, porque las URLs de Apple caducan. Lo más cómodo es pegar el enlace abriendo BBDS en el móvil o el PC: la pantalla lo recoge sola. En demo se usan las fotos de `src/assets/gallery/`.
 
 ## Energía, PVPC y recomendaciones
 
@@ -145,7 +145,7 @@ En producción, `public/sw.js` guarda el shell de la app y la última respuesta 
 
 La franja de estado global resume la frescura de cuatro fuentes: tiempo, listas, limpieza y agenda. **Energía** mantiene su propio aviso de vigencia y copia local tanto en Inicio como en su vista, porque el precio se consulta al arrancar y se refresca cada 30 minutos. Si una fuente falla, se sigue viendo el último dato y el aviso explica cuándo se actualizó. **Estado** abre el detalle por fuente; cada tarjeta de la agenda también puede mostrar su propio error de feed sin tumbar los demás.
 
-El panel de pruebas (`D`, pulsación larga en el reloj del rail o `?demo`) permite simular **sin conexión**, forzar **datos de hace 2 h**, cambiar la hora y el idle o abrir el diagnóstico. El diagnóstico (`Shift+I` o `?diag`) muestra red, visibilidad, service worker, cachés, almacenamiento y una comprobación de APIs/CSS del WebView; el botón **Copiar diagnóstico** genera un JSON para pegar en un informe.
+En modo demo, el panel de pruebas (`D`, pulsación larga en el reloj del rail o `?demo`) permite simular **sin conexión**, forzar **datos de hace 2 h**, cambiar la hora y el idle o abrir el diagnóstico. El diagnóstico (`Shift+I` o `?diag`) muestra red, visibilidad, service worker, cachés, almacenamiento y una comprobación de APIs/CSS del WebView; el botón **Copiar diagnóstico** genera un JSON para pegar en un informe.
 
 `npm run check:webview` revisa el build contra el objetivo Chrome 64 de `vite.config.js` y avisa de sintaxis o CSS que puedan degradarse en un WebView antiguo. Los avisos del chunk opcional de OCR y de `color-mix()`, `dvh`, `backdrop-filter` o flex `gap` son esperados: la app funciona y el efecto visual se degrada en navegadores muy antiguos. `npm run check:energy` comprueba sin red los cálculos de PVPC: formatos, franjas completas, huecos, ahorro, impuestos, días de 23/25 horas y los parseadores de REE y ESIOS.
 
@@ -178,7 +178,7 @@ VITE_IDLE_RETURN_MINUTES=10
 - `VITE_SCREENSAVER_IDLE_MINUTES=3` son los minutos sin actividad antes de abrir la galería. Usa `0` para desactivar la apertura automática; el botón de galería del rail seguirá funcionando.
 - `VITE_NIGHTLY_RELOAD_HOUR=3` fija la recarga diaria del kiosco. En demo no se programa. Sirve para que el WebView no acumule memoria durante semanas.
 - `VITE_IDLE_RETURN_MINUTES=10` devuelve la pantalla a **Hoy** tras ese tiempo sin interacción. Usa `0` para desactivarlo. Es independiente del salvapantallas: a los 3 minutos se abren las fotos y a los 10 la vista de fondo vuelve a **Hoy**.
-- El tiempo se pide a Open-Meteo desde el navegador, con caché de 24 h en `localStorage`. El radar y las fotos del salvapantallas no hacen peticiones externas.
+- El tiempo se pide a Open-Meteo desde el navegador, con caché de 24 h en `localStorage`. Las fotos del salvapantallas se piden al Worker solo mientras está abierto.
 
 ## Worker y D1
 
@@ -191,6 +191,7 @@ SENSOR_TOKEN=dev-sensor-token
 DASHBOARD_TOKEN=
 ESIOS_TOKEN=
 ICLOUD_ICS_URL=
+ICLOUD_ALBUM_URL=
 ```
 
 `.dev.vars` está ignorado por Git. `ESIOS_TOKEN` es opcional: REE es la fuente principal y ESIOS el respaldo, pero una clave de ESIOS evita límites de uso y permite consultas filtradas si algún día hacen falta.
@@ -277,6 +278,10 @@ X-Sensor-Token: dev-sensor-token
 | `DELETE` | `/api/calendars/:id` | Borra el feed. |
 | `POST` | `/api/calendars/:id/sync?days=14` | Fuerza la lectura del ICS y guarda el resultado. |
 | `GET` | `/api/calendar?days=21` | Eventos ICS agregados de todos los feeds activos, con errores por feed. |
+| `GET` | `/api/photos` | Álbum de iCloud configurado y sus fotos (`id`, `width`, `height`, `caption`, `takenAt`). `?refresh` fuerza la lectura. |
+| `PUT` | `/api/photos/album` | `{ url }` con el enlace público del álbum; se comprueba antes de guardarlo. |
+| `DELETE` | `/api/photos/album` | Quita el álbum guardado en la app. |
+| `GET` | `/api/photos/:id` | La foto, servida con caché. No pide token: un `<img>` no puede enviarlo. |
 
 `GET /api/electricity` devuelve `source` (`id`, `label`, `priceType`, `note`, `url`), `days` con `{ date, hours: [{ start, price }] }` en €/kWh, `updatedAt` (publicación de la fuente), `fetchedAt` (consulta), `stale`, `timezone` y, si procede, `warning`. Las horas se agrupan por día de Madrid; `start` es un instante ISO con offset para que los cambios de hora no dependan de la posición en la lista.
 
@@ -346,7 +351,9 @@ Si configuras `DASHBOARD_TOKEN`, las rutas de lectura, listas, personas, limpiez
 - Cambiar la URL: `adb shell am start -n net.bbds.kiosk/.MainActivity --es url https://…`. Añade `--ez debug true` para depurar con `chrome://inspect`.
 - Hacerlo pantalla de inicio: desactiva Frameo (`adb shell su -c "pm disable net.frameo.frame"`; se revierte con `pm enable`).
 - Salir del kiosco: mantén tres dedos quietos 2 s y se abren los Ajustes de Android.
-- En equipos con `navigator.deviceMemory <= 2` (o con `?lite` en la URL) se activa el modo ligero (`html.is-lite`): sin barrido del radar, grano ni animaciones de entrada.
+- El kiosco mantiene el Wi‑Fi activo aunque la pantalla esté en reposo y expone `window.BBDSKiosk.setBrightness(nivel)`: el modo noche baja el brillo real de la pantalla (y más aún con el salvapantallas nocturno). `-1` devuelve el brillo del sistema.
+- Si el aparato no está en la zona horaria de `VITE_TIMEZONE`, la franja de estado lo avisa: la hora, el saludo y la agenda saldrían desplazados.
+- En equipos con `navigator.deviceMemory <= 2` (o con `?lite` en la URL) se activa el modo ligero (`html.is-lite`): sin grano, brillos de fondo, desenfoques (`backdrop-filter`) ni animaciones de entrada.
 - El WebView de fábrica (44) no sirve: el marco necesita el WebView 106 de LineageOS en `/system/app/webview` con sus librerías extraídas en `lib/arm/`.
 
 - Añade el dashboard a la pantalla de inicio o instálalo si tu navegador lo permite; el manifest ya declara orientación horizontal y modo `fullscreen`.
@@ -362,7 +369,7 @@ Si configuras `DASHBOARD_TOKEN`, las rutas de lectura, listas, personas, limpiez
 
 ```text
 src/
-  components/       vistas, tiempo/radar, energía/PVPC, limpieza, galería,
+  components/       vistas, tiempo/próximas horas, energía/PVPC, limpieza, fotos,
                     agenda, listas, clima, libreta manuscrita, hojas y diagnóstico
   hooks/            reloj, tiempo, energía, limpieza, inactividad, sensores,
                     calendario, listas y kiosco (recarga, vuelta a Hoy, gestos demo)
@@ -371,7 +378,7 @@ src/
   assets/gallery/   fotos locales del salvapantallas
   config.js         lugar, modo noche, agenda, clima, idle, recarga y kiosco
   styles.css        tema papel/tinta BBDS y reglas responsive
-  views.css         estilos de tiempo, radar, limpieza y galería
+  views.css         estilos de tiempo, limpieza y fotos
   features.css      estilos de las funciones nuevas, energía y hojas de edición
   almanaque.css     detalles editoriales del rediseño
 worker/
@@ -421,11 +428,10 @@ Los tres estudios visuales viven en `design/` y se abren directamente en el nave
 
 - El OCR es local y aproximado. TrOCR small está entrenado con letras inglesas y puede fallar con palabras cortas, tildes o ñ; el texto editable es parte del flujo, no un extra. No se indexa ni se envía a la nube.
 - Las notas manuscritas antiguas siguen guardadas como imagen; las nuevas se guardan como texto.
-- El radar es una animación ilustrativa local: sirve para validar la interfaz, no para consultar lluvia real. La conexión con una fuente meteorológica real queda como siguiente paso.
 - **Energía** usa PVPC 2.0 TD (Península), no el precio mayorista. El coste mostrado es el término de energía con peajes y cargos; IEE e IVA son estimaciones y el término de potencia queda fuera. No sirve para facturar ni sustituye a la comercializadora.
 - Las recomendaciones reparten el consumo por igual entre las horas del programa porque no hay un perfil real de potencia. Son una ayuda para decidir, no un sistema de control que encienda el electrodoméstico.
 - La limpieza y las tareas viven en D1 en producción y en `localStorage` en demo. Los checks de limpieza se agrupan por semana, pero no hay cuentas separadas: la pantalla es de la casa.
-- Las fotos del salvapantallas son de demostración (Unsplash) y están empaquetadas en la app. Sustitúyelas por fotos propias antes de usar el marco en producción.
+- Las fotos salen de un álbum compartido de iCloud con el sitio web público activado: cualquiera con el enlace puede verlo. Los vídeos del álbum se ignoran y se muestran como mucho las 300 fotos más recientes.
 - El token del dashboard no sustituye a autenticación real; usa Cloudflare Access si la URL es pública.
 - Los calendarios dependen de enlaces ICS activos. BBDS no modifica el calendario original; si un feed se revoca o cambia, hay que actualizar su URL en **Calendarios**. La copia offline conserva los últimos eventos leídos, no los cambios que ocurran mientras no haya red.
 - La primera carga y las actualizaciones necesitan red. El service worker permite arrancar con la última copia del shell y de los datos, y la franja de estado explica la antigüedad; en demo o en `npm run preview` sin Worker no hay API real.

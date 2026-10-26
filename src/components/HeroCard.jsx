@@ -20,7 +20,6 @@ import {
   weatherLabel,
 } from "../lib/weather";
 import { WeatherGlyph } from "./WeatherGlyph";
-import { dateFormat } from "../lib/intl";
 
 const ADVICE_ICONS = {
   umbrella: Umbrella,
@@ -29,15 +28,9 @@ const ADVICE_ICONS = {
   mild: Sparkles,
 };
 
+// La hora ya viene en la zona de LOCATION ("2026-10-26T19:00").
 function hourLabel(value) {
-  try {
-    return dateFormat({
-      hour: "2-digit",
-      hour12: false,
-    }).format(new Date(value));
-  } catch {
-    return "";
-  }
+  return String(value || "").slice(11, 13);
 }
 
 export function HeroCard({ now, weather }) {
