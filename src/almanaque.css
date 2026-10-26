@@ -167,8 +167,9 @@ body {
     linear-gradient(148deg, #191714 0%, #141311 58%, #100f0e 100%);
 }
 
+/* De noche el brillo blanco girado se veía como un cuadrado claro. */
 .app.is-night .ambient::before {
-  opacity: 0.34;
+  display: none;
 }
 
 .app.is-night .ambient__grain {
@@ -3447,7 +3448,7 @@ body {
 }
 
 .app.is-night .weather-now::before {
-  opacity: 0.3;
+  display: none;
 }
 
 .weather-now::after {
