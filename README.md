@@ -346,6 +346,7 @@ Si configuras `DASHBOARD_TOKEN`, las rutas de lectura, listas, personas, limpiez
 - Cambiar la URL: `adb shell am start -n net.bbds.kiosk/.MainActivity --es url https://…`. Añade `--ez debug true` para depurar con `chrome://inspect`.
 - Hacerlo pantalla de inicio: desactiva Frameo (`adb shell su -c "pm disable net.frameo.frame"`; se revierte con `pm enable`).
 - Salir del kiosco: mantén tres dedos quietos 2 s y se abren los Ajustes de Android.
+- En equipos con `navigator.deviceMemory <= 2` (o con `?lite` en la URL) se activa el modo ligero (`html.is-lite`): sin barrido del radar, grano ni animaciones de entrada.
 - El WebView de fábrica (44) no sirve: el marco necesita el WebView 106 de LineageOS en `/system/app/webview` con sus librerías extraídas en `lib/arm/`.
 
 - Añade el dashboard a la pantalla de inicio o instálalo si tu navegador lo permite; el manifest ya declara orientación horizontal y modo `fullscreen`.

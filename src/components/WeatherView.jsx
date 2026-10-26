@@ -11,6 +11,7 @@ import { weatherLabel } from "../lib/weather";
 import { RadarPanel } from "./RadarPanel";
 import { WeatherGlyph } from "./WeatherGlyph";
 import { WeeklyForecast } from "./WeeklyForecast";
+import { dateFormat } from "../lib/intl";
 
 function round(value) {
   return Number.isFinite(Number(value)) ? Math.round(Number(value)) : "—";
@@ -67,9 +68,9 @@ export function WeatherView({ now, weather, error, loading }) {
     today && today.sunset
   );
   const weekday = capitalize(
-    new Intl.DateTimeFormat("es-ES", { weekday: "long" }).format(now)
+    dateFormat({ weekday: "long" }).format(now)
   );
-  const month = new Intl.DateTimeFormat("es-ES", { month: "short" })
+  const month = dateFormat({ month: "short" })
     .format(now)
     .replace(".", "");
   const updated = weather

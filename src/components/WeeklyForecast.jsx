@@ -1,10 +1,11 @@
 import { capitalize, isSameDay, parseAllDay } from "../lib/date";
 import { weatherLabel } from "../lib/weather";
 import { WeatherGlyph } from "./WeatherGlyph";
+import { dateFormat } from "../lib/intl";
 
-const WEEKDAY = new Intl.DateTimeFormat("es-ES", { weekday: "short" });
-const DAY = new Intl.DateTimeFormat("es-ES", { day: "numeric" });
-const MONTH = new Intl.DateTimeFormat("es-ES", { month: "short" });
+const WEEKDAY = dateFormat({ weekday: "short" });
+const DAY = dateFormat({ day: "numeric" });
+const MONTH = dateFormat({ month: "short" });
 
 function dayName(date) {
   return capitalize(WEEKDAY.format(date).replace(".", ""));

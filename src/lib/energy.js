@@ -1,4 +1,5 @@
 import { formatAge } from "./date.js";
+import { dateFormat, numberFormat } from "./intl.js";
 
 // Todo el cálculo vive aquí, sin DOM ni APIs del navegador, para poder
 // verificarlo con `npm run check:energy`. Las horas se interpretan siempre
@@ -78,7 +79,21 @@ function roundTo(value, decimals = 0) {
   return Math.round(value * factor) / factor;
 }
 
+// Los mismos instantes (horas de la tarifa) se consultan muchas veces por
+// render, y formatToParts es lento en el WebView del marco.
+const zonedCache = new Map();
+
 export function zonedParts(date) {
+  const time = date instanceof Date ? date.getTime() : new Date(date).getTime();
+  const hit = zonedCache.get(time);
+  if (hit) return { ...hit };
+  const result = computeZonedParts(time);
+  if (zonedCache.size > 512) zonedCache.clear();
+  zonedCache.set(time, result);
+  return { ...result };
+}
+
+function computeZonedParts(date) {
   const parts = zonedFormatter.formatToParts(date);
   const result = {};
   for (let index = 0; index < parts.length; index += 1) {
@@ -136,7 +151,7 @@ export function dayKeyToDate(key) {
 
 export function formatDayShort(key) {
   if (!key) return "";
-  return new Intl.DateTimeFormat("es-ES", {
+  return dateFormat({
     timeZone: PRICE_TIMEZONE,
     weekday: "short",
     day: "numeric",
@@ -160,7 +175,7 @@ export function formatHour(iso) {
   if (!iso) return "—";
   const date = new Date(iso);
   if (!Number.isFinite(date.getTime())) return "—";
-  const value = new Intl.DateTimeFormat("es-ES", {
+  const value = dateFormat({
     timeZone: PRICE_TIMEZONE,
     hour: "2-digit",
     minute: "2-digit",
@@ -202,7 +217,7 @@ export function formatUpdatedStamp(value) {
   if (!value) return "Sin datos";
   const date = new Date(value);
   if (!Number.isFinite(date.getTime())) return "Sin datos";
-  return new Intl.DateTimeFormat("es-ES", {
+  return dateFormat({
     timeZone: PRICE_TIMEZONE,
     day: "2-digit",
     month: "short",
@@ -228,7 +243,7 @@ function asNumber(value) {
 export function formatPrice(value) {
   const price = asNumber(value);
   if (!Number.isFinite(price)) return "—";
-  return new Intl.NumberFormat("es-ES", {
+  return numberFormat({
     minimumFractionDigits: 3,
     maximumFractionDigits: 3,
   }).format(price);
@@ -238,7 +253,7 @@ export function formatMoney(value) {
   const amount = asNumber(value);
   if (!Number.isFinite(amount)) return "—";
   const digits = Math.abs(amount) > 0 && Math.abs(amount) < 0.1 ? 3 : 2;
-  return new Intl.NumberFormat("es-ES", {
+  return numberFormat({
     style: "currency",
     currency: "EUR",
     minimumFractionDigits: digits,
@@ -249,7 +264,7 @@ export function formatMoney(value) {
 export function formatConsumption(value) {
   const amount = asNumber(value);
   if (!Number.isFinite(amount)) return "—";
-  return `${new Intl.NumberFormat("es-ES", {
+  return `${numberFormat({
     minimumFractionDigits: 0,
     maximumFractionDigits: 1,
   }).format(amount)} kWh`;
@@ -258,7 +273,7 @@ export function formatConsumption(value) {
 export function formatPercent(value) {
   const ratio = asNumber(value);
   if (!Number.isFinite(ratio)) return "—";
-  return `${new Intl.NumberFormat("es-ES", {
+  return `${numberFormat({
     maximumFractionDigits: 0,
   }).format(ratio * 100)} %`;
 }

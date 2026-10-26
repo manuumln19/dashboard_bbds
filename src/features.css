@@ -4604,3 +4604,18 @@
     grid-template-columns: 120px minmax(0, 1fr) 52px;
   }
 }
+
+/* Modo ligero (html.is-lite, ver main.jsx) ---------------------------------
+   En el marco Frameo (RK3126, 1 GB) cada capa con blend o animación continua
+   obliga a recomponer toda la pantalla: el radar bajaba Tiempo a ~20 FPS. */
+
+.is-lite .ambient__grain,
+.is-lite .radar-sweep {
+  display: none;
+}
+
+.is-lite .view,
+.is-lite .screensaver,
+.is-lite .screensaver__photo {
+  animation: none;
+}

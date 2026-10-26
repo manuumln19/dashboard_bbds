@@ -41,37 +41,44 @@ import { HomeView } from "./components/HomeView";
 import { Screensaver } from "./components/Screensaver";
 import { StatusBanner } from "./components/StatusBanner";
 
-// Las vistas que no se usan al arrancar se descargan solo cuando hacen falta.
+// Las vistas que no se usan al arrancar se descargan aparte y se precargan
+// cuando el arranque ya ha terminado (ver PRELOAD_DELAY_MS).
+const loadAgenda = () => import("./components/AgendaView");
+const loadLists = () => import("./components/ListsView");
+const loadCleaning = () => import("./components/CleaningView");
+const loadWeather = () => import("./components/WeatherView");
+const loadClimate = () => import("./components/ClimateView");
+const loadEnergy = () => import("./components/EnergyView");
+
 const AgendaView = lazy(() =>
-  import("./components/AgendaView").then((module) => ({
-    default: module.AgendaView,
-  }))
+  loadAgenda().then((module) => ({ default: module.AgendaView }))
 );
 const ListsView = lazy(() =>
-  import("./components/ListsView").then((module) => ({
-    default: module.ListsView,
-  }))
+  loadLists().then((module) => ({ default: module.ListsView }))
 );
 const CleaningView = lazy(() =>
-  import("./components/CleaningView").then((module) => ({
-    default: module.CleaningView,
-  }))
+  loadCleaning().then((module) => ({ default: module.CleaningView }))
 );
 const WeatherView = lazy(() =>
-  import("./components/WeatherView").then((module) => ({
-    default: module.WeatherView,
-  }))
+  loadWeather().then((module) => ({ default: module.WeatherView }))
 );
 const ClimateView = lazy(() =>
-  import("./components/ClimateView").then((module) => ({
-    default: module.ClimateView,
-  }))
+  loadClimate().then((module) => ({ default: module.ClimateView }))
 );
 const EnergyView = lazy(() =>
-  import("./components/EnergyView").then((module) => ({
-    default: module.EnergyView,
-  }))
+  loadEnergy().then((module) => ({ default: module.EnergyView }))
 );
+
+// En el marco, descargar y compilar una vista al tocarla añade cientos de ms.
+const PRELOAD_DELAY_MS = 8000;
+const PRELOADERS = [
+  loadAgenda,
+  loadLists,
+  loadCleaning,
+  loadWeather,
+  loadEnergy,
+  ...(CLIMATE_ENABLED ? [loadClimate] : []),
+];
 
 const VALID_VIEWS = new Set([
   "home",
@@ -165,6 +172,23 @@ export default function App() {
   useEffect(() => {
     document.title = `${clock} · BBDS`;
   }, [clock]);
+
+  // Una vista por tarea para no bloquear la pantalla mientras se compila.
+  useEffect(() => {
+    let cancelled = false;
+    let timer = window.setTimeout(function next(index = 0) {
+      if (cancelled || index >= PRELOADERS.length) return;
+      PRELOADERS[index]()
+        .catch(() => {})
+        .then(() => {
+          timer = window.setTimeout(() => next(index + 1), 400);
+        });
+    }, PRELOAD_DELAY_MS);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, []);
 
   // `?demo` y `?diag` abren una vez; la URL vuelve a quedar limpia para que
   // una recarga nocturna no vuelva a abrir los controles.

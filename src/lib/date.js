@@ -1,3 +1,5 @@
+import { dateFormat } from "./intl.js";
+
 export function pad(value) {
   return String(value).padStart(2, "0");
 }
@@ -11,7 +13,7 @@ export function formatClockWithSeconds(date) {
 }
 
 export function formatLongDate(date) {
-  const formatted = new Intl.DateTimeFormat("es-ES", {
+  const formatted = dateFormat({
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -20,7 +22,7 @@ export function formatLongDate(date) {
 }
 
 export function formatShortDay(date) {
-  return new Intl.DateTimeFormat("es-ES", {
+  return dateFormat({
     weekday: "short",
     day: "numeric",
     month: "short",
@@ -30,11 +32,11 @@ export function formatShortDay(date) {
 }
 
 export function formatMonth(date) {
-  return new Intl.DateTimeFormat("es-ES", { month: "long" }).format(date);
+  return dateFormat({ month: "long" }).format(date);
 }
 
 export function formatEventTime(date) {
-  return new Intl.DateTimeFormat("es-ES", {
+  return dateFormat({
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
@@ -90,10 +92,10 @@ export function relativeDayLabel(date, now = new Date()) {
   if (diff === -1) return "Ayer";
   if (diff > 1 && diff < 7) {
     return capitalize(
-      new Intl.DateTimeFormat("es-ES", { weekday: "long" }).format(date)
+      dateFormat({ weekday: "long" }).format(date)
     );
   }
-  return new Intl.DateTimeFormat("es-ES", {
+  return dateFormat({
     day: "numeric",
     month: "short",
   })

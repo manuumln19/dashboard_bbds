@@ -10,15 +10,16 @@ import {
   sourceNote,
   taxBreakdown,
 } from "../lib/energy";
+import { numberFormat } from "../lib/intl";
 
 function numberText(value) {
-  return new Intl.NumberFormat("es-ES", {
+  return numberFormat({
     maximumFractionDigits: 1,
   }).format(Number(value));
 }
 
 function rateText(value) {
-  return `${new Intl.NumberFormat("es-ES", {
+  return `${numberFormat({
     maximumFractionDigits: 2,
   }).format(Number(value) * 100)} %`;
 }

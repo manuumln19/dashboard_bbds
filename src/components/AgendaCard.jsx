@@ -7,13 +7,14 @@ import {
   startOfDay,
 } from "../lib/date";
 import { eventTone, groupEventsByDay } from "../lib/agenda";
+import { dateFormat } from "../lib/intl";
 
 function dayCopy(date, now) {
   const today = startOfDay(now);
   if (date.getTime() === today.getTime()) return "Hoy";
   if (date.getTime() === addDays(today, 1).getTime()) return "Mañana";
   return capitalize(
-    new Intl.DateTimeFormat("es-ES", { weekday: "long" }).format(date)
+    dateFormat({ weekday: "long" }).format(date)
   );
 }
 
@@ -72,7 +73,7 @@ export function AgendaCard({ events, now, configured = true, error, onOpen }) {
               <div className="agenda-preview__day">
                 <strong>{dayCopy(group.day, now)}</strong>
                 <span>
-                  {new Intl.DateTimeFormat("es-ES", { day: "numeric" }).format(
+                  {dateFormat({ day: "numeric" }).format(
                     group.day
                   )}
                 </span>

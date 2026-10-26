@@ -1,4 +1,5 @@
 import { useId, useMemo } from "react";
+import { dateFormat } from "../lib/intl";
 
 const VIEW_WIDTH = 760;
 const VIEW_HEIGHT = 390;
@@ -9,11 +10,11 @@ const Y_TICKS = [30, 40, 50, 60, 70, 80];
 
 function formatAxisLabel(date, range) {
   if (range === "7d") {
-    return new Intl.DateTimeFormat("es-ES", { weekday: "short" })
+    return dateFormat({ weekday: "short" })
       .format(date)
       .replace(/\.$/, "");
   }
-  return new Intl.DateTimeFormat("es-ES", {
+  return dateFormat({
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,

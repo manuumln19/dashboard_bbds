@@ -1,4 +1,5 @@
 import { addDays, capitalize, formatMonth, startOfWeek } from "./date";
+import { dateFormat } from "./intl";
 
 // El cuadrante de demostración. En producción estas tareas viven en D1 y se
 // editan desde la propia pantalla de limpieza.
@@ -144,12 +145,12 @@ export function weekRangeLabel(date = new Date()) {
 
 export function weekdayLong(date) {
   return capitalize(
-    new Intl.DateTimeFormat("es-ES", { weekday: "long" }).format(date)
+    dateFormat({ weekday: "long" }).format(date)
   );
 }
 
 export function monthShort(date) {
-  return new Intl.DateTimeFormat("es-ES", { month: "short" })
+  return dateFormat({ month: "short" })
     .format(date)
     .replace(".", "");
 }

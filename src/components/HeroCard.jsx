@@ -20,6 +20,7 @@ import {
   weatherLabel,
 } from "../lib/weather";
 import { WeatherGlyph } from "./WeatherGlyph";
+import { dateFormat } from "../lib/intl";
 
 const ADVICE_ICONS = {
   umbrella: Umbrella,
@@ -30,7 +31,7 @@ const ADVICE_ICONS = {
 
 function hourLabel(value) {
   try {
-    return new Intl.DateTimeFormat("es-ES", {
+    return dateFormat({
       hour: "2-digit",
       hour12: false,
     }).format(new Date(value));

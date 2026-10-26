@@ -21,6 +21,7 @@ import { eventTone, eventsForDay, layoutDayEvents } from "../lib/agenda";
 import { formatFreshnessTime } from "../lib/freshness";
 import { CalendarSheet } from "./CalendarSheet";
 import { EventQR } from "./EventQR";
+import { dateFormat } from "../lib/intl";
 
 const MODES = [
   { id: "day", label: "Hoy" },
@@ -44,14 +45,14 @@ function modeDays(mode) {
 
 function weekdayShort(date) {
   return capitalize(
-    new Intl.DateTimeFormat("es-ES", { weekday: "short" })
+    dateFormat({ weekday: "short" })
       .format(date)
       .replace(".", "")
   );
 }
 
 function monthShort(date) {
-  return new Intl.DateTimeFormat("es-ES", { month: "short" })
+  return dateFormat({ month: "short" })
     .format(date)
     .replace(".", "");
 }

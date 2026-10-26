@@ -32,6 +32,7 @@ BBDS is a home dashboard for a 1280 x 800 wall touchscreen: React 18 + Vite SPA 
 ## Conventions and gotchas
 
 - Keep user-facing copy in Spanish and dates formatted as `es-ES`; the reference viewport is 1280 x 800 landscape.
+- Use `dateFormat()` / `numberFormat()` from `src/lib/intl.js` instead of `new Intl.*Format`: creating formatters is very slow on the Frameo WebView.
 - Cleaning task ids are persistence keys in D1 (`cleaning_tasks` and `cleaning_checks`) and in `localStorage` for demo. Changing or removing an id drops its checks; the week key resets state every Monday.
 - List mutations are optimistic and use a `pending` ref to suppress polling while writes are in flight. Preserve that guard when adding mutations.
 - Handwriting OCR is lazy-loaded. The first use downloads a ~70 MB model from Hugging Face; ONNX wasm files must stay in `public/ort/` because `wasmPaths` points there.

@@ -3,6 +3,7 @@
 // original para que la pantalla pueda decir "datos de las 21:34".
 
 import { getDemoControls } from "./demoControls";
+import { dateFormat } from "./intl";
 
 const listeners = new Set();
 
@@ -108,7 +109,7 @@ export function formatFreshnessTime(value) {
   if (!value) return "";
   const date = new Date(value);
   if (!Number.isFinite(date.getTime())) return "";
-  return new Intl.DateTimeFormat("es-ES", {
+  return dateFormat({
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,

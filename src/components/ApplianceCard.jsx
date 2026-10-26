@@ -17,9 +17,10 @@ import {
   APPLIANCE_SHORT_NAMES,
   ApplianceIcon,
 } from "./ApplianceIcon";
+import { numberFormat } from "../lib/intl";
 
 function numberText(value) {
-  return new Intl.NumberFormat("es-ES", {
+  return numberFormat({
     maximumFractionDigits: 1,
   }).format(Number(value));
 }

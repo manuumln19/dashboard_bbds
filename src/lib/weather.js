@@ -1,5 +1,6 @@
 import { LOCATION } from "../config";
 import { isDemoOffline } from "./demoControls";
+import { dateFormat } from "./intl";
 
 const WEATHER_LABELS = {
   0: "Despejado",
@@ -157,7 +158,7 @@ export function getWeatherAdvice(weather, now = new Date()) {
   if (rainy) {
     const hour = new Date(rainy.time);
     const label = Number.isFinite(hour.getTime())
-      ? `sobre las ${new Intl.DateTimeFormat("es-ES", {
+      ? `sobre las ${dateFormat({
           hour: "2-digit",
           minute: "2-digit",
           hour12: false,
