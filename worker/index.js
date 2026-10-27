@@ -1933,25 +1933,36 @@ const PHOTO_ID_RE = /^[A-Za-z0-9_-]{8,64}$/;
 const BASE62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 let photoAlbumCache = null;
 
-function albumToken(value) {
+// { kind: "stream" | "cloudkit", token, url } o null si no es un enlace válido.
+// - Antiguo, www.icloud.com/sharedalbum/#<token>: API «sharedstreams».
+// - Nuevo, photos.icloud.com/shared/album/<guid>: zona compartida de CloudKit
+//   con acceso anónimo. Los de invitación (piden correo) no se pueden leer.
+function albumRef(value) {
   const text = String(value || "").trim();
-  if (!text) return "";
-  let token = text;
-  if (/^https?:\/\//i.test(text)) {
-    let parsed;
-    try {
-      parsed = new URL(text);
-    } catch {
-      return "";
-    }
-    if (!/(^|\.)icloud\.com$/i.test(parsed.hostname)) return "";
-    // Formato nuevo: https://photos.icloud.com/shared/album/<token>
-    const modern = parsed.pathname.match(/\/shared\/album\/([^/]+)\/?$/i);
-    if (modern) token = modern[1];
-    else if (/\/sharedalbum\//i.test(parsed.pathname)) token = parsed.hash.replace(/^#/, "").split(";")[0];
-    else return "";
+  if (!text) return null;
+  if (!/^https?:\/\//i.test(text)) {
+    return /^[A-Za-z0-9]{10,40}$/.test(text)
+      ? { kind: "stream", token: text, url: `https://www.icloud.com/sharedalbum/#${text}` }
+      : null;
   }
-  return /^[A-Za-z0-9]{10,40}$/.test(token) ? token : "";
+  let parsed;
+  try {
+    parsed = new URL(text);
+  } catch {
+    return null;
+  }
+  if (!/(^|\.)icloud\.com$/i.test(parsed.hostname)) return null;
+  const modern = parsed.pathname.match(/\/shared\/album\/([A-Za-z0-9_-]{10,60})\/?$/i);
+  if (modern) {
+    return { kind: "cloudkit", token: modern[1], url: `https://photos.icloud.com/shared/album/${modern[1]}` };
+  }
+  if (/\/sharedalbum\//i.test(parsed.pathname)) {
+    const token = parsed.hash.replace(/^#/, "").split(";")[0];
+    return /^[A-Za-z0-9]{10,40}$/.test(token)
+      ? { kind: "stream", token, url: `https://www.icloud.com/sharedalbum/#${token}` }
+      : null;
+  }
+  return null;
 }
 
 function albumHost(token) {
@@ -1999,17 +2010,118 @@ function pickDerivative(derivatives) {
   );
 }
 
-async function loadAlbum(token, { force = false } = {}) {
+const CLOUDKIT_DB = "database/1/com.apple.photos.cloud/production";
+const CLOUDKIT_IMAGE_TYPES = new Set(["public.jpeg", "public.heic", "public.heif", "public.png"]);
+
+async function cloudkitPost(url, body) {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain", Origin: "https://photos.icloud.com" },
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) {
+    throw new HttpError(502, `iCloud respondió ${response.status}`, "album_fetch_failed");
+  }
+  return response.json();
+}
+
+function cloudkitValue(record, key) {
+  const field = record.fields && record.fields[key];
+  return field ? field.value : undefined;
+}
+
+// Álbum nuevo: se resuelve el enlace (público), que da un token anónimo, y se
+// descarga la zona compartida entera. Cada CPLAsset apunta a su CPLMaster, que
+// trae las versiones JPEG con su URL de descarga.
+async function loadCloudkitAlbum(token) {
+  const resolved = await cloudkitPost(
+    `https://ckdatabasews.icloud.com/${CLOUDKIT_DB}/public/records/resolve`,
+    { shortGUIDs: [{ value: token, shouldFetchRootRecord: true }] }
+  );
+  const result = resolved.results && resolved.results[0];
+  const access = result && result.anonymousPublicAccess;
+  if (!result || result.serverErrorCode || !access || !access.token || result.requireAppleLogin) {
+    throw new HttpError(
+      404,
+      "Ese enlace es de invitación y pide un correo para verlo. Activa el enlace público del álbum en el iPhone y pega ese.",
+      "album_invite_only"
+    );
+  }
+
+  const partition = String(access.databasePartition || "https://ckdatabasews.icloud.com").replace(/:443$/, "");
+  const zoneUrl = `${partition}/${CLOUDKIT_DB}/shared/changes/zone?publicAccessAuthToken=${encodeURIComponent(access.token)}`;
+  const records = [];
+  let syncToken = null;
+  for (let page = 0; page < 30; page += 1) {
+    const data = await cloudkitPost(zoneUrl, {
+      zones: [{ zoneID: result.zoneID, desiredKeys: null, syncToken }],
+    });
+    const zone = data.zones && data.zones[0];
+    if (!zone) break;
+    records.push(...(zone.records || []));
+    syncToken = zone.syncToken;
+    if (!zone.moreComing) break;
+  }
+
+  const masters = new Map(
+    records.filter((record) => record.recordType === "CPLMaster").map((record) => [record.recordName, record])
+  );
+  const photos = [];
+  const urls = new Map();
+  for (const asset of records) {
+    if (asset.recordType !== "CPLAsset" || asset.deleted) continue;
+    if (cloudkitValue(asset, "isHidden") === 1 || cloudkitValue(asset, "isDeleted") === 1) continue;
+    const ref = cloudkitValue(asset, "masterRef");
+    const master = ref && masters.get(ref.recordName);
+    // Los vídeos se saltan: el salvapantallas solo pasa fotos.
+    if (!master || !CLOUDKIT_IMAGE_TYPES.has(cloudkitValue(master, "itemType"))) continue;
+    // Si el original ya es JPEG, Apple no genera versión media: se usa el
+    // original, que en esos casos es pequeño y viene sin rotación EXIF.
+    const isJpeg = cloudkitValue(master, "itemType") === "public.jpeg";
+    const prefix = cloudkitValue(master, "resJPEGMedRes") ? "resJPEGMed" : isJpeg ? "resOriginal" : null;
+    const medium = prefix && cloudkitValue(master, `${prefix}Res`);
+    if (!medium || !medium.downloadURL || !medium.fileChecksum) continue;
+    if (!PHOTO_ID_RE.test(asset.recordName)) continue;
+    const date = cloudkitValue(asset, "assetDate");
+    photos.push({
+      id: asset.recordName,
+      checksum: medium.fileChecksum,
+      width: Number(cloudkitValue(master, `${prefix}Width`)) || 0,
+      height: Number(cloudkitValue(master, `${prefix}Height`)) || 0,
+      caption: "",
+      takenAt: date ? new Date(date).toISOString() : null,
+    });
+    urls.set(medium.fileChecksum, medium.downloadURL.replace("${f}", "photo.jpg"));
+  }
+  photos.sort((a, b) => String(b.takenAt || "").localeCompare(String(a.takenAt || "")));
+  photos.splice(PHOTO_MAX);
+
+  const owner = result.ownerIdentity && result.ownerIdentity.nameComponents;
+  const title = result.share && result.share.fields && result.share.fields["cloudkit.title"];
+  return {
+    name: String((title && title.value) || "").trim() || "Álbum compartido",
+    owner: owner ? [owner.givenName, owner.familyName].filter(Boolean).join(" ") : "",
+    photos,
+    urls,
+  };
+}
+
+async function loadAlbum(ref, { force = false } = {}) {
   const now = Date.now();
   if (
     !force &&
     photoAlbumCache &&
-    photoAlbumCache.token === token &&
+    photoAlbumCache.token === ref.token &&
     now - photoAlbumCache.fetchedAt < PHOTO_ALBUM_TTL_MS
   ) {
     return photoAlbumCache;
   }
+  const album = ref.kind === "cloudkit" ? await loadCloudkitAlbum(ref.token) : await loadStreamAlbum(ref.token);
+  photoAlbumCache = { token: ref.token, fetchedAt: now, ...album };
+  return photoAlbumCache;
+}
 
+async function loadStreamAlbum(token) {
   const state = { token, host: albumHost(token) };
   const stream = await icloudPost(state, "webstream", { streamCtag: null });
   const photos = [];
@@ -2040,15 +2152,12 @@ async function loadAlbum(token, { force = false } = {}) {
     }
   }
 
-  photoAlbumCache = {
-    token,
-    fetchedAt: now,
+  return {
     name: String(stream.streamName || "").trim() || "Álbum compartido",
     owner: [stream.userFirstName, stream.userLastName].filter(Boolean).join(" "),
     photos: photos.filter((photo) => urls.has(photo.checksum)),
     urls,
   };
-  return photoAlbumCache;
 }
 
 async function albumSetting(env) {
@@ -2063,12 +2172,12 @@ async function albumSetting(env) {
 
 async function photosPayload(env, { force = false } = {}) {
   const setting = await albumSetting(env);
-  const token = setting ? albumToken(setting.url) : "";
-  if (!token) {
+  const ref = setting ? albumRef(setting.url) : null;
+  if (!ref) {
     return { configured: false, source: setting ? setting.source : null, photos: [] };
   }
   try {
-    const album = await loadAlbum(token, { force });
+    const album = await loadAlbum(ref, { force });
     return {
       configured: true,
       source: setting.source,
@@ -2097,18 +2206,18 @@ async function handlePhotoImage(request, env, id, ctx) {
   // Sin token: un <img> no puede enviar cabeceras. Solo se sirven fotos del
   // álbum configurado, y los ids de iCloud no se pueden adivinar.
   const setting = await albumSetting(env);
-  const token = setting ? albumToken(setting.url) : "";
-  if (!token) throw new HttpError(404, "No hay álbum configurado");
+  const ref = setting ? albumRef(setting.url) : null;
+  if (!ref) throw new HttpError(404, "No hay álbum configurado");
 
-  let album = await loadAlbum(token);
+  let album = await loadAlbum(ref);
   let photo = album.photos.find((item) => item.id === id);
   if (!photo) {
-    album = await loadAlbum(token, { force: true });
+    album = await loadAlbum(ref, { force: true });
     photo = album.photos.find((item) => item.id === id);
   }
   if (!photo) throw new HttpError(404, "Esa foto ya no está en el álbum");
 
-  const cacheKey = new Request(`https://photos.bbds.cache/${photo.checksum}`);
+  const cacheKey = new Request(`https://photos.bbds.cache/${encodeURIComponent(photo.checksum)}`);
   const cache = caches.default;
   const cached = await cache.match(cacheKey);
   if (cached) return cached;
@@ -2116,7 +2225,7 @@ async function handlePhotoImage(request, env, id, ctx) {
   let upstream = await fetch(album.urls.get(photo.checksum));
   if (upstream.status === 403 || upstream.status === 404) {
     // URL caducada: se piden de nuevo al álbum.
-    album = await loadAlbum(token, { force: true });
+    album = await loadAlbum(ref, { force: true });
     const url = album.urls.get(photo.checksum);
     if (url) upstream = await fetch(url);
   }
@@ -2148,33 +2257,20 @@ async function handlePhotos(request, env, url, ctx) {
 
   if (url.pathname === "/api/photos/album" && request.method === "PUT") {
     const body = await readJson(request);
-    const token = albumToken(body.url);
-    if (!token) {
+    const ref = albumRef(body.url);
+    if (!ref) {
       throw new HttpError(
         400,
-        "Pega el enlace público del álbum (https://www.icloud.com/sharedalbum/#…)",
+        "Pega el enlace público del álbum (https://photos.icloud.com/shared/album/…)",
         "invalid_album"
       );
     }
     // Se comprueba antes de guardar para avisar al momento si no es público.
-    try {
-      await loadAlbum(token, { force: true });
-    } catch (caught) {
-      // Los enlaces photos.icloud.com/shared/album/… son de invitación: la web
-      // pide un correo para verlos y no hay API anónima detrás.
-      if (caught instanceof HttpError && caught.status === 404 && /photos\.icloud\.com\/shared\/album\//i.test(String(body.url))) {
-        throw new HttpError(
-          404,
-          "Ese enlace es de invitación y pide un correo para verlo. En el iPhone: Fotos → el álbum → Personas → activa «Sitio web público» y copia el enlace que empieza por www.icloud.com/sharedalbum/#",
-          "album_invite_only"
-        );
-      }
-      throw caught;
-    }
+    await loadAlbum(ref, { force: true });
     await env.DB.prepare(
       "INSERT INTO app_meta (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value"
     )
-      .bind(PHOTO_ALBUM_KEY, `https://www.icloud.com/sharedalbum/#${token}`)
+      .bind(PHOTO_ALBUM_KEY, ref.url)
       .run();
     return json(await photosPayload(env));
   }
