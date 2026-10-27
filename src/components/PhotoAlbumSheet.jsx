@@ -137,7 +137,7 @@ export function PhotoAlbumSheet({ photos, onClose }) {
                     inputMode="url"
                     autoComplete="off"
                     spellCheck={false}
-                    placeholder="https://photos.icloud.com/shared/album/…"
+                    placeholder="https://www.icloud.com/sharedalbum/#B0…"
                     value={url}
                     onChange={(event) => setUrl(event.target.value)}
                   />

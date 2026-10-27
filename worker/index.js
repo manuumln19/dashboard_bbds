@@ -2152,12 +2152,25 @@ async function handlePhotos(request, env, url, ctx) {
     if (!token) {
       throw new HttpError(
         400,
-        "Pega el enlace público del álbum (https://photos.icloud.com/shared/album/…)",
+        "Pega el enlace público del álbum (https://www.icloud.com/sharedalbum/#…)",
         "invalid_album"
       );
     }
     // Se comprueba antes de guardar para avisar al momento si no es público.
-    await loadAlbum(token, { force: true });
+    try {
+      await loadAlbum(token, { force: true });
+    } catch (caught) {
+      // Los enlaces photos.icloud.com/shared/album/… son de invitación: la web
+      // pide un correo para verlos y no hay API anónima detrás.
+      if (caught instanceof HttpError && caught.status === 404 && /photos\.icloud\.com\/shared\/album\//i.test(String(body.url))) {
+        throw new HttpError(
+          404,
+          "Ese enlace es de invitación y pide un correo para verlo. En el iPhone: Fotos → el álbum → Personas → activa «Sitio web público» y copia el enlace que empieza por www.icloud.com/sharedalbum/#",
+          "album_invite_only"
+        );
+      }
+      throw caught;
+    }
     await env.DB.prepare(
       "INSERT INTO app_meta (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value"
     )
