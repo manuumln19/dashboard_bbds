@@ -92,7 +92,7 @@ export function useNotes() {
     }
   }
 
-  // El corcho llama aquí al soltar un pósit: sitio, tamaño, giro, forma o
+  // Las notas de Hoy llaman aquí al soltar un pósit: sitio, tamaño, giro, forma o
   // color. Se aplica ya y, si falla, vuelve a donde estaba.
   async function updateNote(id, patch) {
     const previous = notes;

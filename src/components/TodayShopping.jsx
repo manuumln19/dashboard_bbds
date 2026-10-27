@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowUpRight, Plus, ShoppingBasket } from "lucide-react";
+import { ArrowUpRight, Plus, ShoppingBasket, StickyNote } from "lucide-react";
 import { isLegacyDrawing } from "../lib/listItems";
 import { useRecentlyDone } from "../hooks/useRecentlyDone";
 import { CheckMark } from "./CheckMark";
@@ -7,8 +7,8 @@ import { SeasonMark } from "./SeasonDecor";
 
 const VISIBLE = 6;
 
-// `children`: el pósit de las notas, pegado en la esquina de la tarjeta.
-export function TodayShopping({ lists, onOpenLists, children }) {
+// `onWriteNote` abre la hoja de nota nueva; las notas viven sueltas en Hoy.
+export function TodayShopping({ lists, onOpenLists, onWriteNote }) {
   const [text, setText] = useState("");
   const recent = useRecentlyDone();
   const shopping = lists.items.filter((item) => item.listId === "shopping");
@@ -38,6 +38,12 @@ export function TodayShopping({ lists, onOpenLists, children }) {
           {open.length ? <span className="today-count">{open.length}</span> : null}
           <SeasonMark />
         </h2>
+        {onWriteNote ? (
+          <button type="button" className="today-link today-link--note" onClick={onWriteNote}>
+            <StickyNote size={15} strokeWidth={2} aria-hidden="true" />
+            Nota
+          </button>
+        ) : null}
         <button type="button" className="today-link" onClick={onOpenLists}>
           Listas
           <ArrowUpRight size={15} strokeWidth={2} aria-hidden="true" />
@@ -74,8 +80,6 @@ export function TodayShopping({ lists, onOpenLists, children }) {
       ) : (
         <p className="today-shopping__empty">No falta nada.</p>
       )}
-
-      {children}
 
       <form className="today-shopping__add" onSubmit={submit}>
         <input

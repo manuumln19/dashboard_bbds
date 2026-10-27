@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useElectricity } from "../hooks/useElectricity";
 import { useNotes } from "../hooks/useNotes";
+import { HomeNotes, NoteComposer } from "./HomeNotes";
 import { TodayCrew } from "./TodayCrew";
-import { TodayNotes } from "./TodayNotes";
 import { TodayNext } from "./TodayNext";
 import { TodayNow } from "./TodayNow";
 import { TodayPower } from "./TodayPower";
@@ -29,6 +29,7 @@ export function HomeView({
   const electricity = useElectricity();
   const notes = useNotes();
   const [summaryOpen, setSummaryOpen] = useState(false);
+  const [writing, setWriting] = useState(false);
   const due = !cleaning.loading && summaryDue(now, cleaning.weekKey);
 
   useEffect(() => {
@@ -72,12 +73,12 @@ export function HomeView({
             onOpenCleaning={onOpenCleaning}
             onOpenSummary={() => setSummaryOpen(true)}
           />
-          <TodayShopping lists={lists} onOpenLists={onOpenLists}>
-            <TodayNotes notes={notes} people={cleaning.people} now={now} />
-          </TodayShopping>
+          <TodayShopping lists={lists} onOpenLists={onOpenLists} onWriteNote={() => setWriting(true)} />
           <TodayPower electricity={electricity} now={now} onOpenEnergy={onOpenEnergy} />
         </div>
       </div>
+      <HomeNotes notes={notes} people={cleaning.people} now={now} />
+      {writing ? <NoteComposer notes={notes} people={cleaning.people} onClose={() => setWriting(false)} /> : null}
       {summaryOpen ? (
         <WeeklySummary
           now={now}

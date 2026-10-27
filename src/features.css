@@ -5460,81 +5460,10 @@
   padding: 14px 22px 20px;
 }
 
-/* Pósit pegado en la esquina de Compra ------------------------------------ */
+/* Compra en Hoy ----------------------------------------------------------- */
 
 .today-shopping {
   position: relative;
-}
-
-.today-notes {
-  position: absolute;
-  right: 22px;
-  bottom: 80px;
-  z-index: 3;
-  width: 216px;
-  height: 204px;
-}
-
-/* La lista deja sitio al pósit para que no tape lo que hay que comprar. */
-.today-shopping__list li {
-  padding-right: 244px;
-}
-
-.today-notes .postit {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 100%;
-  padding: 22px 16px 10px;
-  border-radius: 2px;
-  transform: rotate(2.2deg);
-  box-shadow:
-    0 1px 1px rgba(60, 40, 10, 0.08),
-    0 12px 20px -12px rgba(60, 40, 10, 0.55);
-}
-
-.today-notes .postit::after {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  width: 22px;
-  height: 22px;
-  background: linear-gradient(135deg, var(--postit) 0%, var(--postit) 49%, rgba(0, 0, 0, 0.1) 50%, rgba(255, 255, 255, 0.55) 100%);
-  content: "";
-}
-
-.today-notes .postit blockquote {
-  font-size: 22px;
-  line-height: 1.1;
-  -webkit-line-clamp: 4;
-}
-
-.today-notes .postit figcaption {
-  margin-top: 8px;
-  font-size: 12px;
-}
-
-.postit__actions {
-  display: inline-flex;
-  flex: none;
-  gap: 4px;
-}
-
-.postit__actions button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  min-width: 34px;
-  min-height: 34px;
-  padding: 0 9px;
-  border: 0;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.5);
-  color: #3a2f1d;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 600;
 }
 
 .postit__tape {
@@ -5547,48 +5476,6 @@
   background: rgba(255, 255, 255, 0.62);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
   transform: rotate(-4deg);
-}
-
-/* Segunda nota asomando detrás, girada al otro lado. */
-.today-notes .postit--behind {
-  position: absolute;
-  top: -10px;
-  left: -14px;
-  padding: 8px 12px;
-  border: 0;
-  align-items: flex-start;
-  text-align: left;
-  transform: rotate(-6deg);
-}
-
-.today-notes .postit--behind::after {
-  display: none;
-}
-
-.postit--behind span {
-  color: rgba(58, 47, 29, 0.65);
-  font-size: 13px;
-  font-weight: 700;
-}
-
-/* Sin notas: pósit en blanco, medio transparente. */
-.today-notes .postit--blank {
-  display: flex;
-  min-height: 92px;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  border: 1.5px dashed rgba(58, 47, 29, 0.25);
-  background: rgba(248, 227, 160, 0.38);
-  box-shadow: none;
-  color: rgba(58, 47, 29, 0.65);
-  font-family: var(--font-serif);
-  font-size: 20px;
-  font-style: italic;
-}
-
-.today-notes .postit--blank::after {
-  display: none;
 }
 
 /* Hoy, pase fino ---------------------------------------------------------- */
@@ -5659,108 +5546,9 @@
   font-size: 17px;
 }
 
-/* Pósit cuadrado: el texto arriba, el pie abajo. */
-.today-notes .postit blockquote {
-  flex: 1;
-  min-height: 0;
-}
-
-.today-notes .postit figcaption {
-  flex: none;
-}
-
-.today-notes .postit--blank {
-  min-height: 0;
-  flex-direction: column;
-}
-
-/* En el marco (1280 × 800) la columna es estrecha: pósit más pequeño. */
-@media (max-width: 1440px) {
-  .today-notes {
-    right: 16px;
-    bottom: 76px;
-    width: 172px;
-    height: 164px;
-  }
-
-  .today-shopping__list li {
-    padding-right: 190px;
-  }
-
-  .today-notes .postit {
-    padding: 20px 12px 8px;
-  }
-
-  .today-notes .postit blockquote {
-    font-size: 19px;
-  }
-
-  .today-notes .postit__label {
-    display: none;
-  }
-}
-
-/* Corcho de notas ----------------------------------------------------------- */
-/* Los pósits se mueven con transform y se guardan al soltar: el corcho no
-   re-renderiza mientras se arrastra. */
-
-.note-board {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 100;
-  display: flex;
-  flex-direction: column;
-  background: var(--bg);
-  color: var(--text);
-}
-
-.note-board__head {
-  display: flex;
-  align-items: center;
-  padding: 14px 20px;
-  border-bottom: 1px solid var(--line);
-}
-
-.note-board__head > * + * {
-  margin-left: 14px;
-}
-
-.note-board__title h2 {
-  margin: 0;
-  font-family: var(--font-serif);
-  font-size: 28px;
-  font-weight: 500;
-}
-
-.note-board__hint {
-  flex: 1;
-  margin-top: 0;
-  margin-bottom: 0;
-  color: var(--muted);
-  font-size: 14px;
-  text-align: right;
-}
-
-.note-board__write {
-  min-height: 48px;
-  padding: 0 20px;
-  border: 0;
-  border-radius: 999px;
-  background: var(--ink);
-  color: var(--paper);
-  font: inherit;
-  font-size: 15px;
-  font-weight: 700;
-}
-
-.app.is-night .note-board__write,
-:root[data-theme="dark"] .note-board__write {
-  background: var(--text);
-  color: var(--bg);
-}
+/* Pósits en Hoy ------------------------------------------------------------ */
+/* Se mueven con transform y se guardan al soltar: nada re-renderiza mientras
+   se arrastran. */
 
 .board-new {
   padding: 12px 20px 4px;
@@ -5791,39 +5579,6 @@
 
 .board-new__row > * {
   margin-right: 12px;
-}
-
-.note-board__cork {
-  position: relative;
-  flex: 1;
-  margin: 14px 20px 20px;
-  overflow: hidden;
-  border-radius: 18px;
-  background-color: #c79d6b;
-  background-image:
-    radial-gradient(rgba(90, 55, 20, 0.22) 1px, transparent 1.5px),
-    radial-gradient(rgba(255, 235, 200, 0.18) 1px, transparent 1.5px);
-  background-position: 0 0, 7px 9px;
-  background-size: 14px 14px, 18px 18px;
-  box-shadow: inset 0 0 0 6px rgba(120, 78, 36, 0.35), inset 0 6px 24px rgba(60, 35, 10, 0.35);
-  touch-action: none;
-}
-
-.app.is-night .note-board__cork {
-  background-color: #6f5538;
-}
-
-.note-board__empty {
-  position: absolute;
-  top: 45%;
-  right: 0;
-  left: 0;
-  margin: 0;
-  color: rgba(255, 248, 235, 0.85);
-  font-family: var(--font-serif);
-  font-size: 26px;
-  font-style: italic;
-  text-align: center;
 }
 
 .board-note {
@@ -5950,7 +5705,7 @@
   height: 12px;
   margin-top: -6px;
   border-radius: 50%;
-  background: #c79d6b;
+  background: var(--bg);
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
@@ -6764,85 +6519,7 @@ button:not(:disabled):active {
   left: 40px;
 }
 
-/* Corcho con personalidad --------------------------------------------------- */
-
-.note-board {
-  background:
-    radial-gradient(circle at 15% 0%, rgba(111, 208, 76, 0.16), transparent 40%),
-    var(--bg);
-  animation: board-in 0.35s ease-out;
-}
-
-.note-board__head {
-  padding-top: 6px;
-  padding-bottom: 6px;
-  border-bottom: 0;
-}
-
-.note-board__head .yoshi {
-  align-self: flex-end;
-  margin: 0 0 -12px;
-}
-
-.note-board__head .yoshi__bubble {
-  bottom: auto;
-  top: 30%;
-  left: 100%;
-  margin-left: 8px;
-  transform: none;
-}
-
-.note-board__head .yoshi__bubble::after {
-  top: 50%;
-  left: -12px;
-  margin: -6px 0 0;
-  border-color: transparent;
-  border-right-color: #3f9a2b;
-}
-
-.note-board__title h2 {
-  font-size: 32px;
-  font-weight: 600;
-}
-
-.note-board__write {
-  position: relative;
-  min-height: 52px;
-  padding: 0 24px;
-  border-radius: 4px 4px 16px 4px;
-  background: #f8e3a0;
-  box-shadow: 0 8px 14px -8px rgba(60, 40, 10, 0.55);
-  color: #3a2f1d;
-  font-family: var(--font-serif);
-  font-size: 19px;
-  font-style: italic;
-  font-weight: 600;
-  transform: rotate(-2deg);
-}
-
-.app.is-night .note-board__write {
-  background: #f8e3a0;
-  color: #3a2f1d;
-}
-
-.note-board__cork {
-  margin: 10px 20px 20px;
-  border: 14px solid #9a6534;
-  border-radius: 20px;
-  box-shadow:
-    inset 0 0 0 2px rgba(60, 35, 10, 0.35),
-    inset 0 8px 26px rgba(60, 35, 10, 0.4),
-    0 18px 36px -18px rgba(0, 0, 0, 0.55),
-    0 0 0 2px #7a4d22;
-}
-
-.note-board__empty::before {
-  content: "📌";
-  display: block;
-  margin-bottom: 8px;
-  font-size: 42px;
-  font-style: normal;
-}
+/* Pósits: entrada, chinchetas y barra ---------------------------------------- */
 
 .board-note {
   animation: note-in 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) backwards;
@@ -6940,4 +6617,60 @@ button:not(:disabled):active {
   85% { transform: rotate(-8deg); }
   90% { transform: rotate(7deg); }
   95% { transform: rotate(-4deg); }
+}
+
+/* Capa de pósits sobre Hoy: ocupa toda la vista, pero solo los pósits y su
+   barra reciben el dedo; el panel de debajo sigue funcionando. */
+.home-view {
+  position: relative;
+}
+
+.home-notes {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 20;
+  pointer-events: none;
+}
+
+.home-notes .board-note,
+.home-notes .board-tools {
+  pointer-events: auto;
+}
+
+.home-notes .board-note {
+  box-shadow: 0 12px 22px -12px rgba(40, 25, 5, 0.55);
+}
+
+.home-notes .board-note.is-selected {
+  outline-color: var(--accent);
+}
+
+.home-notes .board-tools {
+  right: auto;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  flex-wrap: nowrap;
+  animation: none;
+}
+
+.today-link--note {
+  margin-right: 10px;
+  margin-left: auto;
+}
+
+.today-link--note svg {
+  margin-right: 4px;
+}
+
+.note-composer {
+  width: 720px;
+}
+
+.note-composer .board-new {
+  padding: 16px 0 0;
 }

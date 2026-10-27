@@ -120,9 +120,9 @@ Rutas principales: `GET /api/cleaning?week=YYYY-MM-DD`, `PATCH /api/cleaning/che
 
 Los puntos se calculan en el cliente (`src/lib/points.js`) y se reinician el lunes: 10 por tarea de limpieza hecha, 5 por cada tarea de la lista con dueño marcada esta semana, +20 a quien termina todo lo suyo y +10 a cada uno si la casa completa la semana. Los niveles van de «Huevo» a «Leyenda de casa». La racha personal sale de `personStreaks` del Worker más la semana en curso si ya está completa. El **resumen semanal** (`WeeklySummary.jsx`) se abre solo el domingo desde las 20:00, una vez por semana (`localStorage` `bbds.summary.seen`), y siempre desde el trofeo de Hoy. Es una hoja `ink-sheet` como Energía o Calendarios: Yoshi (con el trofeo si hay ganador) en la cabecera, una columna por persona con puntos, nivel, limpieza, tareas y racha, un título para cada uno («Todo hecho», «En racha», «Modo sofá»…), la casa y la semana que viene.
 
-## Notas en el corcho
+## Notas en Hoy
 
-Tocar el pósit de Hoy abre el corcho a pantalla completa (`NoteBoard.jsx`): los pósits se arrastran, se estiran desde la esquina y, al tocarlos, cambian de color, forma (pósit, redonda, nube, rayada, etiqueta), tamaño y giro. Durante el arrastre solo se toca el `transform` del elemento; la posición se guarda al soltar con `PATCH /api/notes/:id` (migración `0007_note_layout.sql`). El texto se ajusta al tamaño del pósit.
+Las notas viven sueltas sobre la pantalla de Hoy, como pósits en la nevera (`HomeNotes.jsx`). Se arrastran a cualquier sitio, se estiran desde la esquina y, al tocarlas, sale una barra para cambiar el color, la forma (pósit, redonda, nube, rayada, etiqueta), el tamaño y el giro, o quitarlas con «Visto». Solo los pósits capturan el dedo: el panel de debajo sigue funcionando. Durante el arrastre solo se toca el `transform` del elemento; la posición (fracción de la vista) se guarda al soltar con `PATCH /api/notes/:id` (migración `0007_note_layout.sql`). El botón **Nota** de la tarjeta de Compra abre la hoja para escribir una nueva. El texto se ajusta al tamaño del pósit.
 
 ## Yoshi
 
@@ -131,11 +131,11 @@ La mascota vive en la barra lateral (`Yoshi.jsx`). Son 16 sprites WebP de 192 px
 - **Estado**: duerme de noche y en modo noche, paraguas si llueve, bufanda con 10 °C o menos, abanicos con 31 °C o más y manzanas a la hora de comer (13–15 h) y cenar (20–22 h). Disfraz en Halloween, Navidad y cumpleaños.
 - **Vida propia**: respira, parpadea cada pocos segundos y cada 12–25 s hace algo solo: un saltito, darse la vuelta, bostezar o decir algo. Dormido, ronca.
 - **Toques**: uno, salta y habla; 3 seguidos, se marea; 5, se enfada; 7, se va de paseo. Mantener pulsado le da mimos (corazones). Dormido, se despierta un momento y protesta.
-- **Sabe lo que pasa en casa** (`src/lib/yoshiTalk.js`): al tocarlo o cuando habla solo, comenta la limpieza pendiente de hoy («¡Ánimo, Manu! Hoy te toca baño principal.»), el próximo evento de las 3 h siguientes («En 40 min: clase de oboe, Paco.»), lo que falta en la compra y los cumpleaños («¡Mañana es el cumple de Paco! 🎂» / «¡Feliz cumple, Paco!»). La primera vez que se le toca por la mañana da los **buenos días**, y se alegra con cada **nota nueva** del corcho (aviso `bbds:yoshi` en `window`).
+- **Sabe lo que pasa en casa** (`src/lib/yoshiTalk.js`): al tocarlo o cuando habla solo, comenta la limpieza pendiente de hoy («¡Ánimo, Manu! Hoy te toca baño principal.»), el próximo evento de las 3 h siguientes («En 40 min: clase de oboe, Paco.»), lo que falta en la compra y los cumpleaños («¡Mañana es el cumple de Paco! 🎂» / «¡Feliz cumple, Paco!»). La primera vez que se le toca por la mañana da los **buenos días**, y se alegra con cada **nota nueva** (aviso `bbds:yoshi` en `window`).
 - **Manzanas** (tipo Tamagotchi): cada tarea hecha (limpieza o lista de tareas) es una manzana que se come al momento; el contador del día sale bajo Yoshi y se reinicia a medianoche (`localStorage` `bbds.yoshi.apples`). Sin ninguna pasado el mediodía tiene **hambre** y lo dice; con 5 o más, está lleno y contento. La primera carga de datos no cuenta como tarea hecha.
 - **Saluda** al volver del salvapantallas o de un paseo.
 - **Paseos**: de día, cada 25–45 min sale de la barra y cruza la pantalla corriendo por abajo (`YoshiStroll`); mientras, en la barra quedan unas huellas 🐾 y «De paseo…».
-- También aparece en el corcho y, con el trofeo, en el resumen semanal.
+- También aparece, con el trofeo, en el resumen semanal.
 
 Es fan art de uso privado: Yoshi es un personaje de Nintendo; no publiques los sprites en un repositorio público.
 
@@ -296,7 +296,7 @@ X-Sensor-Token: dev-sensor-token
 | `PATCH` | `/api/cleaning/checks` | `{ weekKey, taskId, done }`. |
 | `POST` | `/api/cleaning/reset` | `{ weekKey }`; desmarca la semana. |
 | `PUT` | `/api/cleaning/days` | `{ days: [0..6] }`; qué días se limpia. Se guarda en `app_meta`. |
-| `GET` | `/api/notes` | Notas de nevera, las 30 más recientes, con su sitio en el corcho (`x`, `y` de 0 a 1; `w`, `h` en px; `rot` en grados; `shape`). |
+| `GET` | `/api/notes` | Notas de nevera, las 30 más recientes, con su sitio en Hoy (`x`, `y` de 0 a 1; `w`, `h` en px; `rot` en grados; `shape`). |
 | `POST` | `/api/notes` | `{ text, personId?, color?, shape?, x?, y?, rot? }`; texto de hasta 160 caracteres. |
 | `PATCH` | `/api/notes/:id` | Mueve o cambia un pósit: `{ x?, y?, w? (120–520), h? (100–440), rot? (−12–12), shape? (square, round, cloud, lined, tag), color? }`. |
 | `DELETE` | `/api/notes/:id` | Quita una nota («Visto»). |

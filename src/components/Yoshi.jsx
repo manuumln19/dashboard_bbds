@@ -44,7 +44,7 @@ const COSTUMES = { spooky: "halloween", halloween: "halloween", navidad: "navida
 const RAIN_CODES = new Set([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82, 95, 96, 99]);
 
 const TAP_LINES = {
-  idle: ["¡Yoshi!", "¡Mlem!", "¿Jugamos?", "¡Hop, hop!", "¡Vamos, equipo!", "¿Has visto el corcho?", "¡Hola, hola!"],
+  idle: ["¡Yoshi!", "¡Mlem!", "¿Jugamos?", "¡Hop, hop!", "¡Vamos, equipo!", "¿Has visto las notas?", "¡Hola, hola!"],
   hungry: ["¿Qué hay de comer?", "Huele a comida…", "¿Hay manzanas?", "Me como lo que sobre."],
   rain: ["¡Coge paraguas!", "Hoy no salgo sin él.", "Plic, plic, plic…"],
   cold: ["Brrr… ¡qué frío!", "Chaqueta, ¿eh?", "Me quedo en la manta."],
@@ -215,8 +215,8 @@ export function Yoshi({
     lastCheer.current = cheer;
   }, [cheer, main]);
 
-  // Notas nuevas en el corcho: se alegran todos los Yoshis a la vista
-  // (con el corcho abierto, el de la barra queda tapado).
+  // Notas nuevas: se alegran todos los Yoshis a la vista (el del resumen
+  // incluido, por si está abierto).
   useEffect(() => {
     if (!lively) return undefined;
     return listenYoshi((type) => {
