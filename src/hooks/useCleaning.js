@@ -89,6 +89,7 @@ export function useCleaning(now) {
   );
   // En demo no hay historial: una racha y un mes inventados para ver cómo queda.
   const [streak, setStreak] = useState(DEMO_MODE ? 3 : 0);
+  const [personStreaks, setPersonStreaks] = useState(DEMO_MODE ? { manu: 4, paco: 2 } : {});
   const [lastMonth, setLastMonth] = useState(() =>
     DEMO_MODE
       ? { month: "demo", tally: [{ personId: "paco", done: 31 }, { personId: "manu", done: 27 }] }
@@ -111,6 +112,9 @@ export function useCleaning(now) {
     );
     if (payload.weekKey) setWeek(payload.weekKey);
     if (Number.isFinite(payload.streak)) setStreak(payload.streak);
+    if (payload.personStreaks && typeof payload.personStreaks === "object") {
+      setPersonStreaks(payload.personStreaks);
+    }
     if (Array.isArray(payload.days)) setDaysState(validDays(payload.days));
     if (payload.lastMonth) setLastMonth(payload.lastMonth);
     const at =
@@ -482,6 +486,8 @@ export function useCleaning(now) {
     totalCount: activeTasks.length,
     // Semanas completas seguidas, contando esta si ya está terminada.
     streak: streak + (weekComplete ? 1 : 0),
+    // Semanas anteriores seguidas de cada persona; `lib/points` suma esta.
+    personStreaks,
     weekComplete,
     weekKey: week,
     toggleTask,

@@ -111,6 +111,15 @@ export function loadDemoNotes() {
       color: "pink",
       createdAt: new Date(Date.now() - 2 * hour).toISOString(),
     },
+    {
+      id: "note-demo-2",
+      text: "Llamar al fontanero antes del jueves.",
+      personId: "paco",
+      color: "mint",
+      shape: "round",
+      rot: 3,
+      createdAt: new Date(Date.now() - 26 * hour).toISOString(),
+    },
   ];
 }
 

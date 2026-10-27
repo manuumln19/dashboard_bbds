@@ -6,7 +6,7 @@ Pensado para **1280 × 800** en horizontal. En pantallas más estrechas el rail 
 
 ## Qué incluye
 
-- **Hoy**: responde en orden a qué hora y qué tiempo hace (reloj, tiempo actual y próximas horas), qué es **lo siguiente** (una sola tarjeta de color que elige lo más relevante: evento en las próximas 3 h, lluvia, limpieza pendiente de hoy, tramo de luz barata o el próximo evento) y qué pasa hoy en casa: **Hoy y mañana** junta en una lista por horas los eventos, las tareas con fecha (las atrasadas suben a hoy) y la limpieza del día, que se marcan desde ahí. A la derecha, la compra con un campo para añadir y el precio de la luz en una línea; la mejor franja de cada aparato sigue en Energía. La lógica vive en `src/lib/today.js`. Inicio no muestra clima interior.
+- **Hoy**: responde en orden a qué hora y qué tiempo hace (reloj, tiempo actual y próximas horas), qué es **lo siguiente** (una sola tarjeta de color que elige lo más relevante: evento en las próximas 3 h, lluvia, limpieza pendiente de hoy, tramo de luz barata o el próximo evento) y qué pasa hoy en casa: **Hoy y mañana** junta en una lista por horas los eventos, las tareas con fecha (las atrasadas suben a hoy) y la limpieza del día, que se marcan desde ahí. A la derecha, el **equipo** (huevo-avatar de cada persona con sus puntos de la semana, nivel y racha; el trofeo abre el resumen semanal), la compra con un campo para añadir y el precio de la luz en una línea; la mejor franja de cada aparato sigue en Energía. La lógica vive en `src/lib/today.js`. Inicio no muestra clima interior.
 - **Agenda**: varios calendarios ICS de solo lectura con vistas **Hoy**, **3 días** y **Semana**. Cada feed tiene nombre, persona y color; se añaden, pausan o borran desde **Calendarios**, sin tocar código. Los eventos fuera de la rejilla 06:00–23:00 aparecen como fichas con hora en la fila de todo el día. La ficha de un evento incluye un QR con su ubicación.
 - **Listas**: compra y tareas con contadores grandes, progreso y entrada rápida siempre visible. Las tareas admiten fecha, hora y persona, muestran su estado con etiquetas y se ordenan por vencimiento; se pueden programar en línea sin salir de la lista. El texto es el flujo principal; la libreta manuscrita con OCR local queda como acción secundaria.
 - **Limpieza**: cuadrante semanal de Manu y Paco con dos tareas por día, zona y persona asignadas. El cuadrante y las personas viven en D1 y se editan desde la propia pantalla; cada check se guarda por semana y **Reiniciar semana** vuelve a dejar el tablero limpio.
@@ -115,6 +115,29 @@ El botón **Editar** abre el editor de la pantalla: permite cambiar título, zon
 En demo, las personas, las tareas y los checks se guardan en `localStorage` (`bbds.demo.cleaning.v1`). Los ids de las tareas deben permanecer estables: son la clave con la que se conservan los checks.
 
 Rutas principales: `GET /api/cleaning?week=YYYY-MM-DD`, `PATCH /api/cleaning/checks`, `POST /api/cleaning/reset` y el CRUD de `/api/cleaning/tasks`.
+
+### Puntos, rachas y resumen semanal
+
+Los puntos se calculan en el cliente (`src/lib/points.js`) y se reinician el lunes: 10 por tarea de limpieza hecha, 5 por cada tarea de la lista con dueño marcada esta semana, +20 a quien termina todo lo suyo y +10 a cada uno si la casa completa la semana. Los niveles van de «Huevo» a «Leyenda de casa». La racha personal sale de `personStreaks` del Worker más la semana en curso si ya está completa. El **resumen semanal** (`WeeklySummary.jsx`) se abre solo el domingo desde las 20:00, una vez por semana (`localStorage` `bbds.summary.seen`), y siempre desde el trofeo de Hoy: cabecera con confeti, podio con el ganador destacado, puntos que cuentan hacia arriba, barra de nivel, un título para cada uno («Todo hecho», «En racha», «Modo sofá»…) y la semana que viene.
+
+## Notas en el corcho
+
+Tocar el pósit de Hoy abre el corcho a pantalla completa (`NoteBoard.jsx`): los pósits se arrastran, se estiran desde la esquina y, al tocarlos, cambian de color, forma (pósit, redonda, nube, rayada, etiqueta), tamaño y giro. Durante el arrastre solo se toca el `transform` del elemento; la posición se guarda al soltar con `PATCH /api/notes/:id` (migración `0007_note_layout.sql`). El texto se ajusta al tamaño del pósit.
+
+## Yoshi
+
+La mascota vive en la barra lateral (`Yoshi.jsx`). Son 16 sprites WebP de 192 px con alfa en `src/assets/yoshi/` (unos 130 KB en total), al estilo de *Yoshi's Island* con borde de pegatina, todos mirando a la derecha y con los pies a la misma altura; las animaciones son solo CSS (`transform`/`opacity`). Salen de una hoja 4×4 con fondo magenta, en este orden: idle, blink, happy, run / sleep, rain, cold, hot / hungry, cheer, trophy, halloween / navidad, cumple, stretch, dizzy. Para regenerarlos: `node scripts/yoshi-sprites.cjs <hoja> src/assets/yoshi sharp` (`sharp` llega como dependencia transitiva); el script quita el magenta, los números y la rejilla, y limpia el rosa de los bordes.
+
+- **Estado**: duerme de noche y en modo noche, paraguas si llueve, bufanda con 10 °C o menos, abanicos con 31 °C o más y manzanas a la hora de comer (13–15 h) y cenar (20–22 h). Disfraz en Halloween, Navidad y cumpleaños.
+- **Vida propia**: respira, parpadea cada pocos segundos y cada 12–25 s hace algo solo: un saltito, darse la vuelta, bostezar o decir algo. Dormido, ronca.
+- **Toques**: uno, salta y habla; 3 seguidos, se marea; 5, se enfada; 7, se va de paseo. Mantener pulsado le da mimos (corazones). Dormido, se despierta un momento y protesta.
+- **Sabe lo que pasa en casa** (`src/lib/yoshiTalk.js`): al tocarlo o cuando habla solo, comenta la limpieza pendiente de hoy («¡Ánimo, Manu! Hoy te toca baño principal.»), el próximo evento de las 3 h siguientes («En 40 min: clase de oboe, Paco.»), lo que falta en la compra y los cumpleaños («¡Mañana es el cumple de Paco! 🎂» / «¡Feliz cumple, Paco!»). La primera vez que se le toca por la mañana da los **buenos días**, y se alegra con cada **nota nueva** del corcho (aviso `bbds:yoshi` en `window`).
+- **Manzanas** (tipo Tamagotchi): cada tarea hecha (limpieza o lista de tareas) es una manzana que se come al momento; el contador del día sale bajo Yoshi y se reinicia a medianoche (`localStorage` `bbds.yoshi.apples`). Sin ninguna pasado el mediodía tiene **hambre** y lo dice; con 5 o más, está lleno y contento. La primera carga de datos no cuenta como tarea hecha.
+- **Saluda** al volver del salvapantallas o de un paseo.
+- **Paseos**: de día, cada 25–45 min sale de la barra y cruza la pantalla corriendo por abajo (`YoshiStroll`); mientras, en la barra quedan unas huellas 🐾 y «De paseo…».
+- También aparece en el corcho y, con el trofeo, en el resumen semanal.
+
+Es fan art de uso privado: Yoshi es un personaje de Nintendo; no publiques los sprites en un repositorio público.
 
 ## Tiempo y fotos
 
@@ -269,12 +292,13 @@ X-Sensor-Token: dev-sensor-token
 | `DELETE` | `/api/lists?list=shopping&done=1` | Limpia los hechos de una lista. |
 | `GET` | `/api/people` | Manu y Paco con tono e iniciales. |
 | `PATCH` | `/api/people/:id` | `{ name?, tone?, initials?, birthday? }`. `birthday` es `MM-DD` o `null`. |
-| `GET` | `/api/cleaning?week=YYYY-MM-DD` | Cuadrante de esa semana, sus checks, `days` (días de limpieza, lunes = 0), `streak` (semanas completas seguidas antes de esa, contando solo esos días) y `lastMonth` (tareas hechas por persona el mes anterior). |
+| `GET` | `/api/cleaning?week=YYYY-MM-DD` | Cuadrante de esa semana, sus checks, `days` (días de limpieza, lunes = 0), `streak` (semanas completas seguidas antes de esa, contando solo esos días), `lastMonth` (tareas hechas por persona el mes anterior) y `personStreaks` (`{ personId: semanas }` seguidas en las que cada uno hizo todo lo suyo). |
 | `PATCH` | `/api/cleaning/checks` | `{ weekKey, taskId, done }`. |
 | `POST` | `/api/cleaning/reset` | `{ weekKey }`; desmarca la semana. |
 | `PUT` | `/api/cleaning/days` | `{ days: [0..6] }`; qué días se limpia. Se guarda en `app_meta`. |
-| `GET` | `/api/notes` | Notas de nevera, las 30 más recientes. |
-| `POST` | `/api/notes` | `{ text, personId?, color? }`; texto de hasta 160 caracteres. |
+| `GET` | `/api/notes` | Notas de nevera, las 30 más recientes, con su sitio en el corcho (`x`, `y` de 0 a 1; `w`, `h` en px; `rot` en grados; `shape`). |
+| `POST` | `/api/notes` | `{ text, personId?, color?, shape?, x?, y?, rot? }`; texto de hasta 160 caracteres. |
+| `PATCH` | `/api/notes/:id` | Mueve o cambia un pósit: `{ x?, y?, w? (120–520), h? (100–440), rot? (−12–12), shape? (square, round, cloud, lined, tag), color? }`. |
 | `DELETE` | `/api/notes/:id` | Quita una nota («Visto»). |
 | `POST` | `/api/cleaning/tasks` | `{ day, personId, area, title }`; crea una tarea. |
 | `PATCH` | `/api/cleaning/tasks/:id` | Edita día, persona, zona o título. |

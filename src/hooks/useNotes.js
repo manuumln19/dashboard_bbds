@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { DEMO_MODE } from "../config";
 import { apiRequest } from "../lib/api";
 import { loadDemoNotes, saveDemoNotes } from "../lib/localStore";
+import { tellYoshi } from "../lib/yoshiTalk";
 
 const REFRESH_MS = 60 * 1000;
 
@@ -43,7 +44,7 @@ export function useNotes() {
     if (DEMO_MODE) saveDemoNotes(notes);
   }, [notes]);
 
-  async function addNote({ text, personId, color }) {
+  async function addNote({ text, personId, color, shape, x, y, rot }) {
     const clean = String(text || "").replace(/\s+/g, " ").trim().slice(0, 160);
     if (!clean) return;
     const draft = {
@@ -51,9 +52,16 @@ export function useNotes() {
       text: clean,
       personId: personId || null,
       color: color || "amber",
+      shape: shape || "square",
+      x: Number.isFinite(x) ? x : null,
+      y: Number.isFinite(y) ? y : null,
+      w: null,
+      h: null,
+      rot: Number.isFinite(rot) ? rot : 0,
       createdAt: new Date().toISOString(),
     };
     setNotes((current) => [draft, ...current]);
+    tellYoshi("note");
     if (DEMO_MODE) return;
     pending.current += 1;
     try {
@@ -84,5 +92,26 @@ export function useNotes() {
     }
   }
 
-  return { notes, error, addNote, removeNote };
+  // El corcho llama aquí al soltar un pósit: sitio, tamaño, giro, forma o
+  // color. Se aplica ya y, si falla, vuelve a donde estaba.
+  async function updateNote(id, patch) {
+    const previous = notes;
+    setNotes((current) => current.map((note) => (note.id === id ? { ...note, ...patch } : note)));
+    if (DEMO_MODE) return;
+    pending.current += 1;
+    try {
+      const data = await apiRequest(`/api/notes/${encodeURIComponent(id)}`, {
+        method: "PATCH",
+        body: patch,
+      });
+      pending.current -= 1;
+      apply(data.notes);
+    } catch (caught) {
+      pending.current -= 1;
+      setNotes(previous);
+      setError(caught instanceof Error ? caught.message : "No se pudo mover la nota");
+    }
+  }
+
+  return { notes, error, addNote, removeNote, updateNote };
 }

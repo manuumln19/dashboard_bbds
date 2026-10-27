@@ -38,6 +38,7 @@ export function Rail({
   onOpenGallery,
   status,
   seasonId,
+  mascot,
 }) {
   const StatusIcon =
     status.tone === "bad"
@@ -65,7 +66,7 @@ export function Rail({
         ))}
       </nav>
 
-      <SeasonBadge seasonId={seasonId} />
+      {mascot ? <div className="rail__mascot">{mascot}</div> : <SeasonBadge seasonId={seasonId} />}
 
       <div className="rail__bottom">
         <time className="rail__clock" dateTime={now.toISOString()}>

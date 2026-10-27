@@ -46,6 +46,8 @@ import { SeasonContext, SeasonDecor } from "./components/SeasonDecor";
 import { HomeView } from "./components/HomeView";
 import { Screensaver } from "./components/Screensaver";
 import { StatusBanner } from "./components/StatusBanner";
+import { Yoshi, YoshiStroll, yoshiMood } from "./components/Yoshi";
+import { doneCount, houseLines } from "./lib/yoshiTalk";
 
 // Las vistas que no se usan al arrancar se descargan aparte y se precargan
 // cuando el arranque ya ha terminado (ver PRELOAD_DELAY_MS).
@@ -190,10 +192,26 @@ export default function App() {
   const screensaverOpen = galleryOpen || idle;
   const photos = usePhotos(screensaverOpen);
 
+  // Yoshi: saluda al volver y, de día, sale de paseo cada 25–45 minutos.
+  const [strolling, setStrolling] = useState(false);
+  const [yoshiGreet, setYoshiGreet] = useState(0);
+  const startStroll = useCallback(() => setStrolling(true), []);
+  const endStroll = useCallback(() => {
+    setStrolling(false);
+    setYoshiGreet((count) => count + 1);
+  }, []);
+
+  useEffect(() => {
+    if (isNight || strolling || screensaverOpen) return undefined;
+    const timer = window.setTimeout(startStroll, (25 + Math.random() * 20) * 60000);
+    return () => window.clearTimeout(timer);
+  }, [isNight, strolling, screensaverOpen, startStroll]);
+
   const closeScreensaver = useCallback(() => {
     setGalleryOpen(false);
     resetIdle();
     goHome();
+    setYoshiGreet((count) => count + 1);
   }, [resetIdle, goHome]);
 
   const openGallery = useCallback(() => {
@@ -326,7 +344,21 @@ export default function App() {
         onOpenGallery={openGallery}
         status={status}
         seasonId={season.id}
+        mascot={
+          <Yoshi
+            mood={yoshiMood({ now, weather: weather.weather, isNight })}
+            seasonId={season.id}
+            cheer={cleaning.loading || lists.loading ? null : doneCount({ cleaning, lists })}
+            house={houseLines({ now, cleaning, events: calendar.events, lists })}
+            main
+            greet={yoshiGreet}
+            away={strolling}
+            onWander={startStroll}
+            size={96}
+          />
+        }
       />
+      {strolling ? <YoshiStroll onDone={endStroll} /> : null}
 
       <StatusBanner
         online={effectiveOnline}
@@ -355,6 +387,7 @@ export default function App() {
               onOpenLists={() => setView("lists")}
               onOpenEnergy={() => setView("energy")}
               onOpenWeather={() => setView("weather")}
+              onOpenCleaning={() => setView("cleaning")}
             />
           ) : null}
 

@@ -1073,6 +1073,46 @@ async function cleaningStreak(env, weekKey, days, activeCount) {
   return streak;
 }
 
+// Racha de cada persona: semanas seguidas, antes de `weekKey`, en las que
+// hizo todas sus tareas de los días de limpieza. Como la racha de la casa, la
+// semana en curso la suma el cliente.
+async function cleaningPersonStreaks(env, weekKey, days, tasks) {
+  const owed = new Map();
+  for (const task of tasks) {
+    if (days.includes(task.day)) owed.set(task.personId, (owed.get(task.personId) || 0) + 1);
+  }
+  if (!owed.size) return {};
+  const { results } = await env.DB.prepare(
+    `SELECT c.week_key, t.person_id AS personId, COUNT(*) AS n
+       FROM cleaning_checks c
+       JOIN cleaning_tasks t ON t.id = c.task_id AND t.active = 1
+      WHERE c.done = 1 AND c.week_key < ?
+        AND t.day_of_week IN (${days.map(() => "?").join(",")})
+      GROUP BY c.week_key, t.person_id
+      ORDER BY c.week_key DESC
+      LIMIT 416`
+  )
+    .bind(weekKey, ...days)
+    .all();
+  const complete = new Set(
+    (results || [])
+      .filter((row) => row.n >= (owed.get(row.personId) || Infinity))
+      .map((row) => `${row.week_key}|${row.personId}`)
+  );
+  const streaks = {};
+  for (const personId of owed.keys()) {
+    let streak = 0;
+    const cursor = new Date(`${weekKey}T12:00:00Z`);
+    for (;;) {
+      cursor.setUTCDate(cursor.getUTCDate() - 7);
+      if (!complete.has(`${cursor.toISOString().slice(0, 10)}|${personId}`)) break;
+      streak += 1;
+    }
+    streaks[personId] = streak;
+  }
+  return streaks;
+}
+
 // Tareas hechas por persona en el mes anterior (por las semanas que empiezan
 // en ese mes). Hoy lo anuncia la primera semana del mes.
 async function cleaningLastMonth(env) {
@@ -1141,6 +1181,12 @@ async function handleMenu(request, env) {
 const NOTE_COLORS = new Set(["pink", "mint", "amber", "lilac"]);
 const NOTES_KEEP = 30;
 
+const NOTE_SHAPES = new Set(["square", "round", "cloud", "lined", "tag"]);
+
+function numberOrNull(value) {
+  return value === null || value === undefined || value === "" ? null : Number(value);
+}
+
 function rowToNote(row) {
   return {
     id: row.id,
@@ -1148,7 +1194,39 @@ function rowToNote(row) {
     personId: row.person_id || null,
     color: NOTE_COLORS.has(row.color) ? row.color : "amber",
     createdAt: row.created_at,
+    x: numberOrNull(row.x),
+    y: numberOrNull(row.y),
+    w: numberOrNull(row.w),
+    h: numberOrNull(row.h),
+    rot: Number(row.rot) || 0,
+    shape: NOTE_SHAPES.has(row.shape) ? row.shape : "square",
   };
+}
+
+function clampNumber(value, min, max) {
+  if (value === null || value === undefined || value === "") return null;
+  const number = Number(value);
+  if (!Number.isFinite(number)) return null;
+  return Math.min(max, Math.max(min, number));
+}
+
+// Lo que el corcho puede cambiar de un pósit: sitio, tamaño, giro, forma y
+// color. Lo que no venga o no sea válido se queda como estaba.
+function notePatch(body) {
+  const patch = {};
+  const x = clampNumber(body.x, 0, 1);
+  const y = clampNumber(body.y, 0, 1);
+  const w = clampNumber(body.w, 120, 520);
+  const h = clampNumber(body.h, 100, 440);
+  const rot = clampNumber(body.rot, -12, 12);
+  if (x !== null) patch.x = x;
+  if (y !== null) patch.y = y;
+  if (w !== null) patch.w = Math.round(w);
+  if (h !== null) patch.h = Math.round(h);
+  if (rot !== null) patch.rot = Math.round(rot * 10) / 10;
+  if (NOTE_SHAPES.has(body.shape)) patch.shape = body.shape;
+  if (NOTE_COLORS.has(body.color)) patch.color = body.color;
+  return patch;
 }
 
 async function fetchNotes(env) {
@@ -1172,11 +1250,25 @@ async function handleNotes(request, env, url) {
     const text = normalizeLabel(body.text, "La nota", 160);
     const person = body.personId ? await getPerson(env, body.personId) : null;
     const color = NOTE_COLORS.has(body.color) ? body.color : "amber";
+    const layout = notePatch(body);
     const id = `note-${crypto.randomUUID().slice(0, 8)}`;
     await env.DB.batch([
       env.DB.prepare(
-        "INSERT INTO notes (id, text, person_id, color, created_at) VALUES (?, ?, ?, ?, ?)"
-      ).bind(id, text, person ? person.id : null, color, new Date().toISOString()),
+        `INSERT INTO notes (id, text, person_id, color, created_at, x, y, w, h, rot, shape)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      ).bind(
+        id,
+        text,
+        person ? person.id : null,
+        color,
+        new Date().toISOString(),
+        layout.x === undefined ? null : layout.x,
+        layout.y === undefined ? null : layout.y,
+        layout.w === undefined ? null : layout.w,
+        layout.h === undefined ? null : layout.h,
+        layout.rot || 0,
+        layout.shape || "square"
+      ),
       env.DB.prepare(
         "DELETE FROM notes WHERE id NOT IN (SELECT id FROM notes ORDER BY created_at DESC LIMIT ?)"
       ).bind(NOTES_KEEP),
@@ -1185,6 +1277,19 @@ async function handleNotes(request, env, url) {
   }
 
   const match = url.pathname.match(/^\/api\/notes\/([a-z0-9_-]+)$/);
+  if (match && request.method === "PATCH") {
+    const patch = notePatch(await readJson(request));
+    const columns = Object.keys(patch);
+    if (!columns.length) throw new HttpError(400, "No hay nada que cambiar en la nota");
+    const result = await env.DB.prepare(
+      `UPDATE notes SET ${columns.map((column) => `${column} = ?`).join(", ")} WHERE id = ?`
+    )
+      .bind(...columns.map((column) => patch[column]), match[1])
+      .run();
+    if (result.meta && result.meta.changes === 0) throw new HttpError(404, "Esa nota ya no está");
+    return json({ notes: await fetchNotes(env) });
+  }
+
   if (match && request.method === "DELETE") {
     await env.DB.prepare("DELETE FROM notes WHERE id = ?").bind(match[1]).run();
     return json({ notes: await fetchNotes(env) });
@@ -1240,6 +1345,7 @@ async function handleCleaning(request, env, url) {
         days,
         tasks.filter((task) => days.includes(task.day)).length
       ),
+      personStreaks: await cleaningPersonStreaks(env, weekKey, days, tasks),
       updatedAt: new Date().toISOString(),
     });
   }
