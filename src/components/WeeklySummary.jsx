@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { CalendarDays, Cake, Crown, Flame, ListChecks, SprayCan, X } from "lucide-react";
+import { Cake, Crown, Flame, X } from "lucide-react";
 import { weekRangeLabel } from "../lib/cleaning";
 import { addDays, eventStartDate, eventTimeLabel, relativeDayLabel, startOfWeek } from "../lib/date";
 import { weeklyScores } from "../lib/points";
@@ -9,7 +9,6 @@ import { EggAvatar } from "./EggAvatar";
 import { Yoshi } from "./Yoshi";
 
 const SEEN_KEY = "bbds.summary.seen";
-const CONFETTI = 18;
 
 // El domingo desde las 20:00 el resumen se abre solo, una vez por semana.
 export function summaryDue(now, weekKey) {
@@ -30,8 +29,8 @@ function markSeen(weekKey) {
 }
 
 function headline({ cleaning, mvp, scores }) {
-  if (cleaning.weekComplete && mvp) return `¡Semana redonda! ${mvp.person.name} se lleva la corona.`;
-  if (cleaning.weekComplete) return "¡Semana redonda y empate! Así da gusto.";
+  if (cleaning.weekComplete && mvp) return `Semana redonda. ${mvp.person.name} se lleva la corona.`;
+  if (cleaning.weekComplete) return "Semana redonda y empate. Así da gusto.";
   const left = (cleaning.totalCount || 0) - (cleaning.doneCount || 0);
   if (left > 0 && left <= 2) return `A ${left === 1 ? "una tarea" : "dos tareas"} de la semana perfecta. La próxima cae.`;
   if (mvp) return `${mvp.person.name} tira del carro esta semana.`;
@@ -70,7 +69,7 @@ function CountUp({ value, delay = 0 }) {
     if (!el) return undefined;
     let frame = 0;
     const startAt = performance.now() + delay;
-    const duration = 900;
+    const duration = 700;
     el.textContent = "0";
     function tick(at) {
       const t = Math.min(1, Math.max(0, (at - startAt) / duration));
@@ -83,30 +82,17 @@ function CountUp({ value, delay = 0 }) {
   return <span ref={ref}>{value}</span>;
 }
 
-function LevelBar({ entry }) {
-  const { level, points } = entry;
-  const span = level.next ? level.next - level.min : 1;
-  const progress = level.next ? Math.min(1, (points - level.min) / span) : 1;
-  return (
-    <div className="week-summary__level">
-      <span>{level.label}</span>
-      <span className="week-summary__level-bar">
-        <span style={{ transform: `scaleX(${progress})` }} />
-      </span>
-      <small>{level.next ? `${level.next - points} para subir` : "Nivel máximo"}</small>
-    </div>
-  );
+function progressOf(level, points) {
+  if (!level.next) return 1;
+  return Math.min(1, (points - level.min) / (level.next - level.min));
 }
 
 export function WeeklySummary({ now, cleaning, lists, events, seasonId, onClose }) {
   const { scores, mvp } = weeklyScores({ cleaning, lists, now });
-  // El ganador en medio y más alto, como un podio.
   const ranked = [...scores].sort((a, b) => b.points - a.points);
-  const podium = ranked.length === 2 && mvp ? [ranked[1], ranked[0]] : ranked;
   const coming = nextWeekEvents(events, now);
   const birthday = upcomingBirthday(now, cleaning.people, 8);
   const total = cleaning.totalCount || 0;
-  const houseProgress = total ? cleaning.doneCount / total : 0;
   const host = document.querySelector(".app") || document.body;
 
   useEffect(() => {
@@ -115,117 +101,122 @@ export function WeeklySummary({ now, cleaning, lists, events, seasonId, onClose 
 
   return createPortal(
     <div
-      className="ink-overlay feature-overlay week-summary-overlay"
+      className="ink-overlay feature-overlay"
       onPointerDown={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      <section className="week-summary" role="dialog" aria-modal="true" aria-labelledby="summary-title">
-        <header className="week-summary__hero">
-          <div className="week-summary__confetti" aria-hidden="true">
-            {Array.from({ length: CONFETTI }, (_, index) => (
-              <i key={index} />
-            ))}
-          </div>
-          <div className="week-summary__intro">
-            <span className="week-summary__eyebrow">Resumen · {weekRangeLabel(now)}</span>
+      <section className="ink-sheet card week-summary" role="dialog" aria-modal="true" aria-labelledby="summary-title">
+        <header className="ink-head">
+          <span className="week-summary__mascot">
+            <Yoshi mood="idle" seasonId={seasonId} holding={mvp || cleaning.weekComplete ? "trophy" : null} size={92} />
+          </span>
+          <div>
+            <span className="eyebrow">Resumen · {weekRangeLabel(now)}</span>
             <h2 id="summary-title">Así ha ido la semana</h2>
             <p>{headline({ cleaning, mvp, scores })}</p>
           </div>
-          <Yoshi
-            mood="idle"
-            seasonId={seasonId}
-            holding={mvp || cleaning.weekComplete ? "trophy" : null}
-            line={mvp ? `¡Bravo, ${mvp.person.name}!` : "¡Buena semana!"}
-            size={150}
-          />
-          <button type="button" className="week-summary__close" onClick={onClose} aria-label="Cerrar el resumen">
-            <X size={22} strokeWidth={2.4} aria-hidden="true" />
+          <button type="button" className="ink-close" onClick={onClose} aria-label="Cerrar">
+            <X size={18} strokeWidth={1.9} aria-hidden="true" />
           </button>
         </header>
 
-        <ol className="week-summary__podium">
-          {podium.map((entry, index) => {
-            const isMvp = mvp === entry;
-            return (
-              <li
-                key={entry.person.id}
-                className={`week-summary__player tone-${entry.person.tone}${isMvp ? " is-mvp" : ""}`}
-                style={{ animationDelay: `${120 + index * 120}ms` }}
-              >
-                {isMvp ? <Crown className="week-summary__crown" size={30} strokeWidth={2} aria-hidden="true" /> : null}
-                <span className="week-summary__award">{awardFor(entry, scores)}</span>
-                <EggAvatar person={entry.person} size={isMvp ? 58 : 48} cracked={entry.ownWeek} />
-                <strong className="week-summary__name">{entry.person.name}</strong>
-                <span className="week-summary__points">
-                  <CountUp value={entry.points} delay={300 + index * 150} />
-                  <small>pts</small>
-                </span>
-                <LevelBar entry={entry} />
-                <div className="week-summary__chips">
-                  <span title="Limpieza">
-                    <SprayCan size={15} strokeWidth={2} aria-hidden="true" /> {entry.done}/{entry.owed}
+        <div className="week-summary__body">
+          <section className="week-summary__section week-summary__players">
+            {ranked.map((entry, index) => {
+              const isMvp = mvp === entry;
+              return (
+                <article key={entry.person.id} className={`week-summary__player tone-${entry.person.tone}${isMvp ? " is-mvp" : ""}`}>
+                  <div className="week-summary__who">
+                    <EggAvatar person={entry.person} size={38} cracked={entry.ownWeek} />
+                    <div>
+                      <strong>
+                        {entry.person.name}
+                        {isMvp ? <Crown size={15} strokeWidth={2} aria-label="Va ganando" /> : null}
+                      </strong>
+                      <span>{awardFor(entry, scores)}</span>
+                    </div>
+                  </div>
+                  <p className="week-summary__points">
+                    <CountUp value={entry.points} delay={150 + index * 120} />
+                    <small>pts · {entry.level.label}</small>
+                  </p>
+                  <span className="week-summary__bar" aria-hidden="true">
+                    <span style={{ transform: `scaleX(${progressOf(entry.level, entry.points)})` }} />
                   </span>
-                  <span title="Tareas de la lista">
-                    <ListChecks size={15} strokeWidth={2} aria-hidden="true" /> {entry.listDone}
-                  </span>
-                  <span className={`is-flame${entry.streak ? " is-on" : ""}`} title="Semanas de racha">
-                    <Flame size={15} strokeWidth={2.2} aria-hidden="true" /> {entry.streak}
-                  </span>
-                </div>
-              </li>
-            );
-          })}
-        </ol>
+                  <dl className="week-summary__stats">
+                    <div>
+                      <dt>Limpieza</dt>
+                      <dd>
+                        {entry.done}/{entry.owed}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Lista</dt>
+                      <dd>{entry.listDone}</dd>
+                    </div>
+                    <div>
+                      <dt>Racha</dt>
+                      <dd className={entry.streak ? "is-flame" : ""}>
+                        {entry.streak ? <Flame size={13} strokeWidth={2.1} aria-hidden="true" /> : null}
+                        {entry.streak} sem.
+                      </dd>
+                    </div>
+                  </dl>
+                </article>
+              );
+            })}
+          </section>
 
-        <div className="week-summary__house">
-          <div className="week-summary__house-text">
-            <strong>
-              {cleaning.doneCount}/{total}
-            </strong>{" "}
-            tareas de limpieza en casa
-          </div>
-          <span className="week-summary__house-bar">
-            <span style={{ transform: `scaleX(${houseProgress})` }} />
-          </span>
-          <span className={`week-summary__house-streak${cleaning.streak ? " is-on" : ""}`}>
-            <Flame size={18} strokeWidth={2.2} aria-hidden="true" />
-            {cleaning.streak} {cleaning.streak === 1 ? "semana" : "semanas"}
-          </span>
-        </div>
+          <section className="week-summary__section">
+            <div className="week-summary__head">
+              <h3>En casa</h3>
+              <span className={`week-summary__flag${cleaning.streak ? " is-on" : ""}`}>
+                <Flame size={13} strokeWidth={2.1} aria-hidden="true" />
+                {cleaning.streak} {cleaning.streak === 1 ? "semana seguida" : "semanas seguidas"}
+              </span>
+            </div>
+            <div className="week-summary__house">
+              <span>
+                <strong>
+                  {cleaning.doneCount}/{total}
+                </strong>{" "}
+                tareas de limpieza hechas
+              </span>
+              <span className="week-summary__bar" aria-hidden="true">
+                <span style={{ transform: `scaleX(${total ? cleaning.doneCount / total : 0})` }} />
+              </span>
+            </div>
+          </section>
 
-        <div className="week-summary__next">
-          <h3>
-            <CalendarDays size={18} strokeWidth={2} aria-hidden="true" /> La semana que viene
-          </h3>
-          <div className="week-summary__events">
-            {birthday ? (
-              <span className="week-summary__event is-birthday">
-                <b>
-                  <Cake size={15} strokeWidth={2} aria-hidden="true" />
-                </b>
-                <strong>Cumple de {birthday.person.name}</strong>
-                <small>{birthday.inDays === 1 ? "mañana" : `en ${birthday.inDays} días`}</small>
-              </span>
-            ) : null}
-            {coming.slice(0, birthday ? 4 : 5).map((event) => (
-              <span className="week-summary__event" key={`${event.id || event.summary}-${event.start}`}>
-                <b>{relativeDayLabel(eventStartDate(event), now).slice(0, 3)}</b>
-                <strong>{event.summary}</strong>
-                <small>{eventTimeLabel(event)}</small>
-              </span>
-            ))}
-            {!coming.length && !birthday ? (
+          <section className="week-summary__section">
+            <div className="week-summary__head">
+              <h3>La semana que viene</h3>
+            </div>
+            {coming.length || birthday ? (
+              <ul className="week-summary__events">
+                {birthday ? (
+                  <li className="is-birthday">
+                    <span>
+                      <Cake size={14} strokeWidth={1.9} aria-hidden="true" />
+                    </span>
+                    <strong>Cumple de {birthday.person.name}</strong>
+                    <small>{birthday.inDays === 1 ? "mañana" : `en ${birthday.inDays} días`}</small>
+                  </li>
+                ) : null}
+                {coming.slice(0, birthday ? 4 : 5).map((event) => (
+                  <li key={`${event.id || event.summary}-${event.start}`}>
+                    <span>{relativeDayLabel(eventStartDate(event), now)}</span>
+                    <strong>{event.summary}</strong>
+                    <small>{eventTimeLabel(event)}</small>
+                  </li>
+                ))}
+              </ul>
+            ) : (
               <p className="week-summary__empty">Nada en la agenda. Semana libre, de momento.</p>
-            ) : null}
-          </div>
+            )}
+          </section>
         </div>
-
-        <footer className="week-summary__foot">
-          <button type="button" onClick={onClose}>
-            ¡A por la semana que viene!
-          </button>
-        </footer>
       </section>
     </div>,
     host

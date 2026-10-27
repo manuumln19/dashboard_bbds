@@ -118,7 +118,7 @@ Rutas principales: `GET /api/cleaning?week=YYYY-MM-DD`, `PATCH /api/cleaning/che
 
 ### Puntos, rachas y resumen semanal
 
-Los puntos se calculan en el cliente (`src/lib/points.js`) y se reinician el lunes: 10 por tarea de limpieza hecha, 5 por cada tarea de la lista con dueño marcada esta semana, +20 a quien termina todo lo suyo y +10 a cada uno si la casa completa la semana. Los niveles van de «Huevo» a «Leyenda de casa». La racha personal sale de `personStreaks` del Worker más la semana en curso si ya está completa. El **resumen semanal** (`WeeklySummary.jsx`) se abre solo el domingo desde las 20:00, una vez por semana (`localStorage` `bbds.summary.seen`), y siempre desde el trofeo de Hoy: cabecera con confeti, podio con el ganador destacado, puntos que cuentan hacia arriba, barra de nivel, un título para cada uno («Todo hecho», «En racha», «Modo sofá»…) y la semana que viene.
+Los puntos se calculan en el cliente (`src/lib/points.js`) y se reinician el lunes: 10 por tarea de limpieza hecha, 5 por cada tarea de la lista con dueño marcada esta semana, +20 a quien termina todo lo suyo y +10 a cada uno si la casa completa la semana. Los niveles van de «Huevo» a «Leyenda de casa». La racha personal sale de `personStreaks` del Worker más la semana en curso si ya está completa. El **resumen semanal** (`WeeklySummary.jsx`) se abre solo el domingo desde las 20:00, una vez por semana (`localStorage` `bbds.summary.seen`), y siempre desde el trofeo de Hoy. Es una hoja `ink-sheet` como Energía o Calendarios: Yoshi (con el trofeo si hay ganador) en la cabecera, una columna por persona con puntos, nivel, limpieza, tareas y racha, un título para cada uno («Todo hecho», «En racha», «Modo sofá»…), la casa y la semana que viene.
 
 ## Notas en el corcho
 

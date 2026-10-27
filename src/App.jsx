@@ -354,7 +354,7 @@ export default function App() {
             greet={yoshiGreet}
             away={strolling}
             onWander={startStroll}
-            size={96}
+            size={124}
           />
         }
       />

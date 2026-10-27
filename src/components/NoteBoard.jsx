@@ -341,7 +341,7 @@ export function NoteBoard({ notes, people, now, onClose }) {
   return createPortal(
     <div className="note-board" role="dialog" aria-modal="true" aria-labelledby="board-title">
       <header className="note-board__head">
-        <Yoshi mood="idle" size={70} />
+        <Yoshi mood="idle" size={84} />
         <div className="note-board__title">
           <span className="eyebrow">
             La nevera · {ordered.length ? `${ordered.length} ${ordered.length === 1 ? "nota" : "notas"}` : "vacía"}
