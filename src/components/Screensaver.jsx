@@ -4,6 +4,9 @@ import { APP_NAME, LOCATION } from "../config";
 import { formatClock, formatLongDate } from "../lib/date";
 import { dateFormat } from "../lib/intl";
 import { photoSrc } from "../hooks/usePhotos";
+import { addDays, eventStartDate, eventTimeLabel, isSameDay } from "../lib/date";
+import { moonPhase } from "../lib/moon";
+import { MoonGlyph } from "./MoonGlyph";
 import { PhotoAlbumSheet } from "./PhotoAlbumSheet";
 
 const SLIDE_MS = 15000;
@@ -25,7 +28,42 @@ function photoDate(value) {
   return dateFormat({ month: "long", year: "numeric" }).format(date);
 }
 
-export function Screensaver({ now, onClose, isNight, photos }) {
+// De noche, en vez de fotos: la luna, la mínima de esta noche y lo primero
+// de mañana. Todo estático y oscuro para no molestar.
+function NightPanel({ now, weather, events }) {
+  const moon = moonPhase(now);
+  const days = (weather && weather.days) || [];
+  // Pasado el mediodía, la mínima que importa es la de la madrugada siguiente.
+  const night = now.getHours() >= 12 ? days[1] : days[0];
+  const tomorrow = now.getHours() >= 12 ? addDays(now, 1) : now;
+  const first = (events || [])
+    .filter((event) => isSameDay(eventStartDate(event), tomorrow) && !event.allDay)
+    .sort((a, b) => eventStartDate(a) - eventStartDate(b))[0];
+
+  return (
+    <div className="night-panel">
+      <MoonGlyph phase={moon.phase} size={132} />
+      <dl>
+        <div>
+          <dt>Esta noche</dt>
+          <dd>{moon.name}</dd>
+        </div>
+        {night ? (
+          <div>
+            <dt>Mínima</dt>
+            <dd>{Math.round(night.min)}°</dd>
+          </div>
+        ) : null}
+        <div>
+          <dt>{now.getHours() >= 12 ? "Mañana" : "Hoy"}</dt>
+          <dd>{first ? `${eventTimeLabel(first)} · ${first.summary || "Sin título"}` : "Nada en la agenda"}</dd>
+        </div>
+      </dl>
+    </div>
+  );
+}
+
+export function Screensaver({ now, onClose, isNight, photos, weather, events }) {
   const list = photos.photos || [];
   const count = list.length;
   const [index, setIndex] = useState(0);
@@ -141,6 +179,8 @@ export function Screensaver({ now, onClose, isNight, photos }) {
           <X size={19} strokeWidth={2} aria-hidden="true" />
         </button>
       </header>
+
+      {isNight ? <NightPanel now={now} weather={weather} events={events} /> : null}
 
       {isNight ? null : (
         <footer className="screensaver__bottom">

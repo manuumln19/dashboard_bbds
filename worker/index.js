@@ -127,6 +127,7 @@ function rowToPerson(row) {
     name: row.name,
     tone: TONES.has(row.tone) ? row.tone : "ink",
     initials: row.initials || "",
+    birthday: row.birthday || null,
   };
 }
 
@@ -232,10 +233,24 @@ function normalizeLabel(raw, label, maxLength) {
   return value;
 }
 
+// Cumpleaños como MM-DD; vacío o null lo quita.
+function normalizeBirthday(raw) {
+  if (raw === undefined || raw === null || raw === "") return null;
+  const value = String(raw).trim();
+  const match = value.match(/^(\d{2})-(\d{2})$/);
+  const month = match ? Number(match[1]) : 0;
+  const day = match ? Number(match[2]) : 0;
+  const date = new Date(Date.UTC(2000, month - 1, day));
+  if (!match || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) {
+    throw new HttpError(400, "El cumpleaños debe tener el formato MM-DD");
+  }
+  return value;
+}
+
 async function getPerson(env, personId) {
   if (!personId) return null;
   const row = await env.DB.prepare(
-    "SELECT id, name, tone, initials FROM people WHERE id = ?"
+    "SELECT id, name, tone, initials, birthday FROM people WHERE id = ?"
   )
     .bind(String(personId))
     .first();
@@ -720,7 +735,7 @@ const LIST_ITEM_SELECT = `SELECT li.id, li.list_id, li.text, li.drawing, li.done
 
 async function fetchPeople(env) {
   const { results } = await env.DB.prepare(
-    "SELECT id, name, tone, initials FROM people ORDER BY created_at ASC, id ASC"
+    "SELECT id, name, tone, initials, birthday FROM people ORDER BY created_at ASC, id ASC"
   ).all();
   return (results || []).map(rowToPerson);
 }
@@ -914,7 +929,7 @@ async function handlePeople(request, env, url) {
 
   const id = match[1];
   const existing = await env.DB.prepare(
-    "SELECT id, name, tone, initials FROM people WHERE id = ?"
+    "SELECT id, name, tone, initials, birthday FROM people WHERE id = ?"
   )
     .bind(id)
     .first();
@@ -930,15 +945,18 @@ async function handlePeople(request, env, url) {
   const initials = Object.prototype.hasOwnProperty.call(body, "initials")
     ? normalizeText(body.initials).slice(0, 3).toUpperCase()
     : existing.initials || "";
+  const birthday = Object.prototype.hasOwnProperty.call(body, "birthday")
+    ? normalizeBirthday(body.birthday)
+    : existing.birthday || null;
 
   await env.DB.prepare(
-    "UPDATE people SET name = ?, tone = ?, initials = ?, updated_at = ? WHERE id = ?"
+    "UPDATE people SET name = ?, tone = ?, initials = ?, birthday = ?, updated_at = ? WHERE id = ?"
   )
-    .bind(name, tone, initials || null, new Date().toISOString(), id)
+    .bind(name, tone, initials || null, birthday, new Date().toISOString(), id)
     .run();
 
   const row = await env.DB.prepare(
-    "SELECT id, name, tone, initials FROM people WHERE id = ?"
+    "SELECT id, name, tone, initials, birthday FROM people WHERE id = ?"
   )
     .bind(id)
     .first();
@@ -1010,12 +1028,133 @@ async function fetchCleaningTask(env, id) {
   return rowToCleaningTask(row);
 }
 
+const CLEANING_DAYS_KEY = "cleaning.days";
+const ALL_DAYS = [0, 1, 2, 3, 4, 5, 6];
+
+// Días de la semana en que se limpia (lunes = 0). Por defecto, todos.
+async function cleaningDays(env) {
+  const row = await env.DB.prepare("SELECT value FROM app_meta WHERE key = ?")
+    .bind(CLEANING_DAYS_KEY)
+    .first();
+  if (!row) return ALL_DAYS;
+  const days = String(row.value)
+    .split(",")
+    .map(Number)
+    .filter((day) => Number.isInteger(day) && day >= 0 && day <= 6);
+  return days.length ? [...new Set(days)].sort() : ALL_DAYS;
+}
+
+// Semanas seguidas, antes de `weekKey`, con todas las tareas de los días de
+// limpieza hechas. La semana en curso la suma el cliente cuando se completa.
+async function cleaningStreak(env, weekKey, days, activeCount) {
+  if (!activeCount) return 0;
+  const { results } = await env.DB.prepare(
+    `SELECT c.week_key, COUNT(*) AS n
+       FROM cleaning_checks c
+       JOIN cleaning_tasks t ON t.id = c.task_id AND t.active = 1
+      WHERE c.done = 1 AND c.week_key < ?
+        AND t.day_of_week IN (${days.map(() => "?").join(",")})
+      GROUP BY c.week_key
+      ORDER BY c.week_key DESC
+      LIMIT 104`
+  )
+    .bind(weekKey, ...days)
+    .all();
+  const complete = new Set(
+    (results || []).filter((row) => row.n >= activeCount).map((row) => row.week_key)
+  );
+  let streak = 0;
+  const cursor = new Date(`${weekKey}T12:00:00Z`);
+  for (;;) {
+    cursor.setUTCDate(cursor.getUTCDate() - 7);
+    if (!complete.has(cursor.toISOString().slice(0, 10))) break;
+    streak += 1;
+  }
+  return streak;
+}
+
+// Tareas hechas por persona en el mes anterior (por las semanas que empiezan
+// en ese mes). Hoy lo anuncia la primera semana del mes.
+async function cleaningLastMonth(env) {
+  const now = new Date();
+  const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1));
+  const month = start.toISOString().slice(0, 7);
+  const { results } = await env.DB.prepare(
+    `SELECT t.person_id AS personId, COUNT(*) AS done
+       FROM cleaning_checks c
+       JOIN cleaning_tasks t ON t.id = c.task_id
+      WHERE c.done = 1 AND substr(c.week_key, 1, 7) = ?
+      GROUP BY t.person_id`
+  )
+    .bind(month)
+    .all();
+  return { month, tally: (results || []).map((row) => ({ personId: row.personId, done: row.done })) };
+}
+
+// --- Notas de nevera ---------------------------------------------------------
+// Mensajes cortos entre vosotros. Hoy enseña las últimas; se quitan a mano.
+
+const NOTE_COLORS = new Set(["pink", "mint", "amber", "lilac"]);
+const NOTES_KEEP = 30;
+
+function rowToNote(row) {
+  return {
+    id: row.id,
+    text: row.text,
+    personId: row.person_id || null,
+    color: NOTE_COLORS.has(row.color) ? row.color : "amber",
+    createdAt: row.created_at,
+  };
+}
+
+async function fetchNotes(env) {
+  const { results } = await env.DB.prepare(
+    "SELECT * FROM notes ORDER BY created_at DESC LIMIT ?"
+  )
+    .bind(NOTES_KEEP)
+    .all();
+  return (results || []).map(rowToNote);
+}
+
+async function handleNotes(request, env, url) {
+  requireDashboard(request, env);
+
+  if (url.pathname === "/api/notes" && request.method === "GET") {
+    return json({ notes: await fetchNotes(env) });
+  }
+
+  if (url.pathname === "/api/notes" && request.method === "POST") {
+    const body = await readJson(request);
+    const text = normalizeLabel(body.text, "La nota", 160);
+    const person = body.personId ? await getPerson(env, body.personId) : null;
+    const color = NOTE_COLORS.has(body.color) ? body.color : "amber";
+    const id = `note-${crypto.randomUUID().slice(0, 8)}`;
+    await env.DB.batch([
+      env.DB.prepare(
+        "INSERT INTO notes (id, text, person_id, color, created_at) VALUES (?, ?, ?, ?, ?)"
+      ).bind(id, text, person ? person.id : null, color, new Date().toISOString()),
+      env.DB.prepare(
+        "DELETE FROM notes WHERE id NOT IN (SELECT id FROM notes ORDER BY created_at DESC LIMIT ?)"
+      ).bind(NOTES_KEEP),
+    ]);
+    return json({ notes: await fetchNotes(env) }, 201);
+  }
+
+  const match = url.pathname.match(/^\/api\/notes\/([a-z0-9_-]+)$/);
+  if (match && request.method === "DELETE") {
+    await env.DB.prepare("DELETE FROM notes WHERE id = ?").bind(match[1]).run();
+    return json({ notes: await fetchNotes(env) });
+  }
+
+  throw new HttpError(405, "Método no permitido");
+}
+
 async function handleCleaning(request, env, url) {
   requireDashboard(request, env);
 
   if (url.pathname === "/api/cleaning" && request.method === "GET") {
     const weekKey = normalizeWeekKey(url.searchParams.get("week"));
-    const [tasksResult, checksResult, people] = await Promise.all([
+    const [tasksResult, checksResult, people, days, lastMonth] = await Promise.all([
       env.DB.prepare(
         `SELECT t.*, p.name AS person_name, p.tone AS person_tone,
                 p.initials AS person_initials
@@ -1030,6 +1169,8 @@ async function handleCleaning(request, env, url) {
         .bind(weekKey)
         .all(),
       fetchPeople(env),
+      cleaningDays(env),
+      cleaningLastMonth(env),
     ]);
 
     const checks = new Map(
@@ -1047,8 +1188,30 @@ async function handleCleaning(request, env, url) {
       weekKey,
       people,
       tasks,
+      days,
+      lastMonth,
+      streak: await cleaningStreak(
+        env,
+        weekKey,
+        days,
+        tasks.filter((task) => days.includes(task.day)).length
+      ),
       updatedAt: new Date().toISOString(),
     });
+  }
+
+  if (url.pathname === "/api/cleaning/days" && request.method === "PUT") {
+    const body = await readJson(request);
+    const days = Array.isArray(body.days)
+      ? [...new Set(body.days.map(Number))].filter((day) => Number.isInteger(day) && day >= 0 && day <= 6).sort()
+      : [];
+    if (!days.length) throw new HttpError(400, "Elige al menos un día de limpieza");
+    await env.DB.prepare(
+      "INSERT INTO app_meta (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value"
+    )
+      .bind(CLEANING_DAYS_KEY, days.join(","))
+      .run();
+    return json({ days });
   }
 
   if (url.pathname === "/api/cleaning/checks" && request.method === "PATCH") {
@@ -1738,8 +1901,11 @@ function albumToken(value) {
       return "";
     }
     if (!/(^|\.)icloud\.com$/i.test(parsed.hostname)) return "";
-    if (!/\/sharedalbum\//i.test(parsed.pathname)) return "";
-    token = parsed.hash.replace(/^#/, "").split(";")[0];
+    // Formato nuevo: https://photos.icloud.com/shared/album/<token>
+    const modern = parsed.pathname.match(/\/shared\/album\/([^/]+)\/?$/i);
+    if (modern) token = modern[1];
+    else if (/\/sharedalbum\//i.test(parsed.pathname)) token = parsed.hash.replace(/^#/, "").split(";")[0];
+    else return "";
   }
   return /^[A-Za-z0-9]{10,40}$/.test(token) ? token : "";
 }
@@ -1942,7 +2108,7 @@ async function handlePhotos(request, env, url, ctx) {
     if (!token) {
       throw new HttpError(
         400,
-        "Pega el enlace público del álbum (https://www.icloud.com/sharedalbum/#…)",
+        "Pega el enlace público del álbum (https://photos.icloud.com/shared/album/…)",
         "invalid_album"
       );
     }
@@ -2017,10 +2183,15 @@ async function route(request, env, url, ctx) {
     return handlePeople(request, env, url);
   }
 
+  if (url.pathname === "/api/notes" || /^\/api\/notes\/[a-z0-9_-]+$/.test(url.pathname)) {
+    return handleNotes(request, env, url);
+  }
+
   if (
     url.pathname === "/api/cleaning" ||
     url.pathname === "/api/cleaning/checks" ||
     url.pathname === "/api/cleaning/reset" ||
+    url.pathname === "/api/cleaning/days" ||
     url.pathname === "/api/cleaning/tasks" ||
     /^\/api\/cleaning\/tasks\/[a-z0-9_-]+$/.test(url.pathname)
   ) {

@@ -32,6 +32,15 @@ function attachPeople(tasks, people) {
   );
 }
 
+const ALL_DAYS = [0, 1, 2, 3, 4, 5, 6];
+
+function validDays(value) {
+  const days = Array.isArray(value)
+    ? value.filter((day) => Number.isInteger(day) && day >= 0 && day <= 6)
+    : [];
+  return days.length ? days : ALL_DAYS;
+}
+
 function initialDemoState() {
   const saved = loadDemoCleaning();
   const currentWeek = weekKey(new Date());
@@ -62,6 +71,7 @@ function initialDemoState() {
   return {
     tasks: attachPeople(tasks, people),
     people,
+    days: validDays(saved && saved.days),
     weekKey: currentWeek,
     lastUpdated: new Date().toISOString(),
   };
@@ -77,6 +87,14 @@ export function useCleaning(now) {
   const [lastUpdated, setLastUpdated] = useState(() =>
     demo ? demo.lastUpdated : null
   );
+  // En demo no hay historial: una racha y un mes inventados para ver cómo queda.
+  const [streak, setStreak] = useState(DEMO_MODE ? 3 : 0);
+  const [lastMonth, setLastMonth] = useState(() =>
+    DEMO_MODE
+      ? { month: "demo", tally: [{ personId: "paco", done: 31 }, { personId: "manu", done: 27 }] }
+      : null
+  );
+  const [days, setDaysState] = useState(() => (demo ? demo.days : ALL_DAYS));
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(!DEMO_MODE);
   const pending = useRef(0);
@@ -92,6 +110,9 @@ export function useCleaning(now) {
       )
     );
     if (payload.weekKey) setWeek(payload.weekKey);
+    if (Number.isFinite(payload.streak)) setStreak(payload.streak);
+    if (Array.isArray(payload.days)) setDaysState(validDays(payload.days));
+    if (payload.lastMonth) setLastMonth(payload.lastMonth);
     const at =
       (meta && meta.cachedAt) ||
       payload.updatedAt ||
@@ -181,9 +202,31 @@ export function useCleaning(now) {
       weekKey: week,
       done,
       people,
+      days,
       tasks: tasks.map(({ person, ...task }) => task),
     });
-  }, [tasks, people, week]);
+  }, [tasks, people, week, days]);
+
+  // Qué días de la semana se limpia. Las tareas de los demás no cuentan.
+  async function setDays(nextDays) {
+    const previous = days;
+    const clean = validDays([...new Set(nextDays)].sort());
+    setDaysState(clean);
+    if (DEMO_MODE) return;
+    pending.current += 1;
+    try {
+      await apiRequest("/api/cleaning/days", { method: "PUT", body: { days: clean } });
+      setLastUpdated(new Date().toISOString());
+    } catch (caught) {
+      setDaysState(previous);
+      const message = caught instanceof Error ? caught.message : "No se pudo guardar";
+      setError(message);
+      reportFailure("cleaning", message);
+      throw caught;
+    } finally {
+      pending.current -= 1;
+    }
+  }
 
   async function toggleTask(taskId) {
     const task = tasks.find((entry) => entry.id === taskId);
@@ -423,13 +466,23 @@ export function useCleaning(now) {
     }
   }
 
-  const doneCount = tasks.filter((task) => task.done).length;
+  const activeTasks = tasks.filter((task) => days.includes(task.day));
+  const doneCount = activeTasks.filter((task) => task.done).length;
+  const weekComplete = activeTasks.length > 0 && doneCount === activeTasks.length;
 
   return {
-    tasks,
+    // Solo las tareas de los días de limpieza; el editor usa `allTasks`.
+    tasks: activeTasks,
+    allTasks: tasks,
     people,
+    days,
+    setDays,
+    lastMonth,
     doneCount,
-    totalCount: tasks.length,
+    totalCount: activeTasks.length,
+    // Semanas completas seguidas, contando esta si ya está terminada.
+    streak: streak + (weekComplete ? 1 : 0),
+    weekComplete,
     weekKey: week,
     toggleTask,
     resetWeek,

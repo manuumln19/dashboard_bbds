@@ -401,11 +401,14 @@ export function AgendaView({
                       const bottom = positionFor(end);
                       const height = Math.max(3.8, bottom - top);
                       const showLocation = height >= 8;
+                      // Los eventos cortos no caben en dos líneas: hora y
+                      // título van seguidos en una sola.
+                      const short = height < 6.5;
                       return (
                         <button
                           key={event.id}
                           type="button"
-                          className={`agenda-event tone-${eventTone(event)}`}
+                          className={`agenda-event tone-${eventTone(event)}${short ? " is-short" : ""}`}
                           style={{
                             top: `${top}%`,
                             height: `${height}%`,

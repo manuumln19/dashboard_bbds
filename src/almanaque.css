@@ -277,7 +277,7 @@ body {
   margin: 0;
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 7px;
+  font-size: 12px;
   font-weight: 400;
   letter-spacing: 0.14em;
   line-height: 1;
@@ -311,7 +311,7 @@ body {
   background: transparent;
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 8.5px;
+  font-size: 12px;
   font-weight: 400;
   letter-spacing: 0.015em;
   line-height: 1;
@@ -413,7 +413,7 @@ body {
   max-width: 100%;
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 7px;
+  font-size: 12px;
   font-weight: 400;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -502,7 +502,7 @@ body {
   place-items: center;
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -545,7 +545,7 @@ body {
   margin: 0;
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 8.5px;
+  font-size: 12px;
   font-weight: 400;
   letter-spacing: 0.08em;
   line-height: 1.2;
@@ -569,7 +569,7 @@ body {
   background: transparent;
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 12px;
   font-weight: 400;
   letter-spacing: 0.065em;
   text-transform: uppercase;
@@ -586,14 +586,14 @@ body {
   border-radius: 12px;
   background: var(--danger-soft);
   color: var(--danger);
-  font-size: 10.5px;
+  font-size: 12.5px;
   line-height: 1.45;
 }
 
 .card-note {
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 7.5px;
+  font-size: 12px;
   letter-spacing: 0.03em;
 }
 
@@ -669,7 +669,7 @@ body {
 .view-heading p {
   margin: 8px 0 0;
   color: var(--muted);
-  font-size: 10.5px;
+  font-size: 12.5px;
   font-weight: 400;
   letter-spacing: 0;
   line-height: 1.3;
@@ -717,7 +717,7 @@ body {
 .lists-head__sync {
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 7.5px;
+  font-size: 12px;
   font-weight: 400;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -739,7 +739,7 @@ body {
   gap: 6px;
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -764,7 +764,7 @@ body {
   display: block;
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 7.5px;
+  font-size: 12px;
   font-weight: 400;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -834,7 +834,7 @@ body {
   background: transparent;
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 12px;
   font-weight: 400;
   letter-spacing: 0.055em;
   text-transform: uppercase;
@@ -872,7 +872,7 @@ body {
   border-radius: 999px;
   background: transparent;
   color: var(--muted);
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 500;
   transition: none;
 }
@@ -918,7 +918,7 @@ body {
 .agenda-axis__head span {
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 7px;
+  font-size: 12px;
   font-weight: 400;
   letter-spacing: 0.07em;
   text-transform: uppercase;
@@ -940,7 +940,7 @@ body {
   right: 7px;
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 7px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
   line-height: 1;
   transform: translateY(-50%);
@@ -990,7 +990,7 @@ body {
 .agenda-day-head span {
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 7.5px;
+  font-size: 12px;
   font-weight: 400;
   letter-spacing: 0.07em;
   text-transform: uppercase;
@@ -1009,7 +1009,7 @@ body {
 .agenda-day-head small {
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 7px;
+  font-size: 12px;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
@@ -1046,7 +1046,7 @@ body {
   border-radius: 6px;
   background: var(--tone-soft);
   color: var(--text);
-  font-size: 8px;
+  font-size: 12px;
   font-weight: 700;
   line-height: 1.2;
   text-align: left;
@@ -1056,7 +1056,7 @@ body {
 
 .agenda-all-day__empty {
   color: var(--faint);
-  font-size: 10px;
+  font-size: 12.5px;
   opacity: 0.5;
 }
 
@@ -1094,7 +1094,7 @@ body {
 .agenda-event > span {
   color: var(--tone);
   font-family: var(--font-mono);
-  font-size: 7.5px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
   line-height: 1;
 }
@@ -1102,7 +1102,7 @@ body {
 .agenda-event strong {
   display: -webkit-box;
   overflow: hidden;
-  font-size: 9.5px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: -0.005em;
   line-height: 1.15;
@@ -1114,7 +1114,7 @@ body {
   display: block;
   overflow: hidden;
   color: var(--muted);
-  font-size: 7.5px;
+  font-size: 12px;
   line-height: 1.1;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1127,20 +1127,20 @@ body {
 }
 
 .agenda-calendar--day .agenda-event > span {
-  font-size: 8px;
+  font-size: 12px;
 }
 
 .agenda-calendar--day .agenda-event strong {
-  font-size: 12.5px;
+  font-size: 13.5px;
   line-height: 1.1;
 }
 
 .agenda-calendar--day .agenda-event small {
-  font-size: 8.5px;
+  font-size: 12px;
 }
 
 .agenda-calendar--three .agenda-event strong {
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .agenda-calendar--week .agenda-event {
@@ -1197,7 +1197,7 @@ body {
   max-width: 460px;
   margin: 0;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.5;
 }
 
@@ -1260,7 +1260,7 @@ body {
   margin-top: 16px;
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 0.02em;
 }
 
@@ -1280,7 +1280,7 @@ body {
   padding-top: 14px;
   border-top: 1px solid var(--line);
   color: var(--faint);
-  font-size: 9.5px;
+  font-size: 12px;
   line-height: 1.5;
 }
 
@@ -1378,7 +1378,7 @@ body {
 .list-panel__title p {
   margin: 4px 0 0;
   color: var(--faint);
-  font-size: 8.5px;
+  font-size: 12px;
   line-height: 1.3;
 }
 
@@ -1404,7 +1404,7 @@ body {
 .list-panel__count span {
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 7px;
+  font-size: 12px;
   letter-spacing: 0.07em;
   text-transform: uppercase;
 }
@@ -1444,7 +1444,7 @@ body {
   background: var(--paper-strong);
   box-shadow: none;
   color: var(--text);
-  font-size: 12px;
+  font-size: 13.5px;
   outline: none;
   transition: none;
 }
@@ -1547,7 +1547,7 @@ body {
   border-radius: 10px;
   background: transparent;
   color: var(--text);
-  font-size: 12px;
+  font-size: 13.5px;
   font-weight: 600;
   text-align: left;
 }
@@ -1595,7 +1595,7 @@ body {
   border-top: 1px solid var(--line);
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 7.5px;
+  font-size: 12px;
   letter-spacing: 0.02em;
 }
 
@@ -1609,7 +1609,7 @@ body {
   background: transparent;
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 7.5px;
+  font-size: 12px;
   letter-spacing: 0.03em;
 }
 
@@ -1641,7 +1641,7 @@ body {
 }
 
 .empty-state--list span {
-  font-size: 9px;
+  font-size: 12px;
 }
 
 /* Cleaning ---------------------------------------------------------------- */
@@ -1692,7 +1692,7 @@ body {
 .cleaning-progress__top > span {
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 7px;
+  font-size: 12px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -1723,7 +1723,7 @@ body {
   background: rgba(255, 255, 255, 0.28);
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 7px;
+  font-size: 12px;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   transition: none;
@@ -1800,7 +1800,7 @@ body {
 .cleaning-row__day > div small {
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 7px;
+  font-size: 12px;
   letter-spacing: 0.08em;
   line-height: 1;
   text-transform: uppercase;
@@ -1887,7 +1887,7 @@ body {
 .cleaning-task__copy strong {
   overflow: hidden;
   color: var(--text);
-  font-size: 10.5px;
+  font-size: 12.5px;
   font-weight: 700;
   letter-spacing: -0.005em;
   line-height: 1.2;
@@ -1902,7 +1902,7 @@ body {
   overflow: hidden;
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 7.5px;
+  font-size: 12px;
   line-height: 1.2;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1920,7 +1920,7 @@ body {
   gap: 4px;
   color: var(--tone);
   font-family: var(--font-mono);
-  font-size: 7.5px;
+  font-size: 12px;
   line-height: 1;
   white-space: nowrap;
 }
@@ -1934,7 +1934,7 @@ body {
   background: var(--tone-soft);
   color: var(--tone);
   font-family: var(--font-sans);
-  font-size: 7px;
+  font-size: 12px;
   font-style: normal;
   font-weight: 700;
 }
@@ -1961,7 +1961,7 @@ body {
 .cleaning-row__foot span {
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 6.5px;
+  font-size: 12px;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
@@ -1979,7 +1979,7 @@ body {
   padding: 7px 3px 0;
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 7px;
+  font-size: 12px;
   line-height: 1.3;
   letter-spacing: 0.02em;
 }
@@ -2083,7 +2083,7 @@ body {
 .room-card__temperature small {
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 12px;
 }
 
 .room-card__status,
@@ -2091,7 +2091,7 @@ body {
 .room-card__warning {
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 7px;
+  font-size: 12px;
   letter-spacing: 0.02em;
   line-height: 1.25;
 }
@@ -2127,7 +2127,7 @@ body {
 .room-card__side-meta {
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 6.5px;
+  font-size: 12px;
   line-height: 1.2;
   text-transform: uppercase;
 }
@@ -2188,7 +2188,7 @@ body {
   background: transparent;
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 7px;
+  font-size: 12px;
   letter-spacing: 0.03em;
 }
 
@@ -2212,7 +2212,7 @@ body {
   border-top: 1px solid var(--line);
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 7px;
+  font-size: 12px;
   text-transform: uppercase;
 }
 
@@ -2255,7 +2255,7 @@ body {
 .advice-vent__head strong {
   display: block;
   color: var(--text);
-  font-size: 10px;
+  font-size: 12.5px;
   font-weight: 700;
 }
 
@@ -2263,7 +2263,7 @@ body {
 .advice-vent p,
 .advice-risk p {
   color: var(--muted);
-  font-size: 8.5px;
+  font-size: 12px;
   line-height: 1.45;
 }
 
@@ -2309,7 +2309,7 @@ body {
   gap: 8px;
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 7px;
+  font-size: 12px;
 }
 
 .advice-sensor__meta span {
@@ -2346,7 +2346,7 @@ body {
   margin: 8px 0 0;
   color: var(--muted);
   font-family: var(--font-sans);
-  font-size: 10.5px;
+  font-size: 12.5px;
   font-weight: 400;
   line-height: 1.2;
 }
@@ -2378,7 +2378,7 @@ body {
   margin: 0;
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 12px;
   font-weight: 400;
   letter-spacing: 0.055em;
   line-height: 1;
@@ -2415,7 +2415,7 @@ body {
   padding-top: 1px;
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 7.5px;
+  font-size: 12px;
   letter-spacing: 0.08em;
   line-height: 1.45;
   text-transform: uppercase;
@@ -2426,7 +2426,7 @@ body {
   margin: 0;
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 7.5px;
+  font-size: 12px;
   font-weight: 400;
   letter-spacing: 0.075em;
   line-height: 1;
@@ -2443,7 +2443,7 @@ body {
   background: transparent;
   color: var(--amber);
   font-family: var(--font-mono);
-  font-size: 7px;
+  font-size: 12px;
   font-weight: 400;
   letter-spacing: 0.06em;
   line-height: 1;
@@ -2539,7 +2539,7 @@ body {
   gap: 16px;
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 0.085em;
   line-height: 1;
   text-transform: uppercase;
@@ -2625,7 +2625,7 @@ body {
 .weather-now__copy p {
   margin: 7px 0 0;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 12.5px;
   line-height: 1.45;
 }
 
@@ -2647,7 +2647,7 @@ body {
 .weather-now__extremes span {
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 7.5px;
+  font-size: 12px;
   letter-spacing: 0.06em;
   line-height: 1;
   text-transform: uppercase;
@@ -2681,7 +2681,7 @@ body {
   gap: 2px;
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 7.5px;
+  font-size: 12px;
   letter-spacing: 0.055em;
   line-height: 1;
   text-transform: uppercase;
@@ -2787,7 +2787,7 @@ body {
   margin: 0;
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 8.5px;
+  font-size: 12px;
   font-weight: 400;
   letter-spacing: 0.055em;
   line-height: 1;
@@ -2852,7 +2852,7 @@ body {
   margin: 0 0 1px;
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 12px;
   font-weight: 400;
   letter-spacing: 0.055em;
   line-height: 1.4;
@@ -2911,7 +2911,7 @@ body {
 .row-day span {
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 0.025em;
   line-height: 1;
   text-transform: uppercase;
@@ -2940,7 +2940,7 @@ body {
 .row-condition {
   overflow: hidden;
   color: var(--muted);
-  font-size: 10.5px;
+  font-size: 12.5px;
   line-height: 1.2;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2981,7 +2981,7 @@ body {
 .row-min {
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 9.5px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
   line-height: 1;
 }
@@ -2993,7 +2993,7 @@ body {
   gap: 3px;
   color: var(--lilac);
   font-family: var(--font-mono);
-  font-size: 8.5px;
+  font-size: 12px;
   line-height: 1;
 }
 
@@ -3017,7 +3017,7 @@ body {
   border-top: 1px solid var(--line);
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 0.06em;
   line-height: 1;
   text-transform: uppercase;
@@ -3049,7 +3049,7 @@ body {
 
 .forecast-empty span {
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 12px;
   text-transform: uppercase;
 }
 
@@ -3201,7 +3201,7 @@ body {
 .screensaver__brand span:last-child {
   color: rgba(255, 250, 242, 0.62);
   font-family: var(--font-mono);
-  font-size: 7px;
+  font-size: 12px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
 }
@@ -3227,7 +3227,7 @@ body {
 .screensaver__clock span {
   color: rgba(255, 250, 242, 0.66);
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -3289,7 +3289,7 @@ body {
 .screensaver__caption small {
   color: rgba(255, 250, 242, 0.55);
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 0.04em;
 }
 
@@ -3304,7 +3304,7 @@ body {
   background: rgba(8, 10, 10, 0.24);
   color: rgba(255, 250, 242, 0.78);
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 0.04em;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
@@ -3335,7 +3335,7 @@ body {
   margin-left: 4px;
   color: rgba(255, 250, 242, 0.6);
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -3421,6 +3421,6 @@ body {
   }
 
   .cleaning-task__person {
-    font-size: 7px;
+    font-size: 12px;
   }
 }

@@ -1,4 +1,5 @@
-import { CalendarDays, Sparkles, SprayCan, Umbrella, Zap } from "lucide-react";
+import { useState } from "react";
+import { BellRing, Cake, CalendarDays, Plus, Sparkles, SprayCan, Trophy, Umbrella, Zap } from "lucide-react";
 import { getWeatherAdvice } from "../lib/weather";
 import { nextItems } from "../lib/today";
 
@@ -7,12 +8,36 @@ const ICONS = {
   rain: Umbrella,
   cleaning: SprayCan,
   power: Zap,
+  reminder: BellRing,
+  birthday: Cake,
+  trophy: Trophy,
 };
 
-const KIND_TONES = { rain: "lilac", cleaning: "mint", power: "amber" };
+const KIND_TONES = { rain: "lilac", cleaning: "mint", power: "amber", reminder: "amber", birthday: "pink", trophy: "amber" };
+
+// «Añadir a la compra» para avisos como el de las uvas.
+function AddToShopping({ text, lists }) {
+  const [added, setAdded] = useState(false);
+  const already = lists && lists.byList("shopping").some((item) => item.text === text && !item.done);
+  if (!lists || already || added) return <span className="today-next__added">En la compra</span>;
+  return (
+    <button
+      type="button"
+      className="today-next__add"
+      onClick={(event) => {
+        event.stopPropagation();
+        setAdded(true);
+        lists.addItem("shopping", text);
+      }}
+    >
+      <Plus size={14} strokeWidth={2.2} aria-hidden="true" />
+      Añadir a la compra
+    </button>
+  );
+}
 
 // Una sola tarjeta de color: lo más importante ahora, y debajo lo demás.
-export function TodayNext({ now, events, weather, electricity, cleaning, onOpenAgenda }) {
+export function TodayNext({ now, events, weather, electricity, cleaning, lists, onOpenAgenda }) {
   const items = nextItems({ now, events, weather, electricity, cleaning });
   const [lead, ...rest] = items;
 
@@ -44,6 +69,7 @@ export function TodayNext({ now, events, weather, electricity, cleaning, onOpenA
         <strong className="today-next__title">{lead.title}</strong>
         {lead.detail ? <span className="today-next__detail">{lead.detail}</span> : null}
       </button>
+      {lead.addToShopping ? <AddToShopping text={lead.addToShopping} lists={lists} /> : null}
 
       {rest.length ? (
         <ul className="today-next__rest">
@@ -55,7 +81,9 @@ export function TodayNext({ now, events, weather, electricity, cleaning, onOpenA
                 <span>
                   <strong>{item.title}</strong>
                   {item.kind === "event" ? ` · ${item.kicker.replace(/^Próximo · /, "")}` : ""}
+                  {item.kind === "birthday" ? ` · ${item.detail}` : ""}
                 </span>
+                {item.addToShopping ? <AddToShopping text={item.addToShopping} lists={lists} /> : null}
               </li>
             );
           })}

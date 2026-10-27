@@ -1,4 +1,6 @@
 import { useElectricity } from "../hooks/useElectricity";
+import { useNotes } from "../hooks/useNotes";
+import { TodayNotes } from "./TodayNotes";
 import { TodayNext } from "./TodayNext";
 import { TodayNow } from "./TodayNow";
 import { TodayPower } from "./TodayPower";
@@ -13,23 +15,33 @@ export function HomeView({
   calendar,
   lists,
   cleaning,
+  season,
   onOpenAgenda,
   onOpenLists,
   onOpenEnergy,
   onOpenWeather,
 }) {
   const electricity = useElectricity();
+  const notes = useNotes();
 
   return (
     <section className="view home-view" aria-label="Resumen de hoy">
       <div className="today-board">
-        <TodayNow now={now} weather={weather.weather} onOpenWeather={onOpenWeather} />
+        <TodayNow
+          now={now}
+          weather={weather.weather}
+          season={season}
+          lists={lists}
+          cleaning={cleaning}
+          onOpenWeather={onOpenWeather}
+        />
         <TodayNext
           now={now}
           events={calendar.events}
           weather={weather.weather}
           electricity={electricity}
           cleaning={cleaning}
+          lists={lists}
           onOpenAgenda={onOpenAgenda}
         />
         <TodayTimeline
@@ -41,6 +53,7 @@ export function HomeView({
           onOpenLists={onOpenLists}
         />
         <div className="today-side">
+          <TodayNotes notes={notes} people={cleaning.people} now={now} />
           <TodayShopping lists={lists} onOpenLists={onOpenLists} />
           <TodayPower electricity={electricity} now={now} onOpenEnergy={onOpenEnergy} />
         </div>

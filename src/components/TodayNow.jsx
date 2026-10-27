@@ -1,5 +1,6 @@
 import { LOCATION } from "../config";
-import { capitalize, formatClock, formatLongDate, getGreeting } from "../lib/date";
+import { capitalize, formatClock, formatLongDate } from "../lib/date";
+import { greetingFor } from "../lib/greeting";
 import { hourLabel, nextHours, weatherLabel } from "../lib/weather";
 import { WeatherGlyph } from "./WeatherGlyph";
 
@@ -8,18 +9,23 @@ function round(value) {
 }
 
 // Lo que se mira de pasada: hora, fecha y tiempo, con las próximas horas.
-export function TodayNow({ now, weather, onOpenWeather }) {
+export function TodayNow({ now, weather, season, lists, cleaning, onOpenWeather }) {
   const current = weather && weather.current ? weather.current : null;
   const today = weather && weather.today ? weather.today : null;
   const hours = nextHours(weather, now, 6).slice(1);
+  const greeting = greetingFor({ now, weather, season, lists, cleaning });
 
   return (
     <article className="card today-now" aria-label="Hora y tiempo">
       <header className="today-now__head">
-        <span>
-          {getGreeting(now)} · {capitalize(LOCATION.name)}
+        <p className="today-now__greeting">
+          <strong>{greeting.hello}.</strong>
+          {greeting.line ? <span> {greeting.line}</span> : null}
+        </p>
+        <span className="today-now__date">
+          {season && season.note ? <em>{season.note} · </em> : null}
+          {formatLongDate(now)} · {capitalize(LOCATION.name)}
         </span>
-        <span>{formatLongDate(now)}</span>
       </header>
 
       <div className="today-now__main">

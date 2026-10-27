@@ -14,6 +14,7 @@ import {
   SCREENSAVER_IDLE_MS,
 } from "./config";
 import { formatClock } from "./lib/date";
+import { seasonFor, seasonOverride } from "./lib/season";
 import { timeZoneMismatch } from "./lib/timezone";
 import {
   getDemoControls,
@@ -39,6 +40,7 @@ import { useWakeLock } from "./hooks/useWakeLock";
 import { useWeather } from "./hooks/useWeather";
 import { DemoPanel, Diagnostics } from "./components/DemoPanel";
 import { Rail } from "./components/Rail";
+import { SeasonDecor } from "./components/SeasonDecor";
 import { HomeView } from "./components/HomeView";
 import { Screensaver } from "./components/Screensaver";
 import { StatusBanner } from "./components/StatusBanner";
@@ -126,6 +128,7 @@ export default function App() {
   const sensors = useSensors(CLIMATE_ENABLED);
   const lists = useLists();
   const cleaning = useCleaning(now);
+  const season = seasonOverride() || seasonFor(now, cleaning.people);
   const { idle, reset: resetIdle } = useIdle(idleMs);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const { isNight, toggleNight } = useNightMode(now);
@@ -301,12 +304,14 @@ export default function App() {
 
   return (
     <div
-      className={`app app--${view}${isNight ? " is-night" : ""}`}
+      className={`app app--${view} season-${season.id}${isNight ? " is-night" : ""}`}
       data-view={view}
     >
       <div className="ambient" aria-hidden="true">
         <span className="ambient__grain" />
       </div>
+
+      <SeasonDecor seasonId={season.id} />
 
       <Rail
         now={now}
@@ -316,6 +321,7 @@ export default function App() {
         onToggleNight={toggleNight}
         onOpenGallery={openGallery}
         status={status}
+        seasonId={season.id}
       />
 
       <StatusBanner
@@ -339,6 +345,7 @@ export default function App() {
               calendar={calendar}
               lists={lists}
               cleaning={cleaning}
+              season={season}
               onOpenAgenda={() => setView("agenda")}
               onOpenLists={() => setView("lists")}
               onOpenEnergy={() => setView("energy")}
@@ -395,6 +402,8 @@ export default function App() {
           onClose={closeScreensaver}
           isNight={isNight}
           photos={photos}
+          weather={weather.weather}
+          events={calendar.events}
         />
       ) : null}
 

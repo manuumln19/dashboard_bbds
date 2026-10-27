@@ -15,6 +15,7 @@ import {
 import { CLIMATE_ENABLED } from "../config";
 import { formatClock } from "../lib/date";
 import { Brand } from "./Brand";
+import { SeasonBadge } from "./SeasonDecor";
 
 const TABS = [
   { id: "home", label: "Hoy", Icon: House },
@@ -36,6 +37,7 @@ export function Rail({
   onToggleNight,
   onOpenGallery,
   status,
+  seasonId,
 }) {
   const StatusIcon =
     status.tone === "bad"
@@ -62,6 +64,8 @@ export function Rail({
           </button>
         ))}
       </nav>
+
+      <SeasonBadge seasonId={seasonId} />
 
       <div className="rail__bottom">
         <time className="rail__clock" dateTime={now.toISOString()}>

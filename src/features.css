@@ -48,7 +48,7 @@
   border: 0;
   background: transparent;
   color: inherit;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 640;
   text-align: left;
 }
@@ -86,7 +86,7 @@
   background: var(--amber-soft);
   color: var(--amber);
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 700;
 }
 
@@ -135,7 +135,7 @@
   grid-template-columns: 92px minmax(0, 1fr) auto;
   align-items: baseline;
   gap: 8px;
-  font-size: 10px;
+  font-size: 12.5px;
 }
 
 .status-banner__detail strong {
@@ -153,7 +153,7 @@
 .status-banner__detail time {
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .status-banner__diag {
@@ -164,7 +164,7 @@
   border-radius: 9px;
   background: var(--surface-3);
   color: var(--text);
-  font-size: 10px;
+  font-size: 12.5px;
   font-weight: 650;
 }
 
@@ -248,7 +248,7 @@
 .demo-panel__head p {
   margin: 5px 0 0;
   color: var(--muted);
-  font-size: 10.5px;
+  font-size: 12.5px;
   line-height: 1.4;
 }
 
@@ -297,7 +297,7 @@
   gap: 10px;
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -311,7 +311,7 @@
 .demo-block__head strong {
   color: var(--text);
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 12.5px;
   font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: none;
@@ -324,7 +324,7 @@
   gap: 12px;
   margin-top: 6px;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 12.5px;
 }
 
 .demo-link {
@@ -332,7 +332,7 @@
   border: 0;
   background: transparent;
   color: var(--accent);
-  font-size: 10px;
+  font-size: 12.5px;
   font-weight: 650;
 }
 
@@ -355,7 +355,7 @@
   background: transparent;
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 0.02em;
 }
 
@@ -388,7 +388,7 @@
   border-radius: 10px;
   background: transparent;
   color: var(--muted);
-  font-size: 10.5px;
+  font-size: 12.5px;
   font-weight: 600;
   text-align: left;
 }
@@ -407,7 +407,7 @@
 .demo-hint {
   margin: 9px 0 0;
   color: var(--faint);
-  font-size: 10px;
+  font-size: 12.5px;
   line-height: 1.45;
 }
 
@@ -428,7 +428,7 @@
   border-radius: 10px;
   background: rgba(255, 250, 242, 0.04);
   color: var(--text);
-  font-size: 10px;
+  font-size: 12.5px;
   font-weight: 650;
 }
 
@@ -453,7 +453,7 @@
   padding: 11px 22px 15px;
   border-top: 1px solid var(--line);
   color: var(--faint);
-  font-size: 9.5px;
+  font-size: 12px;
   line-height: 1.4;
 }
 
@@ -466,7 +466,7 @@
   background: rgba(255, 250, 242, 0.06);
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 12px;
   text-align: center;
 }
 
@@ -492,7 +492,7 @@
 .diag-list dt {
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -503,7 +503,7 @@
   overflow: hidden;
   color: var(--text);
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: 12px;
   line-height: 1.35;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -524,7 +524,7 @@
   gap: 3px 8px;
   padding-top: 7px;
   border-top: 1px solid var(--line);
-  font-size: 9.5px;
+  font-size: 12px;
 }
 
 .diag-sources li strong {
@@ -536,7 +536,7 @@
 .diag-sources li span {
   color: var(--mint);
   font-family: var(--font-mono);
-  font-size: 8.5px;
+  font-size: 12px;
 }
 
 .diag-sources li span.is-bad {
@@ -546,7 +546,7 @@
 .diag-sources li small {
   grid-column: 2;
   color: var(--faint);
-  font-size: 9px;
+  font-size: 12px;
   line-height: 1.35;
 }
 
@@ -598,7 +598,7 @@
 .compat-list strong {
   overflow: hidden;
   color: var(--text);
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 650;
   line-height: 1.2;
   text-overflow: ellipsis;
@@ -608,7 +608,7 @@
 .compat-list small {
   overflow: hidden;
   color: var(--faint);
-  font-size: 8px;
+  font-size: 12px;
   line-height: 1.3;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -674,7 +674,7 @@
   max-width: 760px;
   margin: 8px 0 0;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.5;
 }
 
@@ -777,7 +777,7 @@
   min-height: 38px;
   padding: 7px 11px;
   border-radius: 11px;
-  font-size: 10px;
+  font-size: 12.5px;
   font-weight: 650;
 }
 
@@ -822,7 +822,7 @@
   padding: 0 15px;
   border: 0;
   background: transparent;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 650;
 }
 
@@ -832,7 +832,7 @@
   gap: 7px;
   min-height: 46px;
   padding: 0 18px;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 750;
 }
 
@@ -874,13 +874,13 @@
 }
 
 .ink-recognition__copy strong {
-  font-size: 12px;
+  font-size: 13.5px;
   font-weight: 700;
 }
 
 .ink-recognition__copy span {
   color: var(--faint);
-  font-size: 10px;
+  font-size: 12.5px;
   line-height: 1.45;
 }
 
@@ -903,7 +903,7 @@
   align-items: center;
   gap: 6px;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 12.5px;
   font-weight: 750;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -911,7 +911,7 @@
 
 .ink-review__head span:last-child {
   color: var(--faint);
-  font-size: 9.5px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -932,7 +932,7 @@
 .ink-review__note {
   margin: 7px 0 0;
   color: var(--faint);
-  font-size: 10px;
+  font-size: 12.5px;
   line-height: 1.45;
 }
 
@@ -1000,7 +1000,7 @@
   border-radius: 10px;
   background: var(--danger-soft);
   color: var(--danger);
-  font-size: 10.5px;
+  font-size: 12.5px;
   line-height: 1.4;
 }
 
@@ -1039,7 +1039,7 @@
 
 .feature-section__head > span {
   color: var(--faint);
-  font-size: 9.5px;
+  font-size: 12px;
   text-align: right;
 }
 
@@ -1051,7 +1051,7 @@
   justify-content: center;
   gap: 6px;
   border-radius: 9px;
-  font-size: 10px;
+  font-size: 12.5px;
   font-weight: 650;
   white-space: nowrap;
 }
@@ -1131,7 +1131,7 @@
   gap: 6px;
   margin: 9px 0 0;
   color: var(--faint);
-  font-size: 9.5px;
+  font-size: 12px;
   line-height: 1.5;
 }
 
@@ -1156,7 +1156,7 @@
   background: rgba(255, 250, 242, 0.055);
   color: var(--text);
   font-family: inherit;
-  font-size: 10.5px;
+  font-size: 12.5px;
   outline: none;
 }
 
@@ -1239,7 +1239,7 @@
   margin: 0 0 6px;
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 8.5px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -1247,7 +1247,7 @@
 
 .cleaning-editor__day h4 span {
   color: var(--faint);
-  font-size: 8px;
+  font-size: 12px;
 }
 
 .cleaning-edit-row {
@@ -1266,7 +1266,7 @@
 .cleaning-editor__empty {
   margin: 4px 0 6px;
   color: var(--faint);
-  font-size: 9.5px;
+  font-size: 12px;
 }
 
 .cleaning-reset.cleaning-edit {
@@ -1290,7 +1290,7 @@
   padding: 11px 24px 14px;
   border-top: 1px solid var(--line);
   color: var(--faint);
-  font-size: 9.5px;
+  font-size: 12px;
   line-height: 1.4;
 }
 
@@ -1349,7 +1349,7 @@
 .calendar-card__title strong {
   overflow: hidden;
   color: var(--text);
-  font-size: 11.5px;
+  font-size: 13px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1357,14 +1357,14 @@
 .calendar-card__title span {
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 12px;
 }
 
 .calendar-card__count {
   flex: none;
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 0.02em;
 }
 
@@ -1377,7 +1377,7 @@
   border-radius: 8px;
   background: var(--danger-soft);
   color: var(--danger);
-  font-size: 9.5px;
+  font-size: 12px;
   line-height: 1.4;
 }
 
@@ -1405,14 +1405,14 @@
 .calendar-add label > span {
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 7.5px;
+  font-size: 12px;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
 .calendar-card__url input {
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .calendar-card__foot {
@@ -1430,7 +1430,7 @@
   align-items: center;
   gap: 6px;
   color: var(--muted);
-  font-size: 9.5px;
+  font-size: 12px;
 }
 
 .calendar-active input {
@@ -1459,7 +1459,7 @@
   gap: 7px;
   margin: 4px 0 8px;
   color: var(--faint);
-  font-size: 10px;
+  font-size: 12.5px;
 }
 
 .calendar-sheet__foot span {
@@ -1479,7 +1479,7 @@
   background: transparent;
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
@@ -1510,7 +1510,7 @@
   background: var(--surface-2);
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 0.02em;
 }
 
@@ -1538,7 +1538,7 @@
 .agenda-all-day__chip--outside span {
   color: var(--tone);
   font-family: var(--font-mono);
-  font-size: 7.5px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -1564,7 +1564,7 @@
   margin-left: auto;
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 12px;
   white-space: nowrap;
 }
 
@@ -1578,7 +1578,7 @@
   background: var(--tone-soft);
   color: var(--tone);
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 0.03em;
   text-transform: uppercase;
 }
@@ -1608,7 +1608,7 @@
   align-items: flex-start;
   gap: 5px;
   color: var(--text);
-  font-size: 10.5px;
+  font-size: 12.5px;
   line-height: 1.35;
 }
 
@@ -1623,7 +1623,7 @@
   align-items: flex-start;
   gap: 5px;
   color: var(--faint);
-  font-size: 9.5px;
+  font-size: 12px;
   line-height: 1.4;
 }
 
@@ -1637,7 +1637,7 @@
   align-items: center;
   gap: 4px;
   color: var(--accent);
-  font-size: 9.5px;
+  font-size: 12px;
   font-weight: 650;
   text-decoration: none;
 }
@@ -1661,7 +1661,7 @@
 
 .event-qr__loading {
   color: var(--faint);
-  font-size: 9px;
+  font-size: 12px;
 }
 
 /* Tareas con fecha, hora y persona ---------------------------------------- */
@@ -1683,7 +1683,7 @@
   background: var(--surface-3);
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.01em;
   line-height: 1.2;
@@ -1703,7 +1703,7 @@
   background: var(--tone);
   color: var(--paper-strong);
   font-family: var(--font-serif);
-  font-size: 8px;
+  font-size: 12px;
   font-style: normal;
   line-height: 1;
 }
@@ -1826,7 +1826,7 @@
   background: transparent;
   color: var(--text);
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: 12px;
   outline: none;
 }
 
@@ -1962,7 +1962,7 @@
   background: var(--amber-soft);
   color: var(--amber);
   font-family: var(--font-mono);
-  font-size: 7.5px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.07em;
   text-transform: uppercase;
@@ -1974,7 +1974,7 @@
   gap: 5px;
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 0.03em;
   white-space: nowrap;
 }
@@ -1998,7 +1998,7 @@
   background: var(--surface-2);
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 7.5px;
+  font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.035em;
   text-transform: uppercase;
@@ -2026,7 +2026,7 @@
   border-radius: 10px;
   background: var(--amber-soft);
   color: var(--amber);
-  font-size: 9.5px;
+  font-size: 12px;
   line-height: 1.45;
 }
 
@@ -2089,7 +2089,7 @@
   gap: 5px;
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 7.5px;
+  font-size: 12px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -2112,7 +2112,7 @@
   margin: 4px 0 0;
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 7.5px;
+  font-size: 12px;
   letter-spacing: 0.02em;
 }
 
@@ -2147,7 +2147,7 @@
   padding: 3px 7px;
   border-radius: 999px;
   font-family: var(--font-mono);
-  font-size: 6.8px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.055em;
   text-transform: uppercase;
@@ -2210,7 +2210,7 @@
 
 .energy-empty span:not(.energy-empty__icon) {
   max-width: 300px;
-  font-size: 10px;
+  font-size: 12.5px;
   line-height: 1.5;
 }
 
@@ -2238,7 +2238,7 @@
   display: block;
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 0.045em;
   text-transform: uppercase;
 }
@@ -2260,7 +2260,7 @@
   margin-left: 5px;
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.02em;
 }
@@ -2278,7 +2278,7 @@
   padding: 2px 7px;
   border-radius: 999px;
   font-family: var(--font-mono);
-  font-size: 6.8px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -2302,7 +2302,7 @@
 .elec-now__stamp {
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 7px;
+  font-size: 12px;
 }
 
 .elec-metrics {
@@ -2322,7 +2322,7 @@
 .elec-metrics dt {
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 6.8px;
+  font-size: 12px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -2344,7 +2344,7 @@
   overflow: hidden;
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 6.8px;
+  font-size: 12px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -2379,7 +2379,7 @@
   margin-left: 6px;
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 7px;
+  font-size: 12px;
   letter-spacing: 0.03em;
 }
 
@@ -2398,7 +2398,7 @@
   background: transparent;
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 6.8px;
+  font-size: 12px;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
@@ -2480,7 +2480,7 @@
   justify-content: space-between;
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 6.5px;
+  font-size: 12px;
   letter-spacing: 0.04em;
 }
 
@@ -2498,7 +2498,7 @@
   gap: 4px;
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 6.8px;
+  font-size: 12px;
   white-space: nowrap;
 }
 
@@ -2526,7 +2526,7 @@
   margin-left: auto;
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 6.5px;
+  font-size: 12px;
   white-space: nowrap;
 }
 
@@ -2549,7 +2549,7 @@
   overflow: hidden;
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 7px;
+  font-size: 12px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -2561,12 +2561,12 @@
 
 .elec-foot > span small {
   color: var(--faint);
-  font-size: 6.8px;
+  font-size: 12px;
 }
 
 .elec-foot .text-button {
   min-height: 24px;
-  font-size: 6.8px;
+  font-size: 12px;
 }
 
 /* Electrodomésticos ------------------------------------------------------- */
@@ -2591,7 +2591,7 @@
   background: transparent;
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 6.4px;
+  font-size: 12px;
   line-height: 1.1;
   text-align: center;
 }
@@ -2634,7 +2634,7 @@
   gap: 8px;
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 6.8px;
+  font-size: 12px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -2644,7 +2644,7 @@
   border-radius: 999px;
   background: var(--mint-soft);
   color: var(--mint);
-  font-size: 6.5px;
+  font-size: 12px;
   letter-spacing: 0.03em;
   white-space: nowrap;
 }
@@ -2685,7 +2685,7 @@
   overflow: hidden;
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 6.5px;
+  font-size: 12px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -2703,7 +2703,7 @@
 .appliance-best__numbers small {
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 6.3px;
+  font-size: 12px;
 }
 
 .appliance-best__tax {
@@ -2721,7 +2721,7 @@
   border-top: 1px dashed var(--line);
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 6.5px;
+  font-size: 12px;
   line-height: 1.35;
 }
 
@@ -2734,7 +2734,7 @@
 .appliance-compare strong {
   flex: none;
   color: var(--mint);
-  font-size: 6.8px;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -2747,7 +2747,7 @@
   border: 1px dashed var(--line-strong);
   border-radius: 16px;
   color: var(--muted);
-  font-size: 9px;
+  font-size: 12px;
   line-height: 1.4;
 }
 
@@ -2761,7 +2761,7 @@
 .appliance-unavailable__hint {
   color: var(--mint);
   font-family: var(--font-mono);
-  font-size: 7px;
+  font-size: 12px;
 }
 
 .appliance-config {
@@ -2784,7 +2784,7 @@
 .appliance-config__label {
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 6.6px;
+  font-size: 12px;
   letter-spacing: 0.03em;
   line-height: 1.2;
   text-transform: uppercase;
@@ -2794,7 +2794,7 @@
   overflow: hidden;
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 6.2px;
+  font-size: 12px;
   line-height: 1.25;
   text-align: right;
   text-overflow: ellipsis;
@@ -2836,7 +2836,7 @@
   justify-content: center;
   color: var(--text);
   font-family: var(--font-mono);
-  font-size: 8.5px;
+  font-size: 12px;
   font-weight: 500;
   white-space: nowrap;
 }
@@ -2844,7 +2844,7 @@
 .energy-stepper strong small {
   margin-left: 2px;
   color: var(--faint);
-  font-size: 6px;
+  font-size: 12px;
   font-weight: 400;
 }
 
@@ -2869,7 +2869,7 @@
   background: transparent;
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 6.1px;
+  font-size: 12px;
   line-height: 1.1;
   white-space: nowrap;
 }
@@ -2898,7 +2898,7 @@
   gap: 4px;
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 6.8px;
+  font-size: 12px;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
@@ -2920,7 +2920,7 @@
   padding: 3px 0;
   border-top: 1px solid var(--line);
   font-family: var(--font-mono);
-  font-size: 7.5px;
+  font-size: 12px;
 }
 
 .appliance-alts li span {
@@ -2929,12 +2929,12 @@
 
 .appliance-alts li small {
   color: var(--faint);
-  font-size: 6.8px;
+  font-size: 12px;
 }
 
 .appliance-alts li strong {
   color: var(--text);
-  font-size: 8px;
+  font-size: 12px;
   font-weight: 500;
   text-align: right;
 }
@@ -2965,20 +2965,20 @@
 .appliance-tomorrow__best span {
   color: var(--mint);
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 12px;
   font-weight: 600;
 }
 
 .appliance-tomorrow__best small {
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 6.8px;
+  font-size: 12px;
 }
 
 .appliance-tomorrow p {
   margin: 3px 0 0;
   color: var(--faint);
-  font-size: 8px;
+  font-size: 12px;
   line-height: 1.4;
 }
 
@@ -2987,7 +2987,7 @@
   margin: 5px 0 0;
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 6.2px;
+  font-size: 12px;
   line-height: 1.4;
 }
 
@@ -3071,7 +3071,7 @@
 .energy-sheet__grid dt {
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 7px;
+  font-size: 12px;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
@@ -3079,7 +3079,7 @@
 .energy-sheet__grid dd {
   margin: 2px 0 0;
   color: var(--text);
-  font-size: 10px;
+  font-size: 12.5px;
   line-height: 1.3;
 }
 
@@ -3088,13 +3088,13 @@
   margin-top: 1px;
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 6.8px;
+  font-size: 12px;
 }
 
 .energy-sheet__copy {
   margin: 7px 0 0;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 12.5px;
   line-height: 1.5;
 }
 
@@ -3119,12 +3119,12 @@
   background: var(--surface-3);
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 7.5px;
+  font-size: 12px;
 }
 
 .energy-sheet__days small {
   color: var(--faint);
-  font-size: 6.5px;
+  font-size: 12px;
 }
 
 .energy-sheet__link {
@@ -3132,7 +3132,7 @@
   margin-top: 7px;
   color: var(--accent);
   font-family: var(--font-mono);
-  font-size: 7.5px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.03em;
   text-decoration: none;
@@ -3151,7 +3151,7 @@
   margin-left: 3px;
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 12px;
 }
 
 .energy-tax {
@@ -3169,7 +3169,7 @@
   padding: 6px 10px;
   border-top: 1px solid var(--line);
   color: var(--muted);
-  font-size: 9.5px;
+  font-size: 12px;
 }
 
 .energy-tax__row:first-child {
@@ -3179,13 +3179,13 @@
 .energy-tax__row small {
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 7px;
+  font-size: 12px;
 }
 
 .energy-tax__row strong {
   color: var(--text);
   font-family: var(--font-mono);
-  font-size: 9.5px;
+  font-size: 12px;
   font-weight: 500;
   white-space: nowrap;
 }
@@ -3200,7 +3200,7 @@
   margin: 7px 0 0;
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 7px;
+  font-size: 12px;
   line-height: 1.45;
 }
 
@@ -3212,7 +3212,7 @@
 
 .energy-sheet__list li {
   margin-bottom: 5px;
-  font-size: 9.8px;
+  font-size: 12.5px;
   line-height: 1.5;
 }
 
@@ -3227,7 +3227,7 @@
   background: var(--violet-soft);
   color: var(--violet);
   font-family: var(--font-mono);
-  font-size: 7px;
+  font-size: 12px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -3245,7 +3245,7 @@
   max-width: 620px;
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 6.8px;
+  font-size: 12px;
   line-height: 1.45;
 }
 
@@ -3273,7 +3273,7 @@
   }
 
   .appliance-config__hint {
-    font-size: 5.8px;
+    font-size: 12px;
   }
 }
 
@@ -3362,35 +3362,35 @@
 
 .eyebrow,
 .kicker {
-  font-size: 10px;
+  font-size: 12.5px;
   letter-spacing: 0.075em;
 }
 
 .text-button {
   min-height: 38px;
-  font-size: 10px;
+  font-size: 12.5px;
   letter-spacing: 0.055em;
 }
 
 .card-note,
 .view-loading {
-  font-size: 10px;
+  font-size: 12.5px;
   line-height: 1.45;
 }
 
 /* Rail ------------------------------------------------------------------- */
 
 .brand__text span {
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .rail__item {
   gap: 4px;
-  font-size: 10px;
+  font-size: 12.5px;
 }
 
 .rail__status {
-  font-size: 9px;
+  font-size: 12px;
 }
 
 /* Cabeceras de vista ----------------------------------------------------- */
@@ -3422,12 +3422,12 @@
 .agenda-calendars-button {
   min-height: 40px;
   padding: 0 14px;
-  font-size: 9.5px;
+  font-size: 12px;
 }
 
 .segmented button {
   min-height: 40px;
-  font-size: 9.5px;
+  font-size: 12px;
 }
 
 .agenda-nav__button,
@@ -3441,11 +3441,11 @@
 .agenda-feed {
   min-height: 26px;
   padding: 5px 9px;
-  font-size: 9.5px;
+  font-size: 12px;
 }
 
 .agenda-freshness {
-  font-size: 9.5px;
+  font-size: 12px;
 }
 
 .agenda-axis,
@@ -3459,7 +3459,7 @@
 
 .agenda-axis__head span,
 .agenda-axis__track span {
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .agenda-day-head {
@@ -3469,7 +3469,7 @@
 
 .agenda-day-head span,
 .agenda-day-head small {
-  font-size: 9.5px;
+  font-size: 12px;
 }
 
 .agenda-day-head strong {
@@ -3479,7 +3479,7 @@
 .agenda-all-day__chip {
   min-height: 26px;
   padding: 5px 8px;
-  font-size: 9.5px;
+  font-size: 12px;
 }
 
 .agenda-event {
@@ -3488,12 +3488,12 @@
 }
 
 .agenda-event > span {
-  font-size: 9px;
+  font-size: 12px;
   line-height: 1;
 }
 
 .agenda-event strong {
-  font-size: 10.5px;
+  font-size: 12.5px;
   line-height: 1.05;
 }
 
@@ -3503,11 +3503,11 @@
 }
 
 .agenda-calendar--three .agenda-event strong {
-  font-size: 11.5px;
+  font-size: 13px;
 }
 
 .agenda-calendar--day .agenda-event > span {
-  font-size: 9.5px;
+  font-size: 12px;
 }
 
 .agenda-calendar--day .agenda-event strong {
@@ -3515,22 +3515,22 @@
 }
 
 .agenda-calendar--day .agenda-event small {
-  font-size: 10.5px;
+  font-size: 12.5px;
 }
 
 /* Listas ----------------------------------------------------------------- */
 
 .lists-head__count span,
 .lists-head__sync {
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .list-panel__title p {
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .list-panel__count span {
-  font-size: 9.5px;
+  font-size: 12px;
 }
 
 .list-panel__add input {
@@ -3566,24 +3566,24 @@
 
 .list-panel__foot {
   min-height: 46px;
-  font-size: 9.5px;
+  font-size: 12px;
 }
 
 .clear-button {
   min-height: 38px;
-  font-size: 9.5px;
+  font-size: 12px;
 }
 
 .todo-badge {
   min-height: 21px;
   padding: 2px 7px;
-  font-size: 9.5px;
+  font-size: 12px;
 }
 
 .todo-badge--person i {
   width: 16px;
   height: 16px;
-  font-size: 9px;
+  font-size: 12px;
 }
 
 /* Limpieza --------------------------------------------------------------- */
@@ -3594,13 +3594,13 @@
 }
 
 .cleaning-progress__top > span {
-  font-size: 9.5px;
+  font-size: 12px;
 }
 
 .cleaning-reset {
   height: 40px;
   padding: 0 12px;
-  font-size: 9.5px;
+  font-size: 12px;
 }
 
 .cleaning-row {
@@ -3617,7 +3617,7 @@
 }
 
 .cleaning-row__day > div small {
-  font-size: 9.5px;
+  font-size: 12px;
 }
 
 .cleaning-row__day strong {
@@ -3635,22 +3635,22 @@
 }
 
 .cleaning-task__copy strong {
-  font-size: 12.5px;
+  font-size: 13.5px;
 }
 
 .cleaning-task__area {
-  font-size: 9.5px;
+  font-size: 12px;
 }
 
 .cleaning-task__person {
   gap: 5px;
-  font-size: 9.5px;
+  font-size: 12px;
 }
 
 .cleaning-task__person i {
   width: 21px;
   height: 21px;
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .cleaning-row__foot strong {
@@ -3658,11 +3658,11 @@
 }
 
 .cleaning-row__foot span {
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .cleaning-foot {
-  font-size: 9px;
+  font-size: 12px;
 }
 
 /* Tiempo ---------------------------------------------------------------- */
@@ -3672,7 +3672,7 @@
 }
 
 .updated {
-  font-size: 9.5px;
+  font-size: 12px;
 }
 
 .weather-date strong {
@@ -3681,11 +3681,11 @@
 
 .weather-date span,
 .weather-folio {
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .weather-demo {
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .weather-layout {
@@ -3693,16 +3693,16 @@
 }
 
 .weather-now__top {
-  font-size: 9.5px;
+  font-size: 12px;
 }
 
 .weather-now__copy p {
-  font-size: 11.5px;
+  font-size: 13px;
   line-height: 1.5;
 }
 
 .weather-now__extremes span {
-  font-size: 9.5px;
+  font-size: 12px;
 }
 
 .weather-now__extremes strong {
@@ -3710,7 +3710,7 @@
 }
 
 .daylight-label {
-  font-size: 9.5px;
+  font-size: 12px;
 }
 
 .daylight-label strong {
@@ -3718,7 +3718,7 @@
 }
 
 .weather-now__metrics dt {
-  font-size: 9.5px;
+  font-size: 12px;
 }
 
 .weather-now__metrics dd {
@@ -3726,15 +3726,15 @@
 }
 
 .forecast-head p {
-  font-size: 9.5px;
+  font-size: 12px;
 }
 
 .row-day span {
-  font-size: 9.5px;
+  font-size: 12px;
 }
 
 .row-condition {
-  font-size: 12px;
+  font-size: 13.5px;
 }
 
 .row-max {
@@ -3742,15 +3742,15 @@
 }
 
 .row-min {
-  font-size: 10.5px;
+  font-size: 12.5px;
 }
 
 .row-rain {
-  font-size: 9.5px;
+  font-size: 12px;
 }
 
 .forecast-foot {
-  font-size: 9.5px;
+  font-size: 12px;
 }
 
 /* Próximas horas (antes radar) ------------------------------------------ */
@@ -3773,7 +3773,7 @@
   margin: 0;
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.07em;
   text-transform: uppercase;
 }
@@ -3826,7 +3826,7 @@
 .hourly-time {
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 13.5px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -3883,7 +3883,7 @@
   flex: none;
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 13px;
   font-variant-numeric: tabular-nums;
   text-align: right;
 }
@@ -3896,21 +3896,21 @@
 
 .energy-kicker,
 .energy-source {
-  font-size: 9.5px;
+  font-size: 12px;
 }
 
 .energy-updated {
-  font-size: 9.5px;
+  font-size: 12px;
 }
 
 .energy-demo {
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .energy-button {
   min-height: 36px;
   padding: 0 11px;
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .energy-icon-button {
@@ -3921,7 +3921,7 @@
 .energy-flag,
 .energy-band {
   padding: 4px 8px;
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .energy-kicker svg {
@@ -3929,20 +3929,20 @@
 }
 
 .elec-now__label {
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .elec-now__price > strong small {
-  font-size: 9.5px;
+  font-size: 12px;
 }
 
 .elec-now__stamp {
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .elec-metrics dt,
 .elec-metrics span {
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .elec-metrics dd {
@@ -3950,35 +3950,35 @@
 }
 
 .elec-chart-title small {
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .elec-tabs button {
   min-height: 34px;
   padding: 4px 11px;
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .elec-chart__axis,
 .elec-legend__item {
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .elec-legend__note {
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .elec-foot > span {
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .elec-foot > span small {
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .elec-foot .text-button {
   min-height: 34px;
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .appliance-card {
@@ -4000,7 +4000,7 @@
   justify-content: center;
   gap: 6px;
   padding: 6px 8px;
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .appliance-tabs button span {
@@ -4009,11 +4009,11 @@
 
 .appliance-best__head,
 .appliance-best__numbers span {
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .appliance-saving {
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .appliance-best__window {
@@ -4021,12 +4021,12 @@
 }
 
 .appliance-best__numbers small {
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .appliance-compare,
 .appliance-compare strong {
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .appliance-config__row {
@@ -4042,11 +4042,11 @@
 }
 
 .appliance-config__label {
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .appliance-config__hint {
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .energy-stepper {
@@ -4055,33 +4055,33 @@
 }
 
 .energy-stepper strong {
-  font-size: 10px;
+  font-size: 12.5px;
 }
 
 .energy-stepper strong small {
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .appliance-flex button {
   min-height: 34px;
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .appliance-section-title {
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .appliance-alts li {
   padding: 4px 0;
-  font-size: 9.5px;
+  font-size: 12px;
 }
 
 .appliance-alts li small {
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .appliance-alts li strong {
-  font-size: 9.5px;
+  font-size: 12px;
 }
 
 .appliance-tomorrow {
@@ -4093,48 +4093,48 @@
 }
 
 .appliance-tomorrow__best span {
-  font-size: 9.5px;
+  font-size: 12px;
 }
 
 .appliance-tomorrow__best small {
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .appliance-tomorrow p {
-  font-size: 9.5px;
+  font-size: 12px;
 }
 
 /* Hojas de detalle ------------------------------------------------------- */
 
 .event-sheet__calendar {
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .event-sheet__meta {
-  font-size: 10.5px;
+  font-size: 12.5px;
 }
 
 .event-sheet__note {
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .energy-sheet__grid dt {
-  font-size: 8.5px;
+  font-size: 12px;
 }
 
 .energy-sheet__grid dd {
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .energy-sheet__grid dd small,
 .energy-sheet__note,
 .energy-sheet__foot span {
-  font-size: 8.5px;
+  font-size: 12px;
 }
 
 .energy-sheet__copy,
 .energy-sheet__list li {
-  font-size: 11px;
+  font-size: 13px;
 }
 
 @media (max-width: 1180px) {
@@ -4166,7 +4166,7 @@
   }
 
   .cleaning-task__person {
-    font-size: 9px;
+    font-size: 12px;
   }
 }
 
@@ -4287,7 +4287,7 @@
   background: none;
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -4302,7 +4302,7 @@
   background: var(--surface-3);
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 13.5px;
   letter-spacing: 0;
 }
 
@@ -4321,7 +4321,7 @@
   gap: 12px;
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.07em;
   text-transform: uppercase;
 }
@@ -4444,7 +4444,7 @@
   gap: 6px;
   color: var(--tone);
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 13.5px;
   letter-spacing: 0.07em;
   text-transform: uppercase;
 }
@@ -4515,7 +4515,7 @@
   margin: 0 0 4px;
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -4552,7 +4552,7 @@
 .today-entry__time {
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 13.5px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -4574,7 +4574,7 @@
   border-radius: 999px;
   background: var(--tone-soft);
   color: var(--tone);
-  font-size: 12px;
+  font-size: 13.5px;
   white-space: nowrap;
 }
 
@@ -4744,7 +4744,7 @@
 .today-power strong small {
   color: var(--muted);
   font-family: inherit;
-  font-size: 12px;
+  font-size: 13.5px;
 }
 
 .today-power > svg:last-child {
@@ -4754,4 +4754,560 @@
 /* En Hoy el reloj grande ya está en la tarjeta: el del rail sobra. */
 .app--home .rail__clock {
   display: none;
+}
+
+/* Saludo de Hoy ----------------------------------------------------------- */
+
+.today-now__head {
+  align-items: flex-start;
+}
+
+.today-now__head .today-now__date {
+  padding-top: 5px;
+}
+
+.today-now__greeting {
+  display: -webkit-box;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: var(--text);
+  font-family: var(--font-serif);
+  font-size: 23px;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  text-transform: none;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.today-now__greeting strong {
+  color: var(--accent);
+  font-weight: 400;
+}
+
+.today-now__greeting span {
+  font-style: italic;
+}
+
+.today-now__date {
+  flex: none;
+}
+
+.today-now__date em {
+  color: var(--accent);
+  font-style: normal;
+}
+
+/* Racha de limpieza ------------------------------------------------------- */
+
+.cleaning-streak {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-right: 16px;
+  border-right: 1px solid var(--line);
+}
+
+.cleaning-streak__top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cleaning-streak__top strong {
+  color: var(--faint);
+  font-family: var(--font-serif);
+  font-size: 38px;
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  line-height: 0.78;
+}
+
+.cleaning-streak.is-on .cleaning-streak__top strong {
+  color: var(--amber);
+}
+
+.cleaning-streak__top span {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  line-height: 1.15;
+  text-transform: uppercase;
+}
+
+.cleaning-streak__leader {
+  color: var(--muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+/* Decoración de temporada (SeasonDecor) ----------------------------------- */
+
+.season-decor {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 112px;
+  z-index: 2;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.season-decor__item {
+  position: absolute;
+  opacity: 0.85;
+}
+
+.season-decor__garland {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 17px;
+}
+
+.season-decor__web {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 96px;
+  height: 96px;
+  color: rgba(60, 52, 64, 0.38);
+}
+
+.season-decor--halloween .season-decor__web {
+  width: 150px;
+  height: 150px;
+}
+
+.app.is-night .season-decor,
+.app.is-night .season-decor__web {
+  opacity: 0.45;
+}
+
+/* En la noche de Halloween la casa entera se pone naranja. */
+.app.season-halloween {
+  --accent: #e0761f;
+  --accent-soft: rgba(224, 118, 31, 0.12);
+}
+
+.app.season-navidad {
+  --accent: #c22f3c;
+  --accent-soft: rgba(194, 47, 60, 0.1);
+}
+
+.season-badge {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.season-badge svg {
+  flex: none;
+  transform: rotate(-8deg);
+}
+
+.app.is-night .season-badge {
+  opacity: 0.45;
+}
+
+/* Iconos del tiempo: relleno de nubes y luna en modo noche. */
+.app.is-night {
+  --weather-cloud: #56636f;
+  --weather-moon: #d9c27a;
+  --weather-snow: #e8eef4;
+}
+
+/* Agenda: eventos cortos en una línea (hora + título) */
+
+.agenda-event.is-short {
+  flex-direction: row;
+  align-items: center;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.agenda-event.is-short > span {
+  flex: none;
+  margin-right: 5px;
+}
+
+.agenda-event.is-short strong {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Días de limpieza y cumpleaños (editor) ---------------------------------- */
+
+.cleaning-days-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cleaning-days-picker button {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--muted);
+  font: inherit;
+  font-size: 15px;
+}
+
+.cleaning-days-picker button.is-on {
+  border-color: var(--mint);
+  background: var(--mint-soft);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.birthday-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--pink);
+}
+
+.birthday-picker select {
+  height: 40px;
+  padding: 0 6px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+}
+
+.cleaning-row.is-off {
+  opacity: 0.6;
+}
+
+.cleaning-row__off {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0 18px;
+  color: var(--faint);
+  font-family: var(--font-serif);
+  font-size: 19px;
+  font-style: italic;
+  grid-column: 2 / -1;
+}
+
+/* Lo siguiente: avisos con acción */
+
+.today-next__add,
+.today-next__added {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 5px;
+  min-height: 36px;
+  margin-left: auto;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--tone);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.today-next__added {
+  background: none;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+/* Notas de nevera --------------------------------------------------------- */
+
+.postit {
+  position: relative;
+  margin: 0;
+  padding: 18px 16px 10px;
+  border-radius: 3px 3px 14px 3px;
+  background: var(--postit, #f8e6a8);
+  box-shadow: 0 6px 14px -8px rgba(60, 40, 10, 0.45);
+  color: #3a2f1d;
+  transform: rotate(-1.2deg);
+}
+
+.postit--amber { --postit: #f8e3a0; }
+.postit--pink { --postit: #f7cfdc; }
+.postit--mint { --postit: #cfeadf; }
+.postit--lilac { --postit: #ded6f6; }
+
+.postit__tape {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  width: 62px;
+  height: 18px;
+  margin-left: -31px;
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  transform: rotate(2deg);
+}
+
+.postit blockquote {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  font-family: var(--font-serif);
+  font-size: 21px;
+  font-style: italic;
+  line-height: 1.12;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.postit figcaption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 6px;
+  color: rgba(58, 47, 29, 0.7);
+  font-size: 13px;
+}
+
+.postit figcaption button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 34px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.5);
+  color: #3a2f1d;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.postit--compact {
+  transform: none;
+}
+
+.postit--compact blockquote {
+  font-size: 18px;
+}
+
+.today-notes {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 6px;
+}
+
+.today-notes__more,
+.today-notes__empty {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 13px;
+}
+
+.today-notes__more {
+  align-self: flex-end;
+}
+
+.today-notes__empty {
+  flex: none;
+  justify-content: center;
+  min-height: 46px;
+  border: 1.5px dashed var(--line-strong);
+  border-radius: 14px;
+}
+
+.notes-sheet {
+  width: min(760px, 92vw);
+}
+
+.notes-sheet__form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 22px;
+}
+
+.notes-sheet__form textarea {
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--postit, #fdf3cf);
+  color: #3a2f1d;
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-style: italic;
+  resize: none;
+  outline: none;
+}
+
+.notes-sheet__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.notes-sheet__chips,
+.notes-sheet__colors {
+  display: flex;
+  gap: 6px;
+}
+
+.notes-sheet__chips button {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--muted);
+  font: inherit;
+  font-size: 14px;
+}
+
+.notes-sheet__chips button.is-on {
+  border-color: var(--tone);
+  background: var(--tone-soft);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.postit-swatch {
+  width: 34px;
+  height: 34px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background: var(--postit);
+}
+
+.postit-swatch.is-on {
+  border-color: var(--text);
+}
+
+.notes-sheet__count {
+  margin-left: auto;
+  color: var(--faint);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.notes-sheet__submit {
+  min-height: 44px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--accent);
+  color: #fffaf2;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.notes-sheet__submit:disabled {
+  opacity: 0.4;
+}
+
+.notes-sheet__wall {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  max-height: 300px;
+  padding: 18px 22px 22px;
+  overflow-y: auto;
+}
+
+.notes-sheet__empty {
+  color: var(--faint);
+  font-size: 15px;
+}
+
+/* Pantalla de noche ------------------------------------------------------- */
+
+.night-panel {
+  position: absolute;
+  right: 0;
+  bottom: 70px;
+  left: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  color: rgba(242, 236, 223, 0.78);
+}
+
+.night-panel dl {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 0;
+}
+
+.night-panel dl div {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+
+.night-panel dt {
+  width: 92px;
+  color: rgba(242, 236, 223, 0.45);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.night-panel dd {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 26px;
+}
+
+.moon-glyph {
+  flex: none;
+  --moon-dark: #24252c;
+  --moon-lit: #d9cfa8;
+}
+
+.app.season-feria {
+  --accent: #d7263d;
+  --accent-soft: rgba(215, 38, 61, 0.1);
+}
+
+.app.season-cumple {
+  --accent: #d92363;
+}
+
+/* Con el cumpleaños, cada persona ocupa una fila entera del editor. */
+.people-editor {
+  grid-template-columns: 1fr;
+}
+
+.people-editor__row {
+  grid-template-columns: 34px minmax(0, 1fr) 110px auto auto;
 }

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
+  Cake,
   Check,
   LoaderCircle,
   Plus,
@@ -37,9 +38,51 @@ function draftFromTask(task) {
   };
 }
 
+const MONTHS = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+
+// Cumpleaños como MM-DD con dos desplegables: en el kiosco es más cómodo que
+// teclear una fecha.
+function BirthdayPicker({ name, value, onChange }) {
+  const [month = "", day = ""] = value ? value.split("-") : [];
+  function update(nextMonth, nextDay) {
+    onChange(nextMonth && nextDay ? `${nextMonth}-${nextDay}` : "");
+  }
+  const pad = (number) => String(number).padStart(2, "0");
+  return (
+    <span className="birthday-picker" title={`Cumpleaños de ${name}`}>
+      <Cake size={15} strokeWidth={1.9} aria-hidden="true" />
+      <select
+        aria-label={`Día del cumpleaños de ${name}`}
+        value={day}
+        onChange={(event) => update(month || "01", event.target.value)}
+      >
+        <option value="">—</option>
+        {Array.from({ length: 31 }, (_, index) => (
+          <option key={index} value={pad(index + 1)}>
+            {index + 1}
+          </option>
+        ))}
+      </select>
+      <select
+        aria-label={`Mes del cumpleaños de ${name}`}
+        value={month}
+        onChange={(event) => update(event.target.value, day || "01")}
+      >
+        <option value="">—</option>
+        {MONTHS.map((label, index) => (
+          <option key={label} value={pad(index + 1)}>
+            {label}
+          </option>
+        ))}
+      </select>
+    </span>
+  );
+}
+
 export function CleaningEditor({ open, onClose, cleaning }) {
-  const { people, tasks, addTask, updateTask, removeTask, updatePerson } =
+  const { people, addTask, updateTask, removeTask, updatePerson, days, setDays } =
     cleaning;
+  const tasks = cleaning.allTasks || cleaning.tasks;
   const [drafts, setDrafts] = useState({});
   const [personDrafts, setPersonDrafts] = useState({});
   const [newTask, setNewTask] = useState({
@@ -220,6 +263,7 @@ export function CleaningEditor({ open, onClose, cleaning }) {
       await updatePerson(person.id, {
         name: draft.name.trim(),
         tone: draft.tone,
+        birthday: draft.birthday || null,
       });
       flashSaved(`person-${person.id}`);
     } catch (caught) {
@@ -280,7 +324,7 @@ export function CleaningEditor({ open, onClose, cleaning }) {
                 <Users size={16} strokeWidth={1.9} aria-hidden="true" />
                 Personas
               </h3>
-              <span>Nombre y color en la pantalla</span>
+              <span>Nombre, color y cumpleaños</span>
             </div>
             <div className="people-editor">
               {people.map((person) => {
@@ -331,6 +375,16 @@ export function CleaningEditor({ open, onClose, cleaning }) {
                         ))}
                       </select>
                     </label>
+                    <BirthdayPicker
+                      name={person.name}
+                      value={draft.birthday || ""}
+                      onChange={(birthday) =>
+                        setPersonDrafts((current) => ({
+                          ...current,
+                          [person.id]: { ...draft, birthday },
+                        }))
+                      }
+                    />
                     <button
                       type="button"
                       className="feature-mini-button"
@@ -359,8 +413,36 @@ export function CleaningEditor({ open, onClose, cleaning }) {
 
           <section className="feature-section">
             <div className="feature-section__head">
+              <h3>Días de limpieza</h3>
+              <span>Los demás días no cuentan para la racha</span>
+            </div>
+            <div className="cleaning-days-picker">
+              {DAYS.map((dayLabel, dayIndex) => {
+                const on = days.includes(dayIndex);
+                return (
+                  <button
+                    type="button"
+                    key={dayLabel}
+                    className={on ? "is-on" : ""}
+                    aria-pressed={on}
+                    disabled={on && days.length === 1}
+                    onClick={() =>
+                      setDays(
+                        on ? days.filter((day) => day !== dayIndex) : [...days, dayIndex]
+                      ).catch(() => {})
+                    }
+                  >
+                    {dayLabel}
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
+          <section className="feature-section">
+            <div className="feature-section__head">
               <h3>Cuadrante semanal</h3>
-              <span>{tasks.length} tareas · dos por día</span>
+              <span>{tasks.length} tareas</span>
             </div>
 
             <div className="cleaning-editor__days">

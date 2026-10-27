@@ -19,6 +19,41 @@ import { formatFreshnessTime } from "../lib/freshness";
 import { CheckMark } from "./CheckMark";
 import { CleaningEditor } from "./CleaningEditor";
 
+// Racha de semanas completas y quién lleva más tareas hechas esta semana.
+function CleaningStreak({ cleaning }) {
+  const tally = cleaning.people
+    .map((person) => ({
+      person,
+      done: cleaning.tasks.filter((task) => task.done && task.personId === person.id).length,
+    }))
+    .sort((a, b) => b.done - a.done);
+  const leader =
+    tally.length > 1 && tally[0].done > tally[1].done ? tally[0] : null;
+  const weeks = cleaning.streak;
+
+  return (
+    <div className={`cleaning-streak${weeks ? " is-on" : ""}`}>
+      <div className="cleaning-streak__top">
+        <strong>{weeks}</strong>
+        <span>
+          {weeks === 1 ? "semana" : "semanas"}
+          <br />
+          {weeks ? "seguidas" : "sin racha"}
+        </span>
+      </div>
+      <span className="cleaning-streak__leader">
+        {cleaning.weekComplete
+          ? "¡Semana completa!"
+          : leader
+            ? `Va ganando ${leader.person.name} · ${tally.map((entry) => entry.done).join(" a ")}`
+            : tally.some((entry) => entry.done)
+              ? `Empate a ${tally[0].done}`
+              : "Aún no hay nada hecho"}
+      </span>
+    </div>
+  );
+}
+
 export function CleaningView({ now, cleaning }) {
   const [editorOpen, setEditorOpen] = useState(false);
   const days = weekDays(now);
@@ -39,6 +74,7 @@ export function CleaningView({ now, cleaning }) {
         </div>
 
         <div className="cleaning-summary">
+          <CleaningStreak cleaning={cleaning} />
           <div className="cleaning-progress">
             <div className="cleaning-progress__top">
               <strong>
@@ -85,6 +121,26 @@ export function CleaningView({ now, cleaning }) {
           const dayTasks = cleaning.tasks.filter((task) => task.day === dayIndex);
           const dayDone = dayTasks.filter((task) => task.done).length;
           const today = isSameDay(date, now);
+          const off = !cleaning.days.includes(dayIndex);
+
+          if (off) {
+            return (
+              <section
+                className={`cleaning-row is-off${today ? " is-today" : ""}`}
+                key={date.toISOString()}
+                aria-label={`${weekdayLong(date)} ${date.getDate()}, día libre`}
+              >
+                <header className="cleaning-row__day">
+                  <div>
+                    <span>{weekdayLong(date)}</span>
+                    <small>{monthShort(date)}</small>
+                  </div>
+                  <strong>{date.getDate()}</strong>
+                </header>
+                <p className="cleaning-row__off">Día libre: hoy no se limpia.</p>
+              </section>
+            );
+          }
 
           return (
             <section

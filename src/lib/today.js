@@ -6,6 +6,7 @@ import {
   currentPriceState,
   formatHour,
 } from "./energy";
+import { houseReminders } from "./reminders";
 import { hourLabel, isRainyHour, nextHours } from "./weather";
 
 // Lógica de la pantalla Hoy: qué es «lo siguiente» y qué entra en la línea
@@ -70,7 +71,8 @@ export function nextItems({ now, events, weather, electricity, cleaning }) {
     });
   }
 
-  const rainy = nextHours(weather, now, 8).find(isRainyHour);
+  // Lluvia en lo que queda de día (hasta medianoche, como mucho 14 horas).
+  const rainy = nextHours(weather, now, Math.min(14, 24 - now.getHours())).find(isRainyHour);
   if (rainy) {
     items.push({
       id: "rain",
@@ -95,6 +97,8 @@ export function nextItems({ now, events, weather, electricity, cleaning }) {
       detail: `${cleaningToday.length} ${cleaningToday.length === 1 ? "tarea pendiente" : "tareas pendientes"}`,
     });
   }
+
+  items.push(...houseReminders({ now, cleaning }));
 
   const power = cheapPower(electricity, now);
   if (power) {

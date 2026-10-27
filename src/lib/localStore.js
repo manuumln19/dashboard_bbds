@@ -96,3 +96,28 @@ export function saveDemoCleaning(state) {
     // La limpieza funciona igual; solo se pierde la persistencia.
   }
 }
+
+const NOTES_KEY = "bbds.demo.notes.v1";
+
+export function loadDemoNotes() {
+  const saved = readArray(NOTES_KEY);
+  if (saved) return saved;
+  const hour = 60 * 60 * 1000;
+  return [
+    {
+      id: "note-demo-1",
+      text: "Hay tortilla en la nevera. Para los dos, no te la comas entera.",
+      personId: "manu",
+      color: "pink",
+      createdAt: new Date(Date.now() - 2 * hour).toISOString(),
+    },
+  ];
+}
+
+export function saveDemoNotes(notes) {
+  try {
+    window.localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
+  } catch {
+    // Las notas se ven igual; solo se pierden al recargar.
+  }
+}

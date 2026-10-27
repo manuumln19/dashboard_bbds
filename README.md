@@ -120,7 +120,9 @@ Rutas principales: `GET /api/cleaning?week=YYYY-MM-DD`, `PATCH /api/cleaning/che
 
 `WeatherView` compone las condiciones actuales, la previsión de siete días y `HourlyPanel` (las próximas 12 horas de Open-Meteo). Open-Meteo devuelve las horas en `VITE_TIMEZONE` sin desfase; `src/lib/weather.js` las compara como texto para no depender de la zona horaria del aparato.
 
-El salvapantallas lee un **álbum compartido de iCloud** con «Sitio web público» activado. El enlace se elige desde el propio salvapantallas (botón del engranaje) y se guarda en D1 (`app_meta`); `ICLOUD_ALBUM_URL` sirve de respaldo. El Worker lee el álbum, elige la versión de cada foto más pequeña que cubre 1280 px y la sirve desde `/api/photos/:id` con caché, porque las URLs de Apple caducan. Lo más cómodo es pegar el enlace abriendo BBDS en el móvil o el PC: la pantalla lo recoge sola. En demo se usan las fotos de `src/assets/gallery/`.
+El salvapantallas lee un **álbum compartido de iCloud** con «Sitio web público» activado (enlaces `https://photos.icloud.com/shared/album/…` o los antiguos `https://www.icloud.com/sharedalbum/#…`).
+
+La decoración de temporada (hojas en otoño, murciélagos y calabazas en Halloween, luces en Navidad…) y el saludo de Hoy salen de `src/lib/season.js` y `src/lib/greeting.js`. También marca las fiestas de casa: San Antón, la Capilla y San Lucas en Jaén, Semana Santa, la feria de Torreperogil (Paco) y San Miguel en Úbeda (Manu), y los cumpleaños que se guardan en Limpieza → Editar. Las fechas de las ferias son aproximadas y fijas en el código. Para ver una temporada sin esperar a su fecha: `?temporada=navidad` (también `otono`, `spooky`, `halloween`, `invierno`, `amor`, `primavera`, `verano`, `feria`, `lumbres`, `semanasanta`, `cumple`). «Lo siguiente» en Hoy añade avisos de calendario (cambio de hora, radiadores, filtros, uvas), cumpleaños cercanos y el ganador de la limpieza del mes. De noche, el salvapantallas enseña la fase de la luna, la mínima y lo primero de la agenda. El enlace se elige desde el propio salvapantallas (botón del engranaje) y se guarda en D1 (`app_meta`); `ICLOUD_ALBUM_URL` sirve de respaldo. El Worker lee el álbum, elige la versión de cada foto más pequeña que cubre 1280 px y la sirve desde `/api/photos/:id` con caché, porque las URLs de Apple caducan. Lo más cómodo es pegar el enlace abriendo BBDS en el móvil o el PC: la pantalla lo recoge sola. En demo se usan las fotos de `src/assets/gallery/`.
 
 ## Energía, PVPC y recomendaciones
 
@@ -265,10 +267,14 @@ X-Sensor-Token: dev-sensor-token
 | `DELETE` | `/api/lists/:id` | Borra un elemento. |
 | `DELETE` | `/api/lists?list=shopping&done=1` | Limpia los hechos de una lista. |
 | `GET` | `/api/people` | Manu y Paco con tono e iniciales. |
-| `PATCH` | `/api/people/:id` | `{ name?, tone?, initials? }`. |
-| `GET` | `/api/cleaning?week=YYYY-MM-DD` | Cuadrante de esa semana y sus checks. |
+| `PATCH` | `/api/people/:id` | `{ name?, tone?, initials?, birthday? }`. `birthday` es `MM-DD` o `null`. |
+| `GET` | `/api/cleaning?week=YYYY-MM-DD` | Cuadrante de esa semana, sus checks, `days` (días de limpieza, lunes = 0), `streak` (semanas completas seguidas antes de esa, contando solo esos días) y `lastMonth` (tareas hechas por persona el mes anterior). |
 | `PATCH` | `/api/cleaning/checks` | `{ weekKey, taskId, done }`. |
 | `POST` | `/api/cleaning/reset` | `{ weekKey }`; desmarca la semana. |
+| `PUT` | `/api/cleaning/days` | `{ days: [0..6] }`; qué días se limpia. Se guarda en `app_meta`. |
+| `GET` | `/api/notes` | Notas de nevera, las 30 más recientes. |
+| `POST` | `/api/notes` | `{ text, personId?, color? }`; texto de hasta 160 caracteres. |
+| `DELETE` | `/api/notes/:id` | Quita una nota («Visto»). |
 | `POST` | `/api/cleaning/tasks` | `{ day, personId, area, title }`; crea una tarea. |
 | `PATCH` | `/api/cleaning/tasks/:id` | Edita día, persona, zona o título. |
 | `DELETE` | `/api/cleaning/tasks/:id` | Borra una tarea y sus checks. |
