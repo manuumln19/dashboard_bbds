@@ -121,3 +121,17 @@ export function saveDemoNotes(notes) {
     // Las notas se ven igual; solo se pierden al recargar.
   }
 }
+
+const MENU_KEY = "bbds.demo.menu.v1";
+
+export function loadDemoMenu() {
+  return readArray(MENU_KEY);
+}
+
+export function saveDemoMenu(days) {
+  try {
+    window.localStorage.setItem(MENU_KEY, JSON.stringify(days));
+  } catch {
+    // Sin persistencia, el menú dura hasta recargar.
+  }
+}

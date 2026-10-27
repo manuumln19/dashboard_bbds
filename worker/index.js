@@ -1091,6 +1091,50 @@ async function cleaningLastMonth(env) {
   return { month, tally: (results || []).map((row) => ({ personId: row.personId, done: row.done })) };
 }
 
+// --- Menú semanal -------------------------------------------------------------
+// Siete días (lunes = 0) con plato e ingredientes. Se guarda como JSON en
+// app_meta. La interfaz está apagada hasta que VITE_MENU_ENABLED sea true.
+
+const MENU_KEY = "menu.week";
+
+function normalizeMenu(raw) {
+  const days = Array.isArray(raw) ? raw.slice(0, 7) : [];
+  return Array.from({ length: 7 }, (_, index) => {
+    const day = days[index] || {};
+    const dish = normalizeText(day.dish).slice(0, 80);
+    const ingredients = (Array.isArray(day.ingredients) ? day.ingredients : [])
+      .map((item) => normalizeText(item).slice(0, 60))
+      .filter(Boolean)
+      .slice(0, 15);
+    return { dish, ingredients };
+  });
+}
+
+async function handleMenu(request, env) {
+  requireDashboard(request, env);
+  if (request.method === "GET") {
+    const row = await env.DB.prepare("SELECT value FROM app_meta WHERE key = ?").bind(MENU_KEY).first();
+    let days = [];
+    try {
+      days = row ? JSON.parse(row.value) : [];
+    } catch {
+      days = [];
+    }
+    return json({ days: normalizeMenu(days) });
+  }
+  if (request.method === "PUT") {
+    const body = await readJson(request);
+    const days = normalizeMenu(body.days);
+    await env.DB.prepare(
+      "INSERT INTO app_meta (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value"
+    )
+      .bind(MENU_KEY, JSON.stringify(days))
+      .run();
+    return json({ days });
+  }
+  throw new HttpError(405, "Método no permitido");
+}
+
 // --- Notas de nevera ---------------------------------------------------------
 // Mensajes cortos entre vosotros. Hoy enseña las últimas; se quitan a mano.
 
@@ -2181,6 +2225,10 @@ async function route(request, env, url, ctx) {
     /^\/api\/people\/[a-z0-9_-]+$/.test(url.pathname)
   ) {
     return handlePeople(request, env, url);
+  }
+
+  if (url.pathname === "/api/menu") {
+    return handleMenu(request, env);
   }
 
   if (url.pathname === "/api/notes" || /^\/api\/notes\/[a-z0-9_-]+$/.test(url.pathname)) {

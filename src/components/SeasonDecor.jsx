@@ -1,4 +1,7 @@
-import { memo } from "react";
+import { createContext, memo, useContext } from "react";
+
+// La temporada activa, para que cualquier tarjeta pueda ponerse su detalle.
+export const SeasonContext = createContext("otono");
 
 // Dibujos de temporada en los márgenes de la pantalla (las franjas de arriba y
 // abajo que dejan libres las vistas). Son SVG estáticos: nada se anima, para
@@ -29,9 +32,9 @@ const SHAPES = {
   ),
   ghost: (
     <>
-      <path d="M5 21V11a7 7 0 0114 0v10l-2.3-1.8L14.3 21 12 19.2 9.7 21l-2.4-1.8z" />
-      <circle cx="9.5" cy="11" r="1.1" fill="var(--bg)" />
-      <circle cx="14.5" cy="11" r="1.1" fill="var(--bg)" />
+      <path d="M5 21V11a7 7 0 0114 0v10l-2.3-1.8L14.3 21 12 19.2 9.7 21l-2.4-1.8z" stroke="rgba(60, 40, 80, 0.45)" strokeWidth="0.9" />
+      <circle cx="9.5" cy="11" r="1.2" fill="#2b2530" />
+      <circle cx="14.5" cy="11" r="1.2" fill="#2b2530" />
     </>
   ),
   snow: (
@@ -102,6 +105,39 @@ const SHAPES = {
       <circle cx="11" cy="13" r="1.6" />
       <rect x="15" y="15" width="4" height="2" rx="0.6" transform="rotate(50 17 16)" />
       <circle cx="6" cy="18" r="1.3" />
+    </>
+  ),
+  tree: (
+    <>
+      <path d="M12 2l5 6h-2.5l4 5h-2.8L20 18H4l4.3-5H5.5l4-5H7z" />
+      <rect x="10.6" y="18" width="2.8" height="4" fill="#7a5233" />
+    </>
+  ),
+  cake: (
+    <>
+      <rect x="4" y="12" width="16" height="9" rx="1.5" />
+      <path d="M4 15c2 1.5 4-1.5 6 0s4-1.5 6 0 3 0 4-.5" fill="none" stroke="#fff" strokeWidth="1.3" opacity="0.8" />
+      <rect x="7.5" y="7" width="1.6" height="5" fill="#f3e3c3" />
+      <rect x="11.2" y="7" width="1.6" height="5" fill="#f3e3c3" />
+      <rect x="14.9" y="7" width="1.6" height="5" fill="#f3e3c3" />
+      <path d="M8.3 4.2c.5.9 1 1.3 1 2a1 1 0 01-2 0c0-.7.5-1.1 1-2zM12 4.2c.5.9 1 1.3 1 2a1 1 0 01-2 0c0-.7.5-1.1 1-2zM15.7 4.2c.5.9 1 1.3 1 2a1 1 0 01-2 0c0-.7.5-1.1 1-2z" fill="#f0a52a" />
+    </>
+  ),
+  acorn: (
+    <>
+      <path d="M6 10c0-3 3-4.5 6-4.5s6 1.5 6 4.5z" fill="#7a5233" />
+      <path d="M7 10h10c0 5-2.5 9-5 10.5C9.5 19 7 15 7 10z" />
+      <path d="M12 5.5V3" fill="none" stroke="#5a3d25" strokeWidth="1.4" strokeLinecap="round" />
+    </>
+  ),
+  snowman: (
+    <>
+      <circle cx="12" cy="16" r="6" fill="#f6f8fb" stroke="currentColor" strokeWidth="0.8" />
+      <circle cx="12" cy="7.5" r="4" fill="#f6f8fb" stroke="currentColor" strokeWidth="0.8" />
+      <path d="M12 7.6l3 1-3 .5z" fill="#ef8f1f" />
+      <circle cx="10.6" cy="6.6" r="0.6" fill="#2b2530" />
+      <circle cx="13.2" cy="6.6" r="0.6" fill="#2b2530" />
+      <path d="M8.5 10.6h7l-1 1.6h-5z" fill="#c22f3c" />
     </>
   ),
   sun: (
@@ -276,5 +312,50 @@ export function SeasonBadge({ seasonId }) {
         <g fill="currentColor">{SHAPES[badge[0]]}</g>
       </svg>
     </div>
+  );
+}
+
+// Escenas para el hueco libre de la tarjeta de la hora: varias piezas
+// colocadas a mano en un lienzo de 150 × 96.
+const SCENES = {
+  otono: [["oak", 8, 44, 42, "#c4622d", -20], ["leaf", 52, 52, 36, "#d8962b", 15], ["acorn", 92, 50, 38, "#a8743f", 8], ["leaf", 104, 8, 30, "#9a3f22", -30], ["leaf", 40, 6, 26, "#e0a948", 40]],
+  spooky: [["pumpkin", 18, 40, 52, "#e0761f", 0], ["bat", 82, 10, 40, "#2b2530", -10], ["bat", 110, 38, 26, "#2b2530", 12], ["leaf", 82, 62, 28, "#c4622d", 20]],
+  halloween: [["pumpkin", 2, 34, 62, "#e0761f", -4], ["pumpkin", 60, 52, 44, "#ea8a2c", 6], ["ghost", 100, 18, 44, "#f4efe6", 0], ["bat", 50, 2, 38, "#2b2530", -12], ["bat", 118, 0, 26, "#2b2530", 16]],
+  navidad: [["tree", 40, 6, 86, "#2f7d57", 0], ["star", 66, 0, 26, "#c8a24a", 0], ["bauble", 6, 54, 34, "#c22f3c", -6], ["bauble", 112, 58, 32, "#3f7cc4", 8], ["snow", 118, 10, 22, "#9fc3d9", 0]],
+  invierno: [["snowman", 30, 12, 80, "#7da2bf", 0], ["snow", 104, 10, 28, "#8fb6d1", 0], ["snow", 6, 20, 22, "#b9cfdd", 20], ["snow", 118, 56, 20, "#7da2bf", -10]],
+  amor: [["heart", 30, 18, 62, "#d92363", -8], ["heart", 92, 8, 36, "#ee7aa0", 12], ["heart", 98, 54, 28, "#b81d52", -14]],
+  primavera: [["flower", 12, 34, 50, "#e889b0", 0], ["flower", 70, 46, 40, "#9b84dd", 15], ["flower", 104, 14, 34, "#e889b0", -10], ["leaf", 56, 8, 28, "#6aa56c", 30]],
+  verano: [["sun", 70, 4, 64, "#f0a52a", 0], ["lemon", 10, 46, 44, "#f2c230", -12], ["lemon", 52, 62, 30, "#e8cf3a", 20]],
+  feria: [["farolillo", 4, 6, 44, "#d7263d", -4], ["farolillo", 40, 20, 40, "#2f7d57", 4], ["farolillo", 74, 4, 46, "#e7b53c", -2], ["farolillo", 112, 22, 36, "#3f7cc4", 6]],
+  lumbres: [["flame", 28, 10, 74, "#e0611f", 0], ["flame", 90, 34, 46, "#d7392b", 6], ["flame", 4, 46, 36, "#ef8f1f", -6]],
+  semanasanta: [["candle", 20, 14, 70, "#e7a93c", 0], ["candle", 66, 26, 58, "#d98c2b", 0], ["candle", 106, 36, 48, "#e7a93c", 0]],
+  cumple: [["cake", 36, 32, 64, "#ee7aa0", 0], ["balloon", 4, 2, 46, "#3f7cc4", -8], ["balloon", 104, 0, 44, "#e7b53c", 10], ["confetti", 104, 54, 34, "#725fc1", 0]],
+};
+
+export function SeasonScene({ seasonId }) {
+  const scene = SCENES[seasonId];
+  if (!scene) return null;
+  return (
+    <svg className={`season-scene season-scene--${seasonId}`} viewBox="0 0 150 96" aria-hidden="true">
+      {scene.map(([shape, x, y, size, color, rotate], index) => (
+        <g key={index} transform={`rotate(${rotate} ${x + size / 2} ${y + size / 2})`} style={{ color }}>
+          <svg x={x} y={y} width={size} height={size} viewBox="0 0 24 24" overflow="visible">
+            <g fill="currentColor">{SHAPES[shape]}</g>
+          </svg>
+        </g>
+      ))}
+    </svg>
+  );
+}
+
+// Detalle pequeño junto al título de una tarjeta.
+export function SeasonMark() {
+  const seasonId = useContext(SeasonContext);
+  const badge = BADGES[seasonId];
+  if (!badge) return null;
+  return (
+    <svg className="season-mark" viewBox="0 0 24 24" width="22" height="22" style={{ color: badge[1] }} aria-hidden="true">
+      <g fill="currentColor">{SHAPES[badge[0]]}</g>
+    </svg>
   );
 }

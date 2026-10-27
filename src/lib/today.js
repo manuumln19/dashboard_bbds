@@ -51,7 +51,7 @@ export function cheapPower(electricity, now) {
 }
 
 // Una lista corta y ordenada por importancia. El primero se pinta grande.
-export function nextItems({ now, events, weather, electricity, cleaning }) {
+export function nextItems({ now, events, weather, electricity, cleaning, menu }) {
   const items = [];
   const upcoming = (Array.isArray(events) ? events : [])
     .filter((event) => getEventEnd(event) > now)
@@ -98,7 +98,20 @@ export function nextItems({ now, events, weather, electricity, cleaning }) {
     });
   }
 
+  const meal = menu && menu.days ? menu.days[cleaningDayIndex(now)] : null;
+  if (meal && meal.dish) {
+    items.push({
+      id: "menu",
+      kind: "menu",
+      kicker: "Hoy se come",
+      title: meal.dish,
+      detail: meal.ingredients.join(", "),
+      addToShopping: meal.ingredients.length ? meal.ingredients : null,
+    });
+  }
+
   items.push(...houseReminders({ now, cleaning }));
+
 
   const power = cheapPower(electricity, now);
   if (power) {

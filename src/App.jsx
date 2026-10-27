@@ -10,6 +10,7 @@ import {
   CLIMATE_ENABLED,
   DEMO_MODE,
   IDLE_RETURN_MINUTES,
+  MENU_ENABLED,
   NIGHTLY_RELOAD_HOUR,
   SCREENSAVER_IDLE_MS,
 } from "./config";
@@ -32,6 +33,7 @@ import {
   useNightlyReload,
 } from "./hooks/useKiosk";
 import { useLists } from "./hooks/useLists";
+import { useMenu } from "./hooks/useMenu";
 import { useNightMode } from "./hooks/useNightMode";
 import { useNow } from "./hooks/useNow";
 import { usePhotos } from "./hooks/usePhotos";
@@ -40,7 +42,7 @@ import { useWakeLock } from "./hooks/useWakeLock";
 import { useWeather } from "./hooks/useWeather";
 import { DemoPanel, Diagnostics } from "./components/DemoPanel";
 import { Rail } from "./components/Rail";
-import { SeasonDecor } from "./components/SeasonDecor";
+import { SeasonContext, SeasonDecor } from "./components/SeasonDecor";
 import { HomeView } from "./components/HomeView";
 import { Screensaver } from "./components/Screensaver";
 import { StatusBanner } from "./components/StatusBanner";
@@ -128,6 +130,7 @@ export default function App() {
   const sensors = useSensors(CLIMATE_ENABLED);
   const lists = useLists();
   const cleaning = useCleaning(now);
+  const menu = useMenu(MENU_ENABLED);
   const season = seasonOverride() || seasonFor(now, cleaning.people);
   const { idle, reset: resetIdle } = useIdle(idleMs);
   const [galleryOpen, setGalleryOpen] = useState(false);
@@ -303,6 +306,7 @@ export default function App() {
   }
 
   return (
+    <SeasonContext.Provider value={season.id}>
     <div
       className={`app app--${view} season-${season.id}${isNight ? " is-night" : ""}`}
       data-view={view}
@@ -346,6 +350,7 @@ export default function App() {
               lists={lists}
               cleaning={cleaning}
               season={season}
+              menu={MENU_ENABLED ? menu : null}
               onOpenAgenda={() => setView("agenda")}
               onOpenLists={() => setView("lists")}
               onOpenEnergy={() => setView("energy")}
@@ -364,7 +369,7 @@ export default function App() {
             />
           ) : null}
 
-          {view === "lists" ? <ListsView lists={lists} now={now} /> : null}
+          {view === "lists" ? <ListsView lists={lists} menu={menu} now={now} /> : null}
 
           {view === "cleaning" ? (
             <CleaningView now={now} cleaning={cleaning} />
@@ -435,5 +440,6 @@ export default function App() {
         onOpenDemo={openDemo}
       />
     </div>
+    </SeasonContext.Provider>
   );
 }

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BellRing, Cake, CalendarDays, Plus, Sparkles, SprayCan, Trophy, Umbrella, Zap } from "lucide-react";
+import { BellRing, Cake, CalendarDays, Plus, Sparkles, SprayCan, Trophy, Umbrella, UtensilsCrossed, Zap } from "lucide-react";
 import { getWeatherAdvice } from "../lib/weather";
 import { nextItems } from "../lib/today";
 
@@ -11,14 +11,18 @@ const ICONS = {
   reminder: BellRing,
   birthday: Cake,
   trophy: Trophy,
+  menu: UtensilsCrossed,
 };
 
-const KIND_TONES = { rain: "lilac", cleaning: "mint", power: "amber", reminder: "amber", birthday: "pink", trophy: "amber" };
+const KIND_TONES = { rain: "lilac", cleaning: "mint", power: "amber", reminder: "amber", birthday: "pink", trophy: "amber", menu: "mint" };
 
 // «Añadir a la compra» para avisos como el de las uvas.
 function AddToShopping({ text, lists }) {
   const [added, setAdded] = useState(false);
-  const already = lists && lists.byList("shopping").some((item) => item.text === text && !item.done);
+  const texts = Array.isArray(text) ? text : [text];
+  const open = lists ? lists.byList("shopping").filter((item) => !item.done).map((item) => item.text.toLowerCase()) : [];
+  const missing = texts.filter((entry) => !open.includes(entry.toLowerCase()));
+  const already = !missing.length;
   if (!lists || already || added) return <span className="today-next__added">En la compra</span>;
   return (
     <button
@@ -27,7 +31,7 @@ function AddToShopping({ text, lists }) {
       onClick={(event) => {
         event.stopPropagation();
         setAdded(true);
-        lists.addItem("shopping", text);
+        missing.forEach((entry) => lists.addItem("shopping", entry));
       }}
     >
       <Plus size={14} strokeWidth={2.2} aria-hidden="true" />
@@ -37,8 +41,8 @@ function AddToShopping({ text, lists }) {
 }
 
 // Una sola tarjeta de color: lo más importante ahora, y debajo lo demás.
-export function TodayNext({ now, events, weather, electricity, cleaning, lists, onOpenAgenda }) {
-  const items = nextItems({ now, events, weather, electricity, cleaning });
+export function TodayNext({ now, events, weather, electricity, cleaning, lists, menu, onOpenAgenda }) {
+  const items = nextItems({ now, events, weather, electricity, cleaning, menu });
   const [lead, ...rest] = items;
 
   if (!lead) {

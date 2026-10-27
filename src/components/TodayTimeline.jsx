@@ -2,6 +2,7 @@ import { ArrowUpRight, CalendarDays, ListChecks, SprayCan } from "lucide-react";
 import { useRecentlyDone } from "../hooks/useRecentlyDone";
 import { timelineDays } from "../lib/today";
 import { CheckMark } from "./CheckMark";
+import { SeasonMark } from "./SeasonDecor";
 
 const KIND_ICONS = { event: CalendarDays, task: ListChecks, cleaning: SprayCan };
 
@@ -34,7 +35,10 @@ export function TodayTimeline({ now, events, lists, cleaning, onOpenAgenda, onOp
   return (
     <article className="card today-timeline" aria-labelledby="today-timeline-title">
       <header className="today-card__head">
-        <h2 id="today-timeline-title">Hoy y mañana</h2>
+        <h2 id="today-timeline-title">
+          Hoy y mañana
+          <SeasonMark />
+        </h2>
         <button type="button" className="today-link" onClick={onOpenAgenda}>
           Agenda
           <ArrowUpRight size={15} strokeWidth={2} aria-hidden="true" />

@@ -1,6 +1,8 @@
 import { LOCATION } from "../config";
 import { capitalize, formatClock, formatLongDate } from "../lib/date";
 import { greetingFor } from "../lib/greeting";
+import { nextFestivity } from "../lib/season";
+import { SeasonScene } from "./SeasonDecor";
 import { hourLabel, nextHours, weatherLabel } from "../lib/weather";
 import { WeatherGlyph } from "./WeatherGlyph";
 
@@ -14,6 +16,7 @@ export function TodayNow({ now, weather, season, lists, cleaning, onOpenWeather 
   const today = weather && weather.today ? weather.today : null;
   const hours = nextHours(weather, now, 6).slice(1);
   const greeting = greetingFor({ now, weather, season, lists, cleaning });
+  const countdown = nextFestivity(now, cleaning ? cleaning.people : []);
 
   return (
     <article className="card today-now" aria-label="Hora y tiempo">
@@ -25,6 +28,7 @@ export function TodayNow({ now, weather, season, lists, cleaning, onOpenWeather 
         <span className="today-now__date">
           {season && season.note ? <em>{season.note} · </em> : null}
           {formatLongDate(now)} · {capitalize(LOCATION.name)}
+          {countdown ? <small className="today-now__countdown">{countdown.label}</small> : null}
         </span>
       </header>
 
@@ -52,6 +56,7 @@ export function TodayNow({ now, weather, season, lists, cleaning, onOpenWeather 
             </span>
           </span>
         </button>
+        {season ? <SeasonScene seasonId={season.id} /> : null}
       </div>
 
       {hours.length ? (

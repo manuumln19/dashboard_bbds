@@ -16,6 +16,7 @@ export function HomeView({
   lists,
   cleaning,
   season,
+  menu,
   onOpenAgenda,
   onOpenLists,
   onOpenEnergy,
@@ -42,6 +43,7 @@ export function HomeView({
           electricity={electricity}
           cleaning={cleaning}
           lists={lists}
+          menu={menu}
           onOpenAgenda={onOpenAgenda}
         />
         <TodayTimeline
@@ -53,8 +55,9 @@ export function HomeView({
           onOpenLists={onOpenLists}
         />
         <div className="today-side">
-          <TodayNotes notes={notes} people={cleaning.people} now={now} />
-          <TodayShopping lists={lists} onOpenLists={onOpenLists} />
+          <TodayShopping lists={lists} onOpenLists={onOpenLists}>
+            <TodayNotes notes={notes} people={cleaning.people} now={now} />
+          </TodayShopping>
           <TodayPower electricity={electricity} now={now} onOpenEnergy={onOpenEnergy} />
         </div>
       </div>

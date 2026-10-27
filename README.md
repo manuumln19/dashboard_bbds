@@ -176,6 +176,7 @@ VITE_IDLE_RETURN_MINUTES=10
 - `VITE_API_BASE` se puede dejar vacío porque frontend y Worker comparten dominio. Vite redirige `/api` en desarrollo.
 - `VITE_DASHBOARD_TOKEN` solo es necesario si activas `DASHBOARD_TOKEN` en el Worker. Es un token de cliente: acaba en el bundle, así que no lo consideres seguridad fuerte.
 - `VITE_CLIMATE_ENABLED=false` (valor por defecto) oculta **Casa**, su deep link `#climate` y detiene las llamadas a `/api/sensors`. Inicio no muestra ninguna tarjeta de clima. Cuando lleguen los sensores, ponlo en `true`, vuelve a compilar y despliega. Los sensores y el simulador pueden seguir existiendo en el Worker mientras la interfaz está oculta.
+- `VITE_MENU_ENABLED=false` (valor por defecto) oculta el menú semanal: el botón **Menú** de Listas y el plato del día en Hoy, con su botón para pasar los ingredientes a la compra. El Worker ya tiene `GET`/`PUT /api/menu` (`{ days: [{ dish, ingredients[] }] }`, lunes = 0, guardado en `app_meta`).
 - `VITE_CALENDAR_DAYS=21` controla la ventana de agenda que se pide al Worker.
 - `VITE_SCREENSAVER_IDLE_MINUTES=3` son los minutos sin actividad antes de abrir la galería. Usa `0` para desactivar la apertura automática; el botón de galería del rail seguirá funcionando.
 - `VITE_NIGHTLY_RELOAD_HOUR=3` fija la recarga diaria del kiosco. En demo no se programa. Sirve para que el WebView no acumule memoria durante semanas.

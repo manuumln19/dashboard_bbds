@@ -3,10 +3,12 @@ import { ArrowUpRight, Plus, ShoppingBasket } from "lucide-react";
 import { isLegacyDrawing } from "../lib/listItems";
 import { useRecentlyDone } from "../hooks/useRecentlyDone";
 import { CheckMark } from "./CheckMark";
+import { SeasonMark } from "./SeasonDecor";
 
 const VISIBLE = 6;
 
-export function TodayShopping({ lists, onOpenLists }) {
+// `children`: el pósit de las notas, pegado en la esquina de la tarjeta.
+export function TodayShopping({ lists, onOpenLists, children }) {
   const [text, setText] = useState("");
   const recent = useRecentlyDone();
   const shopping = lists.items.filter((item) => item.listId === "shopping");
@@ -34,6 +36,7 @@ export function TodayShopping({ lists, onOpenLists }) {
           <ShoppingBasket size={18} strokeWidth={1.8} aria-hidden="true" />
           Compra
           {open.length ? <span className="today-count">{open.length}</span> : null}
+          <SeasonMark />
         </h2>
         <button type="button" className="today-link" onClick={onOpenLists}>
           Listas
@@ -71,6 +74,8 @@ export function TodayShopping({ lists, onOpenLists }) {
       ) : (
         <p className="today-shopping__empty">No falta nada.</p>
       )}
+
+      {children}
 
       <form className="today-shopping__add" onSubmit={submit}>
         <input

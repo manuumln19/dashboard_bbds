@@ -146,3 +146,42 @@ export function seasonOverride() {
     return null;
   }
 }
+
+// Fechas a las que se cuenta hacia atrás en Hoy (mes, día, nombre).
+const COUNTDOWN = [
+  [1, 6, "Reyes"],
+  [1, 16, "San Antón"],
+  [2, 14, "San Valentín"],
+  [2, 28, "el Día de Andalucía"],
+  [6, 23, "San Juan"],
+  [9, 6, "la feria de Torreperogil"],
+  [9, 28, "la feria de San Miguel"],
+  [10, 13, "la feria de San Lucas"],
+  [10, 31, "Halloween"],
+  [12, 24, "Nochebuena"],
+  [12, 31, "Nochevieja"],
+];
+
+// La próxima fiesta (o cumpleaños) en los próximos `limit` días, sin contar hoy.
+export function nextFestivity(date, people = [], limit = 30) {
+  const candidates = [];
+  const year = date.getFullYear();
+  [year, year + 1].forEach((y) => {
+    COUNTDOWN.forEach(([month, day, name]) => candidates.push({ name, date: new Date(y, month - 1, day) }));
+    const palmSunday = easterSunday(y);
+    palmSunday.setDate(palmSunday.getDate() - 7);
+    candidates.push({ name: "Semana Santa", date: palmSunday });
+    (people || []).forEach((person) => {
+      if (!person.birthday) return;
+      const [month, day] = person.birthday.split("-").map(Number);
+      candidates.push({ name: `el cumple de ${person.name}`, date: new Date(y, month - 1, day) });
+    });
+  });
+  const next = candidates
+    .map((entry) => ({ ...entry, inDays: dayDiff(date, entry.date) }))
+    .filter((entry) => entry.inDays > 0 && entry.inDays <= limit)
+    .sort((a, b) => a.inDays - b.inDays)[0];
+  if (!next) return null;
+  const label = next.inDays === 1 ? `Mañana, ${next.name}` : `Faltan ${next.inDays} días para ${next.name}`;
+  return { ...next, label };
+}

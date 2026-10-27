@@ -16,6 +16,8 @@ export const DEMO_MODE = env.VITE_DEMO_MODE === "true";
 // Permite publicar el dashboard sin la vista Casa, sus tarjetas ni las
 // llamadas a /api/sensors hasta que haya sensores instalados.
 export const CLIMATE_ENABLED = asFlag(env.VITE_CLIMATE_ENABLED, false);
+// Menú semanal (Listas → Menú y el plato del día en Hoy). Apagado por ahora.
+export const MENU_ENABLED = asFlag(env.VITE_MENU_ENABLED, false);
 export const API_BASE = String(env.VITE_API_BASE || "").replace(/\/$/, "");
 export const DASHBOARD_TOKEN = env.VITE_DASHBOARD_TOKEN || "";
 

@@ -8,23 +8,31 @@ function authorOf(people, id) {
   return (people || []).find((person) => person.id === id) || null;
 }
 
-// Un pósit en la nevera: el texto grande, quién lo dejó y cuándo.
-function PostIt({ note, people, now, onRemove, compact = false }) {
+// Un pósit: el texto grande, quién lo dejó y cuándo.
+function PostIt({ note, people, now, onRemove, onWrite, compact = false }) {
   const author = authorOf(people, note.personId);
   return (
     <figure className={`postit postit--${note.color}${compact ? " postit--compact" : ""}`}>
       <span className="postit__tape" aria-hidden="true" />
       <blockquote>{note.text}</blockquote>
       <figcaption>
-        <span>
-          {author ? `— ${author.name}` : "— Alguien de casa"} · {formatAge(note.createdAt, now).toLowerCase()}
+        <span className="postit__by">
+          <strong>{author ? `— ${author.name}` : "— Alguien de casa"}</strong>
+          <small>{formatAge(note.createdAt, now).toLowerCase()}</small>
         </span>
-        {onRemove ? (
-          <button type="button" onClick={() => onRemove(note.id)} aria-label="Quitar la nota">
-            <Check size={15} strokeWidth={2.2} aria-hidden="true" />
-            Visto
-          </button>
-        ) : null}
+        <span className="postit__actions">
+          {onWrite ? (
+            <button type="button" onClick={onWrite} aria-label="Escribir otra nota">
+              <PenLine size={15} strokeWidth={2} aria-hidden="true" />
+            </button>
+          ) : null}
+          {onRemove ? (
+            <button type="button" onClick={() => onRemove(note.id)} aria-label="Quitar la nota">
+              <Check size={15} strokeWidth={2.2} aria-hidden="true" />
+              <span className="postit__label">Visto</span>
+            </button>
+          ) : null}
+        </span>
       </figcaption>
     </figure>
   );
@@ -72,6 +80,7 @@ function NoteSheet({ notes, people, now, onClose }) {
 
         <form className="notes-sheet__form" onSubmit={submit}>
           <textarea
+            className={`postit--${color}`}
             value={text}
             maxLength={160}
             rows={3}
@@ -126,28 +135,42 @@ function NoteSheet({ notes, people, now, onClose }) {
   );
 }
 
-// En Hoy: la nota más reciente y, si hay más, cuántas.
+// En Hoy, pegado en la esquina de la tarjeta de Compra: la nota más reciente
+// y, si hay más, otra asomando detrás. Sin notas, un pósit en blanco.
 export function TodayNotes({ notes, people, now }) {
   const [open, setOpen] = useState(false);
-  const [latest, ...others] = notes.notes;
+  const [latest, second] = notes.notes;
 
   return (
-    <>
+    <div className="today-notes">
       {latest ? (
-        <div className="today-notes">
-          <PostIt note={latest} people={people} now={now} onRemove={notes.removeNote} />
-          <button type="button" className="today-notes__more" onClick={() => setOpen(true)}>
-            <PenLine size={14} strokeWidth={2} aria-hidden="true" />
-            {others.length ? `${others.length} ${others.length === 1 ? "nota más" : "notas más"} · escribir` : "Escribir otra"}
-          </button>
-        </div>
+        <>
+          {second ? (
+            <button
+              type="button"
+              className={`postit postit--${second.color} postit--behind`}
+              onClick={() => setOpen(true)}
+              aria-label={`Ver las ${notes.notes.length} notas`}
+            >
+              <span>+{notes.notes.length - 1}</span>
+            </button>
+          ) : null}
+          <PostIt
+            note={latest}
+            people={people}
+            now={now}
+            onRemove={notes.removeNote}
+            onWrite={() => setOpen(true)}
+          />
+        </>
       ) : (
-        <button type="button" className="today-notes__empty" onClick={() => setOpen(true)}>
-          <StickyNote size={16} strokeWidth={1.9} aria-hidden="true" />
-          Dejar una nota en la nevera
+        <button type="button" className="postit postit--blank" onClick={() => setOpen(true)}>
+          <span className="postit__tape" aria-hidden="true" />
+          <PenLine size={18} strokeWidth={1.8} aria-hidden="true" />
+          Deja una nota
         </button>
       )}
       {open ? <NoteSheet notes={notes} people={people} now={now} onClose={() => setOpen(false)} /> : null}
-    </>
+    </div>
   );
 }
