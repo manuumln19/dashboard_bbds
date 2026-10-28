@@ -7556,3 +7556,128 @@ button:not(:disabled):active {
   font-size: 12px;
 }
 
+
+/* Días de fiesta (.is-fiesta) ------------------------------------------------ */
+/* El día señalado la casa entera se viste: un campo de color liso detrás de
+   las tarjetas, elegido para que lo de temporada resalte encima (calabazas
+   sobre lila, bolas rojas sobre verde…) y el texto del rail se siga leyendo.
+   Color macizo: en el marco (lite) cuesta lo mismo que el fondo de siempre. */
+.app.is-fiesta.season-halloween:not(.is-night) { --bg: #d9c7e6; }
+.app.is-fiesta.season-navidad:not(.is-night) { --bg: #cfdcc8; }
+.app.is-fiesta.season-cumple:not(.is-night) { --bg: #f5d3dd; }
+.app.is-fiesta.season-feria:not(.is-night) { --bg: #f2d9a6; }
+.app.is-fiesta.season-lumbres:not(.is-night) { --bg: #ead3c4; }
+.app.is-fiesta.season-amor:not(.is-night) { --bg: #f4d0d9; }
+.app.is-fiesta.season-semanasanta:not(.is-night) { --bg: #dccfe6; }
+.app.is-fiesta.season-verano:not(.is-night) { --bg: #d5e8ee; }
+.app.is-fiesta.season-invierno:not(.is-night) { --bg: #d3e5d1; }
+.app.is-fiesta.season-otono:not(.is-night) { --bg: #ecdcc3; }
+.app.is-fiesta.season-primavera:not(.is-night) { --bg: #e3eccf; }
+
+/* Fuera del marco, una luz suave arriba para que el color no quede plano. */
+.app.is-fiesta:not(.is-night) .ambient {
+  background:
+    radial-gradient(60% 70% at 86% -12%, rgba(255, 255, 255, 0.5), transparent 70%),
+    var(--bg);
+}
+
+/* La ventana de Yoshi según la temporada ------------------------------------- */
+/* Encima del cielo y la colina, debajo del marco y de Yoshi. */
+.yoshi-window__scene,
+.yoshi-window__art {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* La ilustración es algo más alta que el cristal: se recorta más por abajo
+   (la colina, tapada en parte por Yoshi) que por arriba (luces y guirnaldas). */
+.yoshi-window__art {
+  object-fit: cover;
+  object-position: 50% 30%;
+}
+
+/* Lo del alféizar, a los lados de Yoshi. */
+.yoshi-window__prop {
+  position: absolute;
+  bottom: 40px;
+  z-index: 2;
+}
+
+.yoshi-window__prop--left {
+  left: 10px;
+}
+
+.yoshi-window__prop--right {
+  right: 10px;
+}
+
+/* Colina del color de la estación (de día y sin nieve de verdad). */
+.yoshi-window--season-otono:not(.yoshi-window--noche):not(.yoshi-window--snow) .yoshi-window__hill { background: #c9a75a; }
+.yoshi-window--season-primavera:not(.yoshi-window--noche):not(.yoshi-window--snow) .yoshi-window__hill { background: #8fd27a; }
+.yoshi-window--season-verano:not(.yoshi-window--noche):not(.yoshi-window--snow) .yoshi-window__hill { background: #b4d36a; }
+.yoshi-window--season-invierno:not(.yoshi-window--noche) .yoshi-window__hill { background: #e6eef2; }
+
+/* Noche de Halloween: anochecer morado, luna grande y estrellas, sea la hora
+   que sea. */
+.yoshi-window.yoshi-window--season-halloween .yoshi-window__sky {
+  background: linear-gradient(180deg, #241a46 0%, #5a3a7a 62%, #b8618a 100%);
+}
+
+.yoshi-window.yoshi-window--season-halloween .yoshi-window__light {
+  top: 10px;
+  right: 12px;
+  width: 46px;
+  height: 46px;
+  background: radial-gradient(circle at 42% 40%, #fffbe8 0%, #f6e7a8 58%, rgba(246, 231, 168, 0) 72%);
+  opacity: 1;
+}
+
+.yoshi-window.yoshi-window--season-halloween:not(.yoshi-window--rain):not(.yoshi-window--snow) .yoshi-window__weather {
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.9) 1px, transparent 1.4px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.6) 0.8px, transparent 1.2px);
+  background-position: 0 0, 13px 17px;
+  background-size: 31px 29px, 23px 27px;
+}
+
+.yoshi-window.yoshi-window--season-halloween .yoshi-window__hill {
+  background: #2e3a2c;
+}
+
+/* Nochebuena y Navidad: nieve aunque en Jaén no nieve, y la colina blanca. */
+.yoshi-window.yoshi-window--season-navidad.is-fiesta .yoshi-window__weather {
+  background-image:
+    radial-gradient(circle, #fff 1.4px, transparent 2px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.8) 1px, transparent 1.6px);
+  background-position: 0 0, 9px 11px;
+  background-size: 18px 22px, 20px 18px;
+}
+
+.yoshi-window.yoshi-window--season-navidad.is-fiesta .yoshi-window__sky {
+  background: linear-gradient(180deg, #8fa6c4 0%, #d8e2ec 100%);
+}
+
+.yoshi-window.yoshi-window--season-navidad.is-fiesta .yoshi-window__hill {
+  background: #f1f5f8;
+}
+
+/* San Antón: noche de lumbres, el cielo encendido desde abajo. */
+.yoshi-window.yoshi-window--season-lumbres .yoshi-window__sky {
+  background: linear-gradient(180deg, #2c2244 0%, #8a3f45 60%, #e8823f 100%);
+}
+
+.yoshi-window.yoshi-window--season-lumbres .yoshi-window__light {
+  opacity: 0;
+}
+
+.yoshi-window.yoshi-window--season-lumbres .yoshi-window__hill {
+  background: #3a2f2a;
+}
+
+/* Semana Santa: atardecer morado y oro. */
+.yoshi-window.yoshi-window--season-semanasanta .yoshi-window__sky {
+  background: linear-gradient(180deg, #7e6aa8 0%, #d7b4a4 70%, #f1cf96 100%);
+}

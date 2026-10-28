@@ -6,17 +6,30 @@ import { cleaningDayIndex } from "./today";
 // El saludo de Hoy: «Buenos días» y, detrás, una frase según lo que pasa en
 // casa. Se elige una por hora para que no cambie a cada minuto.
 
+// En los días grandes el saludo es la propia fiesta («Feliz Navidad.») y la
+// frase de detrás cuenta otra cosa.
+const FIESTA_HELLO = {
+  "Año nuevo": "Feliz año nuevo",
+  "Día de Reyes": "Feliz día de Reyes",
+  "San Valentín": "Feliz San Valentín",
+  "Día de Andalucía": "Feliz día de Andalucía",
+  "Noche de Halloween": "Feliz Halloween",
+  Nochebuena: "Feliz Nochebuena",
+  Navidad: "Feliz Navidad",
+  Nochevieja: "Feliz Nochevieja",
+};
+
 const HOLIDAY_LINES = {
-  "Año nuevo": "Feliz año nuevo.",
+  "Año nuevo": "Primer día del año: con calma.",
   "Noche de Reyes": "Esta noche vienen los Reyes: zapatos en el salón.",
   "Día de Reyes": "¿Qué han traído los Reyes?",
-  "San Valentín": "Feliz San Valentín.",
-  "Día de Andalucía": "Feliz día de Andalucía.",
+  "San Valentín": "Un detalle hoy no sobra.",
+  "Día de Andalucía": "Hoy toca pan con aceite en el desayuno.",
   "Noche de San Juan": "Noche de San Juan: a quemar lo malo.",
   "Noche de Halloween": "Noche de Halloween: ojo con quién llama a la puerta.",
   "Todos los Santos": "Hoy toca castañas y huesos de santo.",
-  Nochebuena: "Feliz Nochebuena.",
-  Navidad: "Feliz Navidad.",
+  Nochebuena: "Esta noche, cena en familia.",
+  Navidad: "Hoy toca sobremesa larga.",
   "Día de los Inocentes": "Cuidado con lo que os creéis hoy.",
   Nochevieja: "Última noche del año: las uvas, contadas.",
 };
@@ -117,5 +130,6 @@ export function greetingLine({ now, weather, season, lists, cleaning, events }) 
 
 export function greetingFor(context) {
   const line = greetingLine(context);
-  return { hello: getGreeting(context.now), line };
+  const note = context.season && context.season.note;
+  return { hello: (note && FIESTA_HELLO[note]) || getGreeting(context.now), line };
 }

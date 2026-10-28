@@ -137,14 +137,37 @@ export function seasonFor(date, people = []) {
   return { id: "otono", note: null };
 }
 
-// Para probar una temporada sin esperar: `?temporada=navidad`.
+// El día señalado de muestra de cada temporada, para probarlo con `&fiesta`.
+const SAMPLE_NOTES = {
+  halloween: "Noche de Halloween",
+  navidad: "Navidad",
+  lumbres: "San Antón",
+  amor: "San Valentín",
+  invierno: "Día de Andalucía",
+  verano: "Noche de San Juan",
+  otono: "Todos los Santos",
+  feria: "Feria de San Lucas",
+  semanasanta: "Semana Santa",
+};
+
+// Para probar una temporada sin esperar: `?temporada=navidad`, y con
+// `&fiesta` como si fuera el día señalado.
 export function seasonOverride() {
   try {
-    const value = new URLSearchParams(window.location.search).get("temporada");
-    return value ? { id: value, note: null } : null;
+    const params = new URLSearchParams(window.location.search);
+    const value = params.get("temporada");
+    if (!value) return null;
+    const fiesta = params.has("fiesta");
+    return { id: value, note: fiesta ? SAMPLE_NOTES[value] || null : null, fiesta };
   } catch {
     return null;
   }
+}
+
+// Día señalado (tiene nombre: Halloween, Nochebuena, la feria, un cumple…):
+// la casa entera se viste. El resto de la temporada, solo detalles.
+export function isFiesta(season) {
+  return Boolean(season && (season.note || season.fiesta));
 }
 
 // Fechas a las que se cuenta hacia atrás en Hoy (mes, día, nombre).

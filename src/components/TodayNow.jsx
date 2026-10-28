@@ -2,7 +2,7 @@ import { memo } from "react";
 import { LOCATION } from "../config";
 import { capitalize, formatClock, formatLongDate } from "../lib/date";
 import { greetingFor } from "../lib/greeting";
-import { nextFestivity } from "../lib/season";
+import { isFiesta, nextFestivity } from "../lib/season";
 import { SeasonScene } from "./SeasonDecor";
 import { hourLabel, nextHours, weatherLabel } from "../lib/weather";
 import { WeatherGlyph } from "./WeatherGlyph";
@@ -17,7 +17,8 @@ export const TodayNow = memo(function TodayNow({ now, weather, season, lists, cl
   const today = weather && weather.today ? weather.today : null;
   const hours = nextHours(weather, now, 6).slice(1);
   const greeting = greetingFor({ now, weather, season, lists, cleaning, events });
-  const countdown = nextFestivity(now, cleaning ? cleaning.people : []);
+  // El día de la fiesta no se cuenta hacia la siguiente: hoy toca esta.
+  const countdown = isFiesta(season) ? null : nextFestivity(now, cleaning ? cleaning.people : []);
 
   return (
     <article className="card today-now" aria-label="Hora y tiempo">

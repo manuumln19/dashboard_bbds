@@ -35,6 +35,22 @@ const SHAPES = {
       <path d="M12 7.2c0-2 .6-3.4 2-4.2" fill="none" stroke="#5b6b2e" strokeWidth="1.6" strokeLinecap="round" />
     </>
   ),
+  // Calabaza tallada y encendida, para la noche de Halloween.
+  jack: (
+    <>
+      <path d="M12 7c-1.5-1-5.5-1.4-7.5 1.4S3.6 17 6.4 19c2 1.4 3.8.6 5.6.6s3.6.8 5.6-.6c2.8-2 3.9-7.8 1.9-10.6S13.5 6 12 7z" />
+      <path d="M12 7.2c0-2 .6-3.4 2-4.2" fill="none" stroke="#5b6b2e" strokeWidth="1.6" strokeLinecap="round" />
+      <path d="M7.6 11.2l2.6 1.4-2.8 1zM16.4 11.2l-2.6 1.4 2.8 1zM7.4 15.2c1.6 1.4 7.6 1.4 9.2 0-.4 2-2.2 3-4.6 3s-4.2-1-4.6-3z" fill="#ffd36b" />
+    </>
+  ),
+  gift: (
+    <>
+      <rect x="4" y="10" width="16" height="11" rx="1.5" />
+      <rect x="3" y="7.5" width="18" height="4" rx="1" />
+      <rect x="11" y="7.5" width="2" height="13.5" fill="#e7c25a" />
+      <path d="M12 7.5c-1.4-2.8-5-3.2-4.6-1.2.3 1.2 2.6 1.2 4.6 1.2zm0 0c1.4-2.8 5-3.2 4.6-1.2-.3 1.2-2.6 1.2-4.6 1.2z" fill="#e7c25a" />
+    </>
+  ),
   ghost: (
     <>
       <path d="M5 21V11a7 7 0 0114 0v10l-2.3-1.8L14.3 21 12 19.2 9.7 21l-2.4-1.8z" stroke="rgba(60, 40, 80, 0.45)" strokeWidth="0.9" />
@@ -497,6 +513,159 @@ export function SeasonScene({ seasonId }) {
       ))}
     </svg>
   );
+}
+
+// Lo que se ve por la ventana de Yoshi en cada temporada, en un lienzo de
+// 156 × 188 (el cristal). Yoshi tapa el centro de abajo: las piezas van por el
+// cielo y por los lados de la colina. `fiesta` es la escena completa del día
+// señalado; `base`, el detalle discreto del resto de la temporada.
+const WINDOW_SCENES = {
+  spooky: {
+    base: [["bat", 16, 20, 20, C.ink, -10], ["bat", 50, 42, 13, C.ink, 8], ["pumpkin", 118, 128, 20, C.pumpkin, 4]],
+  },
+  halloween: {
+    base: [
+      ["ghost", 12, 26, 28, C.ghost, -8],
+      ["bat", 50, 12, 24, C.ink, -10],
+      ["bat", 94, 50, 16, C.ink, 12],
+      ["bat", 30, 70, 12, C.ink, 0],
+      ["jack", 4, 122, 30, C.pumpkin, -4],
+      ["pumpkin", 126, 132, 22, C.pumpkinLight, 6],
+    ],
+  },
+  otono: {
+    base: [["leaf", 16, 22, 15, "#c4622d", -20], ["leaf", 46, 60, 12, "#d8962b", 30], ["oak", 112, 74, 13, "#9a3f22", -30]],
+  },
+  navidad: {
+    base: [["tree", 116, 100, 40, "#2f7d57", 0], ["star", 130, 94, 12, "#c8a24a", 0]],
+    fiesta: [
+      ["tree", 116, 96, 44, "#2f7d57", 0],
+      ["star", 131, 89, 14, "#e7c25a", 0],
+      ["tree", 2, 112, 32, "#3b8a63", 0],
+      ["star", 12, 107, 11, "#e7c25a", 0],
+    ],
+    string: { kind: "bulbs", y: 10, sag: 14 },
+  },
+  invierno: {
+    base: [["snowman", 112, 108, 38, "#7da2bf", 0]],
+  },
+  primavera: {
+    base: [
+      ["flower", 12, 136, 15, "#e889b0", 0],
+      ["flower", 30, 146, 10, "#9b84dd", 10],
+      ["flower", 124, 138, 15, "#e889b0", -8],
+      ["flower", 110, 150, 10, "#f3f0e8", 0],
+    ],
+  },
+  amor: {
+    base: [["heart", 16, 26, 18, "#d92363", -10], ["heart", 44, 54, 12, "#ee7aa0", 10], ["heart", 120, 66, 11, "#b81d52", 0]],
+  },
+  feria: {
+    base: [],
+    string: { kind: "farolillos", y: 8, sag: 16 },
+    string2: { kind: "farolillos", y: 46, sag: 10 },
+  },
+  lumbres: {
+    base: [
+      ["flame", 6, 108, 32, "#e0611f", 0],
+      ["flame", 26, 122, 20, "#f6a23a", 8],
+      ["sparkle", 20, 84, 7, "#ffd36b", 0],
+      ["sparkle", 34, 70, 5, "#ef8f1f", 0],
+      ["sparkle", 10, 62, 5, "#ffd36b", 0],
+    ],
+  },
+  cumple: {
+    base: [["balloon", 6, 40, 30, "#d92363", -8], ["balloon", 28, 60, 22, "#3f7cc4", 6], ["balloon", 118, 62, 24, "#e7b53c", 8]],
+    string: { kind: "banderines", y: 8, sag: 14 },
+  },
+};
+
+// Lo que se pone en el alféizar, a los lados de Yoshi: [forma, lado, tamaño, color].
+const WINDOW_PROPS = {
+  spooky: [["pumpkin", "left", 22, C.pumpkin]],
+  halloween: [["jack", "left", 30, C.pumpkin], ["pumpkin", "right", 22, C.pumpkinLight]],
+  otono: [["acorn", "right", 18, "#a8743f"]],
+  navidad: [["gift", "right", 24, "#c22f3c"]],
+  cumple: [["cake", "right", 30, "#ee7aa0"]],
+  semanasanta: [["candle", "left", 26, "#e7a93c"], ["candle", "right", 20, "#d98c2b"]],
+};
+
+const STRING_COLORS = {
+  bulbs: ["#ff5b5b", "#ffd34d", "#5fd38a", "#6fb2ff"],
+  farolillos: ["#d7263d", "#2f7d57", "#e7b53c", "#f0f0e8", "#3f7cc4"],
+  banderines: ["#d92363", "#3f7cc4", "#e7b53c", "#2a9b80", "#725fc1"],
+};
+
+// Una guirnalda de lado a lado del cristal (comba de una sola curva).
+function WindowString({ kind, y, sag }) {
+  const colors = STRING_COLORS[kind];
+  const count = kind === "bulbs" ? 9 : 7;
+  const items = [];
+  for (let index = 0; index < count; index += 1) {
+    const t = (index + 0.5) / count;
+    const x = t * 156;
+    const at = y + 4 * t * (1 - t) * sag;
+    const color = colors[index % colors.length];
+    items.push(
+      <g key={index} transform={`translate(${x} ${at})`}>
+        {kind === "bulbs" ? <ellipse cx="0" cy="4" rx="2.6" ry="3.6" fill={color} /> : null}
+        {kind === "farolillos" ? (
+          <>
+            <ellipse cx="0" cy="7" rx="5.4" ry="6.4" fill={color} />
+            <path d="M0 1v12M-3.2 2.6c1.2 2.8 1.2 6 0 8.8M3.2 2.6c-1.2 2.8-1.2 6 0 8.8" fill="none" stroke="rgba(0,0,0,0.18)" strokeWidth="0.8" />
+          </>
+        ) : null}
+        {kind === "banderines" ? <path d="M-6 0h12L0 13z" fill={color} /> : null}
+      </g>
+    );
+  }
+  return (
+    <g>
+      <path d={`M-4 ${y}Q78 ${y + sag * 2} 160 ${y}`} fill="none" stroke="#4a4136" strokeWidth="1" />
+      {items}
+    </g>
+  );
+}
+
+function placed(items) {
+  return items.map(([shape, x, y, size, color, rotate], index) => (
+    <g key={index} transform={rotate ? `rotate(${rotate} ${x + size / 2} ${y + size / 2})` : undefined} style={{ color }}>
+      <svg x={x} y={y} width={size} height={size} viewBox="0 0 24 24" overflow="visible">
+        <g fill="currentColor">{SHAPES[shape]}</g>
+      </svg>
+    </g>
+  ));
+}
+
+export function WindowScene({ seasonId, fiesta }) {
+  const scene = WINDOW_SCENES[seasonId];
+  if (!scene) return null;
+  const items = fiesta && scene.fiesta ? scene.fiesta : scene.base;
+  return (
+    <svg className="yoshi-window__scene" viewBox="0 0 156 188" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+      {placed(items)}
+      {scene.string ? <WindowString {...scene.string} /> : null}
+      {scene.string2 ? <WindowString {...scene.string2} /> : null}
+    </svg>
+  );
+}
+
+export function WindowProps({ seasonId }) {
+  const props = WINDOW_PROPS[seasonId];
+  if (!props) return null;
+  return props.map(([shape, side, size, color]) => (
+    <svg
+      key={side}
+      className={`yoshi-window__prop yoshi-window__prop--${side}`}
+      viewBox="0 0 24 24"
+      width={size}
+      height={size}
+      style={{ color }}
+      aria-hidden="true"
+    >
+      <g fill="currentColor">{SHAPES[shape]}</g>
+    </svg>
+  ));
 }
 
 // Detalle pequeño junto al título de una tarjeta.

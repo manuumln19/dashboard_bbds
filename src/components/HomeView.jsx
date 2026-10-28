@@ -95,7 +95,7 @@ export const HomeView = memo(function HomeView({
             menu={menu}
             onOpenAgenda={onOpenAgenda}
           />
-          <YoshiWindow now={now} weather={weather.weather} mood={mascotMood} mascot={mascot} />
+          <YoshiWindow now={now} weather={weather.weather} mood={mascotMood} mascot={mascot} season={season} />
           <TodayTimeline
             now={now}
             events={calendar.events}

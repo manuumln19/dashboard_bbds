@@ -17,7 +17,7 @@ import {
   SCREENSAVER_IDLE_MS,
 } from "./config";
 import { dayPhase, formatClock } from "./lib/date";
-import { seasonFor, seasonOverride } from "./lib/season";
+import { isFiesta, seasonFor, seasonOverride } from "./lib/season";
 import { timeZoneMismatch } from "./lib/timezone";
 import {
   getDemoControls,
@@ -399,7 +399,7 @@ export default function App() {
   return (
     <SeasonContext.Provider value={season.id}>
     <div
-      className={`app app--${view} season-${season.id} phase-${dayPhase(now)}${isNight ? " is-night" : ""}`}
+      className={`app app--${view} season-${season.id}${isFiesta(season) ? " is-fiesta" : ""} phase-${dayPhase(now)}${isNight ? " is-night" : ""}`}
       data-view={view}
     >
       <div className="ambient" aria-hidden="true">
