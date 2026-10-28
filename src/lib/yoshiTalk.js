@@ -67,11 +67,27 @@ export function houseLines({ now, cleaning, events, lists }) {
   ];
 }
 
-// Tareas hechas que alimentan a Yoshi: limpieza de la semana y tareas de la
-// lista marcadas. Solo importa que suba (cada subida es una manzana).
-export function doneCount({ cleaning, lists }) {
-  const listDone = (lists && lists.byList ? lists.byList("tasks") : []).filter((item) => item.done).length;
-  return ((cleaning && cleaning.doneCount) || 0) + listDone;
+// Las tareas que alimentan a Yoshi (limpieza de la semana y tareas de la
+// lista), cada una con su estado: «c:<id>=1» hecha, «=0» pendiente. Va como
+// texto para que el Yoshi memorizado de App solo cambie si cambia algo. Con
+// el id, Yoshi sabe qué tarea le dio cada manzana y la devuelve si se
+// desmarca; un número solo dejaba ver que subía.
+export function doneState({ cleaning, lists }) {
+  const entries = [];
+  ((cleaning && cleaning.tasks) || []).forEach((task) => entries.push(`c:${task.id}=${task.done ? 1 : 0}`));
+  (lists && lists.byList ? lists.byList("tasks") : []).forEach((item) => entries.push(`l:${item.id}=${item.done ? 1 : 0}`));
+  return entries.join(",");
+}
+
+export function parseDoneState(text) {
+  const state = {};
+  String(text || "")
+    .split(",")
+    .forEach((entry) => {
+      const split = entry.lastIndexOf("=");
+      if (split > 0) state[entry.slice(0, split)] = entry.slice(split + 1) === "1";
+    });
+  return state;
 }
 
 // Avisos sueltos para Yoshi (una nota nueva…), sin pasar props por media app.

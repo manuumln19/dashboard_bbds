@@ -1,6 +1,6 @@
 import { memo, useEffect, useRef, useState } from "react";
 import { LITE_MODE } from "../lib/perf";
-import { listenYoshi } from "../lib/yoshiTalk";
+import { listenYoshi, parseDoneState } from "../lib/yoshiTalk";
 import blinkSrc from "../assets/yoshi/blink.webp";
 import cheerSrc from "../assets/yoshi/cheer.webp";
 import coldSrc from "../assets/yoshi/cold.webp";
@@ -108,10 +108,19 @@ function writeStore(key, value) {
   }
 }
 
-// Manzanas de hoy: cada tarea hecha es una. Se reinician cada día.
-function todayApples() {
+// Manzanas de hoy: una por tarea hecha, apuntando cuál («c:3», «l:…») para
+// devolverla si se desmarca. Se reinician cada día. `extra` son las guardadas
+// antes de apuntar la tarea: cuentan, pero no se pueden devolver.
+function todayEaten() {
   const saved = readStore(APPLES_KEY);
-  return saved && saved.day === dayKey() ? Number(saved.apples) || 0 : 0;
+  if (!saved || saved.day !== dayKey()) return { keys: [], extra: 0 };
+  if (!Array.isArray(saved.keys)) return { keys: [], extra: Number(saved.apples) || 0 };
+  return { keys: saved.keys, extra: Number(saved.extra) || 0 };
+}
+
+function todayApples() {
+  const eaten = todayEaten();
+  return Math.min(APPLES_MAX, eaten.keys.length + eaten.extra);
 }
 
 // Cada cuánto parpadea y hace algo solo. En el marco (modo ligero), menos:
@@ -151,7 +160,7 @@ export const Yoshi = memo(function Yoshi({
   const pressTimer = useRef(0);
   const pressed = useRef(false);
   const taps = useRef([]);
-  const lastCheer = useRef(cheer);
+  const lastCheer = useRef(null);
   const lastGreet = useRef(greet);
   const flippedRef = useRef(false);
   const [apples, setApples] = useState(() => (main ? todayApples() : 0));
@@ -200,25 +209,45 @@ export const Yoshi = memo(function Yoshi({
     setFlipped(value);
   }
 
-  // Celebra cada tarea marcada; el de casa, además, se come una manzana.
-  // `cheer` llega null mientras cargan los datos: la primera cifra no cuenta.
+  // Celebra cada tarea marcada; el de casa, además, se come una manzana y la
+  // devuelve si la tarea se desmarca. `cheer` es el estado de cada tarea (ver
+  // doneState) y llega null mientras cargan los datos: lo que ya estaba hecho
+  // al cargar no cuenta como nuevo.
   useEffect(() => {
     if (cheer === null || cheer === undefined) return;
-    if (lastCheer.current === null || lastCheer.current === undefined) {
-      lastCheer.current = cheer;
+    const state = parseDoneState(cheer);
+    const before = lastCheer.current;
+    lastCheer.current = state;
+    const marked = before ? Object.keys(state).filter((key) => state[key] && !before[key]) : [];
+
+    if (!main) {
+      if (marked.length) {
+        const count = Object.keys(state).filter((key) => state[key]).length;
+        act(count % 2 ? "cheer" : "happy", HAPPY_LINES[count % HAPPY_LINES.length]);
+      }
       return;
     }
-    if (cheer > lastCheer.current) {
-      if (main) {
-        const next = Math.min(APPLES_MAX, todayApples() + 1);
-        writeStore(APPLES_KEY, { day: dayKey(), apples: next });
-        setApples(next);
-        act("eat", next >= APPLES_FULL ? `¡Ñam! ${next} 🍎 ¡Qué lleno!` : `¡Ñam! Van ${next} 🍎`, 2400);
-      } else {
-        act(cheer % 2 ? "cheer" : "happy", HAPPY_LINES[cheer % HAPPY_LINES.length]);
-      }
+
+    const eaten = todayEaten();
+    // Tareas que siguen ahí pero ya no están hechas: su manzana fuera. También
+    // al cargar, por si se desmarcó con la pantalla apagada. Una tarea borrada
+    // ya no aparece y conserva la suya.
+    const returned = eaten.keys.filter((key) => key in state && !state[key]);
+    const fresh = marked.filter((key) => !eaten.keys.includes(key));
+    if (!returned.length && !fresh.length) return;
+
+    const keys = eaten.keys.filter((key) => !returned.includes(key));
+    fresh.forEach((key) => {
+      if (keys.length + eaten.extra < APPLES_MAX) keys.push(key);
+    });
+    writeStore(APPLES_KEY, { day: dayKey(), keys, extra: eaten.extra });
+    const next = Math.min(APPLES_MAX, keys.length + eaten.extra);
+    setApples(next);
+    if (fresh.length) {
+      act("eat", next >= APPLES_FULL ? `¡Ñam! ${next} 🍎 ¡Qué lleno!` : `¡Ñam! Van ${next} 🍎`, 2400);
+    } else if (before) {
+      act("dizzy", next ? `¿Me quitáis una? Me quedan ${next} 🍎` : "¡Eh, mi manzana! 🍎", 2400);
     }
-    lastCheer.current = cheer;
   }, [cheer, main]);
 
   // Notas nuevas: se alegran todos los Yoshis a la vista (el del resumen

@@ -51,7 +51,7 @@ import { StatusBanner } from "./components/StatusBanner";
 import { Yoshi, YoshiStroll, yoshiMood } from "./components/Yoshi";
 import { LITE_MODE } from "./lib/perf";
 import { setPollingPaused } from "./lib/polling";
-import { doneCount, houseLines } from "./lib/yoshiTalk";
+import { doneState, houseLines } from "./lib/yoshiTalk";
 
 // Las vistas que no se usan al arrancar se descargan aparte y se precargan
 // cuando el arranque ya ha terminado (ver PRELOAD_DELAY_MS).
@@ -371,7 +371,7 @@ export default function App() {
   // Semana de limpieza completa: Yoshi luce el trofeo en Hoy hasta el lunes
   // (dormido, no: de noche duerme).
   const yoshiTrophy = cleaning.weekComplete && yoshiMoodNow !== "sleep";
-  const yoshiCheer = cleaning.loading || lists.loading ? null : doneCount({ cleaning, lists });
+  const yoshiCheer = cleaning.loading || lists.loading ? null : doneState({ cleaning, lists });
   const yoshiHouse = useMemo(
     () => houseLines({ now, cleaning, events: calendar.events, lists }),
     [now, cleaning, calendar.events, lists]
