@@ -21,16 +21,20 @@ export const TodayNow = memo(function TodayNow({ now, weather, season, lists, cl
 
   return (
     <article className="card today-now" aria-label="Hora y tiempo">
+      {/* Fecha como antetítulo y, debajo, el saludo a todo el ancho: era la
+          frase más personal de la pantalla y a media tarjeta se cortaba. */}
       <header className="today-now__head">
+        <span className="today-now__date">
+          <span>
+            {season && season.note ? <em>{season.note} · </em> : null}
+            {formatLongDate(now)} · {capitalize(LOCATION.name)}
+          </span>
+          {countdown ? <small className="today-now__countdown">{countdown.label}</small> : null}
+        </span>
         <p className="today-now__greeting">
           <strong>{greeting.hello}.</strong>
           {greeting.line ? <span> {greeting.line}</span> : null}
         </p>
-        <span className="today-now__date">
-          {season && season.note ? <em>{season.note} · </em> : null}
-          {formatLongDate(now)} · {capitalize(LOCATION.name)}
-          {countdown ? <small className="today-now__countdown">{countdown.label}</small> : null}
-        </span>
       </header>
 
       <div className="today-now__main">

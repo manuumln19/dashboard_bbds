@@ -406,8 +406,7 @@ export default function App() {
         <span className="ambient__grain" />
       </div>
 
-      {/* En el marco no se monta: capa a pantalla completa por encima de todo. */}
-      {LITE_MODE ? null : <SeasonDecor seasonId={season.id} />}
+      <SeasonDecor seasonId={season.id} />
 
       <Rail
         now={now}

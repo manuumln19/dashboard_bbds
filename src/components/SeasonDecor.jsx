@@ -3,9 +3,8 @@ import { createContext, memo, useContext } from "react";
 // La temporada activa, para que cualquier tarjeta pueda ponerse su detalle.
 export const SeasonContext = createContext("otono");
 
-// Dibujos de temporada en los márgenes de la pantalla (las franjas de arriba y
-// abajo que dejan libres las vistas). Son SVG estáticos: nada se anima, para
-// que el Frameo no tenga que repintar.
+// Dibujos de temporada en el marco de la pantalla, alrededor de las vistas.
+// Son SVG estáticos: nada se anima, para que el Frameo no tenga que repintar.
 
 const SHAPES = {
   leaf: (
@@ -21,7 +20,13 @@ const SHAPES = {
     </>
   ),
   bat: (
-    <path d="M12 9c.6-1.3 1.4-1.3 2 0 1.6-.8 4.3-1.4 8 .5-1.8.4-2.8 1.4-3 2.8-1.3-.9-2.5-.6-3.2.7-1-.8-2-.7-2.6.3-.6-1-1.6-1.1-2.6-.3-.7-1.3-1.9-1.6-3.2-.7-.2-1.4-1.2-2.4-3-2.8 3.7-1.9 6.4-1.3 8-.5.6-1.3 1.4-1.3 2 0z" />
+    <>
+      <path d="M10.6 10C8 7.6 4.6 6.6 1 7c1.6 1.4 2.3 3.3 2.4 5.4 1-.9 2.2-1.1 3.4-.6.1 1.2.5 2.2 1.3 3 .7-1 1.6-1.6 2.6-1.8z" />
+      <path d="M13.4 10c2.6-2.4 6-3.4 9.6-3-1.6 1.4-2.3 3.3-2.4 5.4-1-.9-2.2-1.1-3.4-.6-.1 1.2-.5 2.2-1.3 3-.7-1-1.6-1.6-2.6-1.8z" />
+      <ellipse cx="12" cy="12" rx="2" ry="3.4" />
+      <circle cx="12" cy="8.2" r="1.8" />
+      <path d="M10.6 7.4l.3-2 1 1.3zM13.4 7.4l-.3-2-1 1.3z" />
+    </>
   ),
   pumpkin: (
     <>
@@ -140,6 +145,20 @@ const SHAPES = {
       <path d="M8.5 10.6h7l-1 1.6h-5z" fill="#c22f3c" />
     </>
   ),
+  spider: (
+    <>
+      <path
+        d="M9 12L4.5 9 2.5 11M9 14H4.5L2.5 17M15 12l4.5-3 2 2M15 14h4.5l2 3M10 16l-3.5 3-1 3M14 16l3.5 3 1 3"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.3"
+        strokeLinecap="round"
+      />
+      <circle cx="12" cy="14" r="3.8" />
+      <circle cx="12" cy="9" r="2.4" />
+    </>
+  ),
+  sparkle: <path d="M12 2l1.8 8.2L22 12l-8.2 1.8L12 22l-1.8-8.2L2 12l8.2-1.8z" />,
   sun: (
     <g>
       <circle cx="12" cy="12" r="4.6" />
@@ -154,95 +173,245 @@ const SHAPES = {
   ),
 };
 
-const PALETTES = {
-  otono: { shapes: ["leaf", "oak", "leaf"], colors: ["#c4622d", "#d8962b", "#9a3f22", "#8a8a2e", "#e0a948"] },
-  spooky: { shapes: ["bat", "leaf", "bat", "oak"], colors: ["#2b2530", "#c4622d", "#d8962b", "#2b2530"] },
-  halloween: { shapes: ["bat", "pumpkin", "ghost", "bat"], colors: ["#2b2530", "#e0761f", "#efe9df", "#2b2530"] },
-  navidad: { shapes: ["star", "bauble", "snow", "bauble"], colors: ["#c8a24a", "#c22f3c", "#9fc3d9", "#2f7d57"] },
-  invierno: { shapes: ["snow"], colors: ["#8fb6d1", "#b9cfdd", "#7da2bf"] },
-  amor: { shapes: ["heart"], colors: ["#d92363", "#ee7aa0", "#b81d52"] },
-  primavera: { shapes: ["flower", "leaf"], colors: ["#e889b0", "#9b84dd", "#f3f0e8", "#6aa56c"] },
-  verano: { shapes: ["lemon", "sun", "lemon"], colors: ["#f2c230", "#f0a52a", "#e8cf3a"] },
-  feria: { shapes: ["farolillo"], colors: ["#d7263d", "#2f7d57", "#e7b53c", "#f0f0e8", "#3f7cc4"] },
-  lumbres: { shapes: ["flame"], colors: ["#e0611f", "#d7392b", "#ef8f1f"] },
-  semanasanta: { shapes: ["candle"], colors: ["#e7a93c", "#d98c2b"] },
-  cumple: { shapes: ["balloon", "confetti", "balloon"], colors: ["#d92363", "#3f7cc4", "#e7b53c", "#2a9b80", "#725fc1"] },
+// Composición de cada temporada, colocada a mano sobre el marco que dejan
+// libres las vistas: la columna entre el rail y las tarjetas (unos 30 px), el
+// margen derecho (26 px) y las esquinas. Las piezas van por detrás de las
+// tarjetas, así que las que se acercan a una se asoman en vez de taparla.
+// `left`/`right` y `top`/`bottom` en px desde el borde; `hang` cuelga la pieza
+// de un hilo desde arriba; `rot` en grados.
+const C = {
+  ink: "#2b2530",
+  pumpkin: "#e0761f",
+  pumpkinLight: "#ea8a2c",
+  ghost: "#f4efe6",
 };
 
-// Cuántos dibujos por franja. Halloween y Navidad van más cargados.
-const DENSITY = { halloween: 14, navidad: 12, spooky: 7, feria: 16, cumple: 14, semanasanta: 6 };
+const COMPOSITIONS = {
+  halloween: {
+    web: 76,
+    pieces: [
+      { s: "bat", left: 4, top: 0, hang: 58, size: 32, color: C.ink },
+      { s: "bat", left: 6, top: 182, size: 26, color: C.ink, rot: -18 },
+      { s: "ghost", left: 3, top: 300, size: 34, color: C.ghost, rot: -8 },
+      { s: "bat", left: 8, top: 468, size: 22, color: C.ink, rot: 14 },
+      { s: "pumpkin", left: 1, bottom: -4, size: 38, color: C.pumpkin, rot: -4 },
+      { s: "pumpkin", left: 21, bottom: -6, size: 24, color: C.pumpkinLight, rot: 8 },
+      { s: "spider", right: 4, top: 0, hang: 132, size: 18, color: C.ink },
+      { s: "bat", right: 1, top: 380, size: 24, color: C.ink, rot: 12 },
+      { s: "pumpkin", right: -3, bottom: -4, size: 28, color: C.pumpkin, rot: 6 },
+    ],
+  },
+  spooky: {
+    web: 54,
+    pieces: [
+      { s: "bat", left: 5, top: 0, hang: 44, size: 26, color: C.ink },
+      { s: "leaf", left: 7, top: 210, size: 20, color: "#c4622d", rot: 30 },
+      { s: "bat", left: 8, top: 380, size: 22, color: C.ink, rot: -14 },
+      { s: "leaf", left: 6, top: 530, size: 18, color: "#d8962b", rot: -40 },
+      { s: "pumpkin", left: 3, bottom: -4, size: 32, color: C.pumpkin, rot: -4 },
+      { s: "bat", right: 1, top: 270, size: 24, color: C.ink, rot: 10 },
+      { s: "leaf", right: 5, bottom: 40, size: 16, color: "#9a3f22", rot: 20 },
+    ],
+  },
+  otono: {
+    pieces: [
+      { s: "leaf", left: 6, top: 40, size: 22, color: "#c4622d", rot: -20 },
+      { s: "oak", left: 9, top: 170, size: 18, color: "#d8962b", rot: 25 },
+      { s: "leaf", left: 4, top: 330, size: 24, color: "#9a3f22", rot: 40 },
+      { s: "leaf", left: 11, top: 480, size: 16, color: "#e0a948", rot: -30 },
+      { s: "acorn", left: 4, bottom: 0, size: 28, color: "#a8743f", rot: -8 },
+      { s: "leaf", left: 22, bottom: -4, size: 18, color: "#c4622d", rot: 60 },
+      { s: "leaf", right: 4, top: 140, size: 18, color: "#d8962b", rot: 15 },
+      { s: "oak", right: 3, top: 520, size: 20, color: "#c4622d", rot: -25 },
+      { s: "acorn", right: 1, bottom: -2, size: 22, color: "#a8743f", rot: 10 },
+    ],
+  },
+  navidad: {
+    garland: "bulbs",
+    pieces: [
+      { s: "star", left: 6, top: 0, hang: 34, size: 24, color: "#c8a24a" },
+      { s: "bauble", left: 12, top: 0, hang: 96, size: 18, color: "#c22f3c" },
+      { s: "snow", left: 7, top: 260, size: 18, color: "#9fc3d9" },
+      { s: "snow", left: 13, top: 420, size: 12, color: "#b9cfdd" },
+      { s: "star", left: 11, bottom: 37, size: 12, color: "#c8a24a" },
+      { s: "tree", left: 1, bottom: -2, size: 40, color: "#2f7d57" },
+      { s: "bauble", right: 3, top: 0, hang: 70, size: 20, color: "#2f7d57" },
+      { s: "snow", right: 5, top: 330, size: 16, color: "#9fc3d9" },
+      { s: "bauble", right: 1, bottom: -3, size: 22, color: "#c22f3c", rot: 10 },
+    ],
+  },
+  invierno: {
+    pieces: [
+      { s: "snow", left: 6, top: 30, size: 22, color: "#8fb6d1" },
+      { s: "snow", left: 13, top: 150, size: 12, color: "#b9cfdd" },
+      { s: "snow", left: 4, top: 260, size: 18, color: "#7da2bf" },
+      { s: "snow", left: 12, top: 400, size: 14, color: "#8fb6d1" },
+      { s: "snowman", left: 1, bottom: -2, size: 40, color: "#7da2bf" },
+      { s: "snow", right: 4, top: 90, size: 16, color: "#b9cfdd" },
+      { s: "snow", right: 7, top: 300, size: 12, color: "#8fb6d1" },
+      { s: "snow", right: 3, top: 520, size: 18, color: "#7da2bf" },
+    ],
+  },
+  amor: {
+    pieces: [
+      { s: "heart", left: 8, top: 0, hang: 40, size: 18, color: "#b81d52" },
+      { s: "heart", left: 13, bottom: 170, size: 10, color: "#ee7aa0" },
+      { s: "heart", left: 6, bottom: 120, size: 14, color: "#b81d52", rot: -12 },
+      { s: "heart", left: 10, bottom: 62, size: 20, color: "#ee7aa0", rot: 10 },
+      { s: "heart", left: 4, bottom: 2, size: 30, color: "#d92363", rot: -8 },
+      { s: "heart", right: 3, top: 200, size: 18, color: "#d92363", rot: 12 },
+      { s: "heart", right: 7, top: 240, size: 10, color: "#ee7aa0", rot: -10 },
+    ],
+  },
+  primavera: {
+    pieces: [
+      { s: "flower", left: 7, top: 120, size: 16, color: "#9b84dd", rot: 15 },
+      { s: "leaf", left: 8, top: 330, size: 16, color: "#6aa56c", rot: -20 },
+      { s: "leaf", left: 7, bottom: 30, size: 16, color: "#6aa56c", rot: -20 },
+      { s: "flower", left: 1, bottom: -4, size: 30, color: "#e889b0" },
+      { s: "flower", left: 19, bottom: -8, size: 22, color: "#9b84dd", rot: 12 },
+      { s: "leaf", right: 4, top: 300, size: 16, color: "#6aa56c", rot: 30 },
+      { s: "flower", right: 1, bottom: -3, size: 24, color: "#e889b0", rot: -10 },
+    ],
+  },
+  verano: {
+    pieces: [
+      { s: "sun", left: -8, top: -10, size: 52, color: "#f0a52a" },
+      { s: "lemon", left: 4, bottom: 0, size: 30, color: "#f2c230", rot: -12 },
+      { s: "lemon", left: 20, bottom: -6, size: 20, color: "#e8cf3a", rot: 20 },
+      { s: "lemon", right: 2, top: 300, size: 20, color: "#f2c230", rot: 15 },
+      { s: "sun", right: -4, bottom: -4, size: 28, color: "#f0a52a" },
+    ],
+  },
+  feria: {
+    garland: "farolillos",
+    pieces: [
+      { s: "farolillo", left: 4, top: 0, hang: 40, size: 28, color: "#d7263d" },
+      { s: "farolillo", left: 14, top: 0, hang: 120, size: 18, color: "#e7b53c" },
+      { s: "farolillo", left: 6, top: 0, hang: 210, size: 22, color: "#2f7d57" },
+      { s: "farolillo", right: 3, top: 0, hang: 60, size: 20, color: "#3f7cc4" },
+      { s: "farolillo", right: 5, top: 0, hang: 170, size: 16, color: "#d7263d" },
+    ],
+  },
+  lumbres: {
+    pieces: [
+      { s: "sparkle", left: 14, bottom: 140, size: 6, color: "#d7392b" },
+      { s: "sparkle", left: 6, bottom: 100, size: 8, color: "#e0611f" },
+      { s: "sparkle", left: 11, bottom: 62, size: 10, color: "#ef8f1f" },
+      { s: "flame", left: -2, bottom: -4, size: 20, color: "#ef8f1f", rot: -8 },
+      { s: "flame", left: 15, bottom: -4, size: 22, color: "#d7392b", rot: 8 },
+      { s: "flame", left: 3, bottom: -2, size: 34, color: "#e0611f" },
+      { s: "sparkle", right: 8, bottom: 50, size: 8, color: "#ef8f1f" },
+      { s: "flame", right: -1, bottom: -3, size: 24, color: "#e0611f" },
+    ],
+  },
+  semanasanta: {
+    pieces: [
+      { s: "candle", left: 1, bottom: -2, size: 34, color: "#e7a93c" },
+      { s: "candle", left: 15, bottom: -4, size: 26, color: "#d98c2b" },
+      { s: "candle", right: 0, bottom: -3, size: 28, color: "#e7a93c" },
+    ],
+  },
+  cumple: {
+    garland: "banderines",
+    pieces: [
+      { s: "balloon", left: 3, top: 120, size: 32, color: "#d92363", rot: -6 },
+      { s: "balloon", left: 11, top: 210, size: 24, color: "#3f7cc4", rot: 8 },
+      { s: "confetti", left: 7, top: 380, size: 18, color: "#e7b53c", rot: 20 },
+      { s: "confetti", left: 10, top: 520, size: 16, color: "#2a9b80", rot: -30 },
+      { s: "cake", left: 1, bottom: -2, size: 34, color: "#ee7aa0" },
+      { s: "balloon", right: 1, top: 260, size: 22, color: "#e7b53c", rot: 6 },
+      { s: "confetti", right: 4, top: 470, size: 14, color: "#725fc1" },
+    ],
+  },
+};
 
-// Pseudoaleatorio estable: la misma temporada siempre se dibuja igual.
-function seeded(seed) {
-  let value = seed;
-  return () => {
-    value = (value * 9301 + 49297) % 233280;
-    return value / 233280;
-  };
-}
-
-function hashString(text) {
-  let hash = 7;
-  for (let index = 0; index < text.length; index += 1) {
-    hash = (hash * 31 + text.charCodeAt(index)) % 233280;
-  }
-  return hash;
-}
-
-function scatter(seasonId) {
-  const palette = PALETTES[seasonId];
-  const random = seeded(hashString(seasonId));
-  const perBand = DENSITY[seasonId] || 9;
-  const items = [];
-  ["top", "bottom"].forEach((band) => {
-    for (let index = 0; index < perBand; index += 1) {
-      const slot = (index + 0.15 + random() * 0.7) / perBand;
-      items.push({
-        band,
-        left: slot * 100,
-        offset: random() * 3,
-        size: 11 + Math.round(random() * 5),
-        rotate: Math.round(random() * 70 - 35),
-        shape: palette.shapes[index % palette.shapes.length],
-        color: palette.colors[Math.floor(random() * palette.colors.length)],
-      });
-    }
+// Una pieza: el dibujo y, si cuelga, su hilo desde el borde de arriba.
+function Piece({ piece }) {
+  const { s, size, color, rot = 0, hang = 0 } = piece;
+  const style = { color };
+  ["left", "right", "top", "bottom"].forEach((side) => {
+    if (piece[side] !== undefined) style[side] = `${piece[side]}px`;
   });
-  return items;
+  return (
+    <svg className="season-decor__piece" width={size} height={hang + size} style={style}>
+      {hang ? <path d={`M${size / 2} 0V${hang + size * 0.3}`} stroke="currentColor" strokeWidth="1" opacity="0.55" /> : null}
+      <svg y={hang} width={size} height={size} viewBox="0 0 24 24" overflow="visible">
+        <g fill="currentColor" transform={rot ? `rotate(${rot} 12 12)` : undefined}>
+          {SHAPES[s]}
+        </g>
+      </svg>
+    </svg>
+  );
 }
 
-// Guirnalda de luces para Navidad: un cable que cuelga por la franja de arriba.
-function Garland() {
-  const bulbs = [];
-  const colors = ["#c22f3c", "#e7b53c", "#2f7d57", "#3f7cc4"];
-  for (let index = 0; index < 28; index += 1) {
-    const x = 10 + index * 36;
-    const phase = (index % 7) / 7;
-    const y = 6 + Math.sin(phase * Math.PI) * 8;
-    bulbs.push(
-      <g key={index} transform={`translate(${x} ${y})`}>
+// Guirnaldas a lo ancho del margen de arriba. El hilo se estira con la
+// pantalla; las piezas no, para que no salgan deformadas.
+const GARLAND_HEIGHT = 30;
+const GARLAND_COUNT = 30;
+
+function wireY(t) {
+  return (1 - t) * (1 - t) * 4 + 2 * (1 - t) * t * 20 + t * t * 4;
+}
+
+const GARLAND_ITEMS = {
+  bulbs: {
+    colors: ["#c22f3c", "#e7b53c", "#2f7d57", "#3f7cc4"],
+    draw: (color) => (
+      <>
         <rect x="-1.6" y="0" width="3.2" height="3" fill="#4a4136" />
-        <ellipse cx="0" cy="7" rx="3.4" ry="4.6" fill={colors[index % colors.length]} />
-      </g>
+        <ellipse cx="0" cy="7" rx="3.4" ry="4.6" fill={color} />
+      </>
+    ),
+  },
+  farolillos: {
+    colors: ["#d7263d", "#2f7d57", "#e7b53c", "#f0f0e8", "#3f7cc4"],
+    draw: (color) => (
+      <>
+        <rect x="-2.4" y="0" width="4.8" height="1.6" fill="#4a4136" />
+        <ellipse cx="0" cy="8" rx="5.6" ry="6.6" fill={color} />
+        <path d="M0 1.6v13M-3.4 3.4c1.3 3 1.3 6.2 0 9.2M3.4 3.4c-1.3 3-1.3 6.2 0 9.2" fill="none" stroke="rgba(0,0,0,0.18)" strokeWidth="0.8" />
+      </>
+    ),
+  },
+  banderines: {
+    colors: ["#d92363", "#3f7cc4", "#e7b53c", "#2a9b80", "#725fc1"],
+    draw: (color) => <path d="M-7 0h14L0 15z" fill={color} />,
+  },
+};
+
+function Garland({ kind }) {
+  const item = GARLAND_ITEMS[kind];
+  const items = [];
+  for (let index = 0; index < GARLAND_COUNT; index += 1) {
+    const along = (index + 0.5) / GARLAND_COUNT;
+    const segment = along * 4;
+    const y = wireY(segment - Math.floor(segment));
+    items.push(
+      <svg key={index} x={`${along * 100}%`} y={y} overflow="visible">
+        {item.draw(item.colors[index % item.colors.length])}
+      </svg>
     );
   }
-  let wire = "M0 6";
+  let wire = "M0 4";
   for (let segment = 0; segment < 4; segment += 1) {
-    const start = segment * 252;
-    wire += ` Q${start + 126} 22 ${start + 252} 6`;
+    const start = segment * 250;
+    wire += ` Q${start + 125} 20 ${start + 250} 4`;
   }
   return (
-    <svg className="season-decor__garland" viewBox="0 0 1008 28" preserveAspectRatio="none" aria-hidden="true">
-      <path d={wire} fill="none" stroke="#4a4136" strokeWidth="1.2" />
-      {bulbs}
+    <svg className="season-decor__garland" width="100%" height={GARLAND_HEIGHT} aria-hidden="true">
+      <svg width="100%" height={GARLAND_HEIGHT} viewBox={`0 0 1000 ${GARLAND_HEIGHT}`} preserveAspectRatio="none">
+        <path d={wire} fill="none" stroke="#4a4136" strokeWidth="1.2" vectorEffect="non-scaling-stroke" />
+      </svg>
+      {items}
     </svg>
   );
 }
 
 // Telaraña para la esquina de arriba a la derecha.
-function Web() {
+function Web({ size }) {
   return (
-    <svg className="season-decor__web" viewBox="0 0 100 100" aria-hidden="true">
+    <svg className="season-decor__web" viewBox="0 0 100 100" width={size} height={size} aria-hidden="true">
       <g fill="none" stroke="currentColor" strokeWidth="0.8">
         <path d="M100 0L0 0M100 0L10 45M100 0L40 80M100 0L75 100M100 0L100 100" />
         <path d="M78 0Q82 10 92 14Q96 18 100 22" />
@@ -250,39 +419,21 @@ function Web() {
         <path d="M30 0Q42 30 66 46Q84 60 100 68" />
         <path d="M8 0Q22 40 52 62Q74 82 100 92" />
       </g>
-      <path d="M62 52v14" stroke="currentColor" strokeWidth="0.6" />
-      <circle cx="62" cy="68" r="3" fill="currentColor" />
     </svg>
   );
 }
 
 export const SeasonDecor = memo(function SeasonDecor({ seasonId }) {
-  if (!PALETTES[seasonId]) return null;
-  const items = scatter(seasonId);
+  const composition = COMPOSITIONS[seasonId];
+  if (!composition) return null;
 
   return (
     <div className={`season-decor season-decor--${seasonId}`} aria-hidden="true">
-      {seasonId === "navidad" ? <Garland /> : null}
-      {seasonId === "halloween" || seasonId === "spooky" ? <Web /> : null}
-      {items
-        .filter((item) => !(seasonId === "navidad" && item.band === "top"))
-        .map((item, index) => (
-          <svg
-            key={index}
-            className={`season-decor__item season-decor__item--${item.band}`}
-            viewBox="0 0 24 24"
-            width={item.size}
-            height={item.size}
-            style={{
-              left: `${item.left}%`,
-              [item.band]: `${item.offset}px`,
-              color: item.color,
-              transform: `rotate(${item.rotate}deg)`,
-            }}
-          >
-            <g fill="currentColor">{SHAPES[item.shape]}</g>
-          </svg>
-        ))}
+      {composition.garland ? <Garland kind={composition.garland} /> : null}
+      {composition.web ? <Web size={composition.web} /> : null}
+      {composition.pieces.map((piece, index) => (
+        <Piece key={index} piece={piece} />
+      ))}
     </div>
   );
 });

@@ -4235,14 +4235,6 @@ html.is-lite {
   --font-sans: "Manrope Static", ui-sans-serif, system-ui, sans-serif;
 }
 
-/* Sin decoración de temporada: es una capa a pantalla completa por encima de
-   todo (y el detalle de la barra). La temporada se sigue notando en Yoshi, el
-   saludo y los colores. */
-.is-lite .season-decor,
-.is-lite .season-badge {
-  display: none;
-}
-
 /* Yoshi sigue vivo cambiando de pose (sprites), solo que sin saltar. */
 /* Lo que solo aparecía gracias a su animación, visible quieto. */
 .is-lite .yoshi__zzz i {
@@ -4918,47 +4910,52 @@ html.is-lite .app {
 
 /* Decoración de temporada (SeasonDecor) ----------------------------------- */
 
+/* Empieza en el filo del rail, sin cruzarlo. Va por debajo de .app-main (z-index 2 en
+   almanaque.css): las piezas que se
+   acercan a una tarjeta se esconden detrás en vez de taparla. El contenedor
+   no pinta nada; solo coloca las piezas. */
 .season-decor {
   position: absolute;
   top: 0;
   right: 0;
   bottom: 0;
   left: 112px;
-  z-index: 2;
+  z-index: 1;
   overflow: hidden;
   pointer-events: none;
 }
 
-.season-decor__item {
+.season-decor__piece {
   position: absolute;
-  opacity: 0.85;
+  overflow: visible;
 }
 
 .season-decor__garland {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 17px;
 }
 
 .season-decor__web {
   position: absolute;
   top: 0;
   right: 0;
-  width: 96px;
-  height: 96px;
   color: rgba(60, 52, 64, 0.38);
-}
-
-.season-decor--halloween .season-decor__web {
-  width: 150px;
-  height: 150px;
 }
 
 .app.is-night .season-decor,
 .app.is-night .season-decor__web {
   opacity: 0.45;
+}
+
+/* En el marco, colores macizos (sin mezclar con lo de debajo) y, de noche,
+   fuera: la pantalla ya va apagada. */
+.is-lite .season-decor__web {
+  color: #aea7a6;
+}
+
+.is-lite .app.is-night .season-decor {
+  display: none;
 }
 
 /* En la noche de Halloween la casa entera se pone naranja. */
@@ -7523,3 +7520,39 @@ button:not(:disabled):active {
 .today-now__main .season-scene {
   display: none;
 }
+
+/* Cabecera de la hora: la fecha (y la cuenta atrás) en una línea de
+   antetítulo, el saludo debajo a todo el ancho en dos líneas como mucho. */
+.today-now__head {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 5px;
+}
+
+/* Gana a `.today-now__head span:first-child`, que pintaba el primer span de
+   acento cuando el saludo iba delante. */
+.today-now .today-now__head .today-now__date {
+  display: flex;
+  min-width: 0;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 0;
+  color: var(--muted);
+}
+
+.today-now__head .today-now__date > span:first-child {
+  color: inherit;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.today-now__countdown {
+  flex: none;
+  margin-top: 0;
+  padding: 1px 9px;
+  font-size: 12px;
+}
+
