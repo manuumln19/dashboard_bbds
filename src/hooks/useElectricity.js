@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DEMO_MODE } from "../config";
 import { apiRequestWithMeta } from "../lib/api";
 import { createDemoElectricity } from "../lib/demo";
 import { reportFailure, reportSync } from "../lib/freshness";
+import { onPollingResume, pollingPaused, pollInterval } from "../lib/polling";
 
 const CACHE_KEY = "bbds.electricity.v1";
 const REFRESH_MS = 30 * 60 * 1000;
@@ -52,7 +53,8 @@ function validPayload(payload) {
 }
 
 export function useElectricity() {
-  const cached = DEMO_MODE ? null : readCache();
+  // La caché se lee una vez al montar, no en cada render.
+  const [cached] = useState(() => (DEMO_MODE ? null : readCache()));
   const [data, setData] = useState(() =>
     DEMO_MODE ? createDemoElectricity() : cached ? cached.data : null
   );
@@ -138,7 +140,12 @@ export function useElectricity() {
   useEffect(() => {
     refresh(Boolean(dataRef.current));
 
-    const timer = setInterval(() => refresh(true), REFRESH_MS);
+    // Sin sondeos con el salvapantallas abierto; al cerrarlo, uno al momento.
+    const tick = () => refresh(true);
+    const timer = setInterval(() => {
+      if (!pollingPaused()) tick();
+    }, pollInterval(REFRESH_MS));
+    const stopResume = onPollingResume(tick);
     function handleVisibility() {
       if (document.visibilityState === "visible") refresh(true);
     }
@@ -150,20 +157,25 @@ export function useElectricity() {
 
     return () => {
       clearInterval(timer);
+      stopResume();
       document.removeEventListener("visibilitychange", handleVisibility);
       window.removeEventListener("online", handleOnline);
     };
   }, [refresh]);
 
-  return {
-    data,
-    error,
-    warning,
-    loading,
-    refreshing,
-    stale,
-    savedAt,
-    lastUpdated: data ? data.fetchedAt : null,
-    refresh,
-  };
+  // Mismo objeto mientras no cambie nada (las tarjetas de Hoy van memorizadas).
+  return useMemo(
+    () => ({
+      data,
+      error,
+      warning,
+      loading,
+      refreshing,
+      stale,
+      savedAt,
+      lastUpdated: data ? data.fetchedAt : null,
+      refresh,
+    }),
+    [data, error, warning, loading, refreshing, stale, savedAt, refresh]
+  );
 }

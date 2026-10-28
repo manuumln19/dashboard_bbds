@@ -1,8 +1,10 @@
 import {
   lazy,
+  startTransition,
   Suspense,
   useCallback,
   useEffect,
+  useMemo,
   useState,
   useSyncExternalStore,
 } from "react";
@@ -14,7 +16,7 @@ import {
   NIGHTLY_RELOAD_HOUR,
   SCREENSAVER_IDLE_MS,
 } from "./config";
-import { formatClock } from "./lib/date";
+import { dayPhase, formatClock } from "./lib/date";
 import { seasonFor, seasonOverride } from "./lib/season";
 import { timeZoneMismatch } from "./lib/timezone";
 import {
@@ -25,6 +27,7 @@ import {
 } from "./lib/demoControls";
 import { useCalendar } from "./hooks/useCalendar";
 import { useCleaning } from "./hooks/useCleaning";
+import { useElectricity } from "./hooks/useElectricity";
 import { useDataHealth } from "./hooks/useFreshness";
 import { useIdle } from "./hooks/useIdle";
 import {
@@ -35,18 +38,19 @@ import {
 import { useLists } from "./hooks/useLists";
 import { useMenu } from "./hooks/useMenu";
 import { useNightMode } from "./hooks/useNightMode";
+import { useNotes } from "./hooks/useNotes";
 import { useNow } from "./hooks/useNow";
 import { usePhotos } from "./hooks/usePhotos";
 import { useSensors } from "./hooks/useSensors";
 import { useWakeLock } from "./hooks/useWakeLock";
 import { useWeather } from "./hooks/useWeather";
-import { DemoPanel, Diagnostics } from "./components/DemoPanel";
 import { Rail } from "./components/Rail";
 import { SeasonContext, SeasonDecor } from "./components/SeasonDecor";
 import { HomeView } from "./components/HomeView";
-import { Screensaver } from "./components/Screensaver";
 import { StatusBanner } from "./components/StatusBanner";
 import { Yoshi, YoshiStroll, yoshiMood } from "./components/Yoshi";
+import { LITE_MODE } from "./lib/perf";
+import { setPollingPaused } from "./lib/polling";
 import { doneCount, houseLines } from "./lib/yoshiTalk";
 
 // Las vistas que no se usan al arrancar se descargan aparte y se precargan
@@ -57,6 +61,9 @@ const loadCleaning = () => import("./components/CleaningView");
 const loadWeather = () => import("./components/WeatherView");
 const loadClimate = () => import("./components/ClimateView");
 const loadEnergy = () => import("./components/EnergyView");
+const loadScreensaver = () => import("./components/Screensaver");
+// Paneles de demo y diagnóstico: casi nunca se abren; fuera del arranque.
+const loadDemoPanel = () => import("./components/DemoPanel");
 
 const AgendaView = lazy(() =>
   loadAgenda().then((module) => ({ default: module.AgendaView }))
@@ -76,6 +83,15 @@ const ClimateView = lazy(() =>
 const EnergyView = lazy(() =>
   loadEnergy().then((module) => ({ default: module.EnergyView }))
 );
+const Screensaver = lazy(() =>
+  loadScreensaver().then((module) => ({ default: module.Screensaver }))
+);
+const DemoPanel = lazy(() =>
+  loadDemoPanel().then((module) => ({ default: module.DemoPanel }))
+);
+const Diagnostics = lazy(() =>
+  loadDemoPanel().then((module) => ({ default: module.Diagnostics }))
+);
 
 // En el marco, descargar y compilar una vista al tocarla añade cientos de ms.
 const PRELOAD_DELAY_MS = 8000;
@@ -85,6 +101,7 @@ const PRELOADERS = [
   loadCleaning,
   loadWeather,
   loadEnergy,
+  loadScreensaver,
   ...(CLIMATE_ENABLED ? [loadClimate] : []),
 ];
 
@@ -111,6 +128,14 @@ function readQueryFlag(name) {
 
 export default function App() {
   const [view, setViewState] = useState(readViewFromHash);
+  // La pestaña marcada cambia al instante; la vista, como transición: React
+  // mantiene la anterior mientras prepara la nueva (sin el «Abriendo…»).
+  const [railView, setRailView] = useState(view);
+  // Hoy se monta la primera vez que se visita y ya no se desmonta.
+  const [homeMounted, setHomeMounted] = useState(view === "home");
+  useEffect(() => {
+    if (view === "home") setHomeMounted(true);
+  }, [view]);
   const [online, setOnline] = useState(
     typeof navigator === "undefined" ? true : navigator.onLine
   );
@@ -133,15 +158,19 @@ export default function App() {
   const lists = useLists();
   const cleaning = useCleaning(now);
   const menu = useMenu(MENU_ENABLED);
-  const season = seasonOverride() || seasonFor(now, cleaning.people);
+  // Aquí y no en Hoy: al volver a Hoy no se vuelven a pedir ni a pintar dos veces.
+  const electricity = useElectricity();
+  const notes = useNotes();
+  // Memorizados: objetos nuevos en cada render repintaban todo Hoy y la barra.
+  const season = useMemo(() => seasonOverride() || seasonFor(now, cleaning.people), [now, cleaning.people]);
   const { idle, reset: resetIdle } = useIdle(idleMs);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const { isNight, toggleNight } = useNightMode(now);
   const dataHealth = useDataHealth(effectiveOnline, now, {
     climateEnabled: CLIMATE_ENABLED,
   });
-  const zoneIssue = DEMO_MODE ? null : timeZoneMismatch(now);
-  const health = zoneIssue
+  const zoneIssue = useMemo(() => (DEMO_MODE ? null : timeZoneMismatch(now)), [now]);
+  const health = useMemo(() => zoneIssue
     ? {
         ...dataHealth,
         issues: [
@@ -155,17 +184,23 @@ export default function App() {
           },
         ],
       }
-    : dataHealth;
+    : dataHealth, [zoneIssue, dataHealth]);
 
   const setView = useCallback((nextView) => {
     if (!VALID_VIEWS.has(nextView)) return;
-    setViewState(nextView);
+    setRailView(nextView);
+    startTransition(() => setViewState(nextView));
     if (typeof window !== "undefined") {
       window.history.replaceState(null, "", `#${nextView}`);
     }
   }, []);
 
   const goHome = useCallback(() => setView("home"), [setView]);
+  const openAgenda = useCallback(() => setView("agenda"), [setView]);
+  const openLists = useCallback(() => setView("lists"), [setView]);
+  const openEnergy = useCallback(() => setView("energy"), [setView]);
+  const openWeather = useCallback(() => setView("weather"), [setView]);
+  const openCleaning = useCallback(() => setView("cleaning"), [setView]);
 
   useWakeLock();
   useNightlyReload(NIGHTLY_RELOAD_HOUR);
@@ -192,7 +227,13 @@ export default function App() {
   const screensaverOpen = galleryOpen || idle;
   const photos = usePhotos(screensaverOpen);
 
-  // Yoshi: saluda al volver y, de día, sale de paseo cada 25–45 minutos.
+  // Con el salvapantallas abierto no se sondea (Hoy sigue montado debajo).
+  useEffect(() => {
+    setPollingPaused(screensaverOpen);
+  }, [screensaverOpen]);
+
+  // Yoshi: saluda al volver y, de día, sale de paseo cada 25–45 minutos. En
+  // el marco (modo ligero) no pasea: cruzar la pantalla animado cuesta mucho.
   const [strolling, setStrolling] = useState(false);
   const [yoshiGreet, setYoshiGreet] = useState(0);
   const startStroll = useCallback(() => setStrolling(true), []);
@@ -202,7 +243,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (isNight || strolling || screensaverOpen) return undefined;
+    if (LITE_MODE || isNight || strolling || screensaverOpen) return undefined;
     const timer = window.setTimeout(startStroll, (25 + Math.random() * 20) * 60000);
     return () => window.clearTimeout(timer);
   }, [isNight, strolling, screensaverOpen, startStroll]);
@@ -275,6 +316,7 @@ export default function App() {
     }
     function syncViewFromHash() {
       const nextView = readViewFromHash();
+      setRailView(nextView);
       setViewState(nextView);
       if (window.location.hash !== `#${nextView}`) {
         window.history.replaceState(null, "", `#${nextView}`);
@@ -300,63 +342,82 @@ export default function App() {
     null;
   const loading = sensors.loading || lists.loading || cleaning.loading;
 
-  let status;
-  if (DEMO_MODE) {
-    status = {
-      tone: "demo",
-      label: "Demo",
-      title: "Datos de ejemplo; los controles se guardan en este navegador",
-    };
-  } else if (!effectiveOnline || relevantError) {
-    status = {
-      tone: "bad",
-      label: effectiveOnline ? "Revisar" : "Sin conexión",
-      title:
-        relevantError ||
-        (!effectiveOnline
-          ? "El dispositivo no tiene conexión"
-          : "Hay datos que no se han podido actualizar"),
-    };
-  } else if (loading) {
-    status = { tone: "good", label: "Sincronizando" };
-  } else {
-    status = { tone: "good", label: "En línea" };
-  }
+  const status = useMemo(() => {
+    if (DEMO_MODE) {
+      return {
+        tone: "demo",
+        label: "Demo",
+        title: "Datos de ejemplo; los controles se guardan en este navegador",
+      };
+    }
+    if (!effectiveOnline || relevantError) {
+      return {
+        tone: "bad",
+        label: effectiveOnline ? "Revisar" : "Sin conexión",
+        title:
+          relevantError ||
+          (!effectiveOnline
+            ? "El dispositivo no tiene conexión"
+            : "Hay datos que no se han podido actualizar"),
+      };
+    }
+    if (loading) return { tone: "good", label: "Sincronizando" };
+    return { tone: "good", label: "En línea" };
+  }, [effectiveOnline, relevantError, loading]);
+
+  // Yoshi vive en la tarjeta «Lo siguiente» de Hoy (en la barra tapaba el menú
+  // en el marco). Elemento memorizado: uno nuevo en cada render repintaba Hoy.
+  const yoshiMoodNow = yoshiMood({ now, weather: weather.weather, isNight });
+  // Semana de limpieza completa: Yoshi luce el trofeo en Hoy hasta el lunes
+  // (dormido, no: de noche duerme).
+  const yoshiTrophy = cleaning.weekComplete && yoshiMoodNow !== "sleep";
+  const yoshiCheer = cleaning.loading || lists.loading ? null : doneCount({ cleaning, lists });
+  const yoshiHouse = useMemo(
+    () => houseLines({ now, cleaning, events: calendar.events, lists }),
+    [now, cleaning, calendar.events, lists]
+  );
+  const homeVisible = view === "home";
+  const mascot = useMemo(
+    () => (
+      <Yoshi
+        lively={homeVisible}
+        mood={yoshiMoodNow}
+        seasonId={season.id}
+        holding={yoshiTrophy ? "trophy" : null}
+        cheer={yoshiCheer}
+        house={yoshiHouse}
+        main
+        greet={yoshiGreet}
+        away={strolling}
+        onWander={LITE_MODE ? undefined : startStroll}
+        size={136}
+      />
+    ),
+    [homeVisible, yoshiMoodNow, yoshiTrophy, season.id, yoshiCheer, yoshiHouse, yoshiGreet, strolling, startStroll]
+  );
 
   return (
     <SeasonContext.Provider value={season.id}>
     <div
-      className={`app app--${view} season-${season.id}${isNight ? " is-night" : ""}`}
+      className={`app app--${view} season-${season.id} phase-${dayPhase(now)}${isNight ? " is-night" : ""}`}
       data-view={view}
     >
       <div className="ambient" aria-hidden="true">
         <span className="ambient__grain" />
       </div>
 
-      <SeasonDecor seasonId={season.id} />
+      {/* En el marco no se monta: capa a pantalla completa por encima de todo. */}
+      {LITE_MODE ? null : <SeasonDecor seasonId={season.id} />}
 
       <Rail
         now={now}
-        view={view}
+        view={railView}
         onChange={setView}
         isNight={isNight}
         onToggleNight={toggleNight}
         onOpenGallery={openGallery}
         status={status}
         seasonId={season.id}
-        mascot={
-          <Yoshi
-            mood={yoshiMood({ now, weather: weather.weather, isNight })}
-            seasonId={season.id}
-            cheer={cleaning.loading || lists.loading ? null : doneCount({ cleaning, lists })}
-            house={houseLines({ now, cleaning, events: calendar.events, lists })}
-            main
-            greet={yoshiGreet}
-            away={strolling}
-            onWander={startStroll}
-            size={124}
-          />
-        }
       />
       {strolling ? <YoshiStroll onDone={endStroll} /> : null}
 
@@ -374,20 +435,29 @@ export default function App() {
             </div>
           }
         >
-          {view === "home" ? (
+          {/* Hoy no se desmonta al cambiar de vista: se oculta. Volver a Hoy es
+              inmediato (antes se reconstruía entera, ~150–300 ms en el marco). */}
+          {homeMounted ? (
             <HomeView
+              hidden={view !== "home"}
+              night={isNight}
+              wake={yoshiGreet}
               now={now}
               weather={weather}
               calendar={calendar}
               lists={lists}
               cleaning={cleaning}
+              electricity={electricity}
+              notes={notes}
               season={season}
               menu={MENU_ENABLED ? menu : null}
-              onOpenAgenda={() => setView("agenda")}
-              onOpenLists={() => setView("lists")}
-              onOpenEnergy={() => setView("energy")}
-              onOpenWeather={() => setView("weather")}
-              onOpenCleaning={() => setView("cleaning")}
+              mascot={mascot}
+              mascotMood={yoshiMoodNow}
+              onOpenAgenda={openAgenda}
+              onOpenLists={openLists}
+              onOpenEnergy={openEnergy}
+              onOpenWeather={openWeather}
+              onOpenCleaning={openCleaning}
             />
           ) : null}
 
@@ -432,46 +502,54 @@ export default function App() {
         </Suspense>
       </main>
 
-      <div className="screen-dim" aria-hidden="true" />
-
       {screensaverOpen ? (
-        <Screensaver
-          now={now}
-          onClose={closeScreensaver}
-          isNight={isNight}
-          photos={photos}
-          weather={weather.weather}
-          events={calendar.events}
-        />
+        <Suspense fallback={null}>
+          <Screensaver
+            now={now}
+            onClose={closeScreensaver}
+            isNight={isNight}
+            photos={photos}
+            weather={weather.weather}
+            events={calendar.events}
+          />
+        </Suspense>
       ) : null}
 
-      <DemoPanel
-        open={DEMO_MODE && demoOpen}
-        onClose={() => setDemoOpen(false)}
-        timeOffset={timeOffset}
-        onTimeOffset={setTimeOffset}
-        idleMs={idleMs}
-        defaultIdleMs={SCREENSAVER_IDLE_MS}
-        onIdleMs={setIdleMs}
-        demoOffline={demoControls.offline}
-        onDemoOffline={setDemoOffline}
-        forceStale={demoControls.forceStale}
-        onForceStale={setForceStale}
-        onOpenDiagnostics={openDiagnostics}
-      />
+      {DEMO_MODE && demoOpen ? (
+        <Suspense fallback={null}>
+          <DemoPanel
+            open
+            onClose={() => setDemoOpen(false)}
+            timeOffset={timeOffset}
+            onTimeOffset={setTimeOffset}
+            idleMs={idleMs}
+            defaultIdleMs={SCREENSAVER_IDLE_MS}
+            onIdleMs={setIdleMs}
+            demoOffline={demoControls.offline}
+            onDemoOffline={setDemoOffline}
+            forceStale={demoControls.forceStale}
+            onForceStale={setForceStale}
+            onOpenDiagnostics={openDiagnostics}
+          />
+        </Suspense>
+      ) : null}
 
-      <Diagnostics
-        open={diagOpen}
-        onClose={() => setDiagOpen(false)}
-        data={{
-          online: effectiveOnline,
-          demoOffline: demoControls.offline,
-          view,
-          now,
-          freshness: dataHealth.freshness,
-        }}
-        onOpenDemo={openDemo}
-      />
+      {diagOpen ? (
+        <Suspense fallback={null}>
+          <Diagnostics
+            open
+            onClose={() => setDiagOpen(false)}
+            data={{
+              online: effectiveOnline,
+              demoOffline: demoControls.offline,
+              view,
+              now,
+              freshness: dataHealth.freshness,
+            }}
+            onOpenDemo={openDemo}
+          />
+        </Suspense>
+      ) : null}
     </div>
     </SeasonContext.Provider>
   );

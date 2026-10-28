@@ -47,14 +47,17 @@ export function reportSync(
     !cachedAt && (!state.lastGoodAt || at > state.lastGoodAt)
       ? at
       : state.lastGoodAt;
-  // Los avisos van por minutos: un sondeo que solo renueva la hora dentro del
-  // mismo minuto no necesita repintar toda la app (en el marco, ~150 ms).
+  // Un sondeo que solo renueva la hora de una fuente que ya estaba bien no
+  // necesita repintar toda la app (en el marco, ~150 ms): las edades se
+  // recalculan con el tic del minuto. Solo avisa si cambia el estado o si la
+  // fuente vuelve tras más de 2 minutos sin datos.
+  const gap = Date.parse(at) - Date.parse(previous.at || "");
   const quiet =
     previous.ok === true &&
     (previous.detail || null) === (detail || null) &&
     (previous.cachedAt || null) === nextSources[source].cachedAt &&
-    String(previous.at || "").slice(0, 16) === String(at).slice(0, 16) &&
-    String(state.lastGoodAt || "").slice(0, 16) === String(lastGoodAt || "").slice(0, 16);
+    gap >= 0 &&
+    gap < 2 * 60 * 1000;
   state = { sources: nextSources, lastGoodAt };
   emit({ quiet });
 }

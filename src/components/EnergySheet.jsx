@@ -11,6 +11,7 @@ import {
   taxBreakdown,
 } from "../lib/energy";
 import { numberFormat } from "../lib/intl";
+import { sheetPortal } from "../lib/sheetPortal";
 
 function numberText(value) {
   return numberFormat({
@@ -64,7 +65,7 @@ export function EnergySheet({
   const isDemo = Boolean(source && source.demo) || Boolean(data && data.demo);
   const outdated = stale || !data || Boolean(data.stale);
 
-  return (
+  return sheetPortal(
     <div
       className="ink-overlay feature-overlay energy-overlay"
       onPointerDown={(event) => {

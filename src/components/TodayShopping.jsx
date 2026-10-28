@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { ArrowUpRight, Plus, ShoppingBasket, StickyNote } from "lucide-react";
+import { memo, useRef, useState } from "react";
+import { ArrowUpRight, Check, Plus, ShoppingBasket, StickyNote } from "lucide-react";
 import { isLegacyDrawing } from "../lib/listItems";
 import { useRecentlyDone } from "../hooks/useRecentlyDone";
 import { CheckMark } from "./CheckMark";
@@ -8,8 +8,11 @@ import { SeasonMark } from "./SeasonDecor";
 const VISIBLE = 6;
 
 // `onWriteNote` abre la hoja de nota nueva; las notas viven sueltas en Hoy.
-export function TodayShopping({ lists, onOpenLists, onWriteNote }) {
-  const [text, setText] = useState("");
+export const TodayShopping = memo(function TodayShopping({ lists, onOpenLists, onWriteNote }) {
+  // Campo no controlado: escribir no redibuja la tarjeta (solo si pasa de
+  // vacío a lleno, para el botón «Añadir»).
+  const inputRef = useRef(null);
+  const [hasText, setHasText] = useState(false);
   const recent = useRecentlyDone();
   const shopping = lists.items.filter((item) => item.listId === "shopping");
   const open = shopping.filter((item) => !item.done);
@@ -24,9 +27,12 @@ export function TodayShopping({ lists, onOpenLists, onWriteNote }) {
 
   function submit(event) {
     event.preventDefault();
-    if (!text.trim()) return;
-    lists.addItem("shopping", text);
-    setText("");
+    const input = inputRef.current;
+    const value = input ? input.value.trim() : "";
+    if (!value) return;
+    lists.addItem("shopping", value);
+    if (input) input.value = "";
+    setHasText(false);
   }
 
   return (
@@ -78,23 +84,28 @@ export function TodayShopping({ lists, onOpenLists, onWriteNote }) {
           ) : null}
         </ul>
       ) : (
-        <p className="today-shopping__empty">No falta nada.</p>
+        <p className="today-shopping__empty">
+          <Check size={22} strokeWidth={1.8} aria-hidden="true" />
+          <strong>No falta nada</strong>
+          <span>La despensa está al día.</span>
+        </p>
       )}
 
       <form className="today-shopping__add" onSubmit={submit}>
         <input
           type="text"
-          value={text}
+          ref={inputRef}
+          defaultValue=""
           maxLength={160}
           placeholder="Añadir a la compra…"
           aria-label="Añadir a la compra"
           enterKeyHint="done"
-          onChange={(event) => setText(event.target.value)}
+          onChange={(event) => setHasText(event.target.value.trim() !== "")}
         />
-        <button type="submit" aria-label="Añadir" disabled={!text.trim()}>
+        <button type="submit" aria-label="Añadir" disabled={!hasText}>
           <Plus size={18} strokeWidth={2} aria-hidden="true" />
         </button>
       </form>
     </article>
   );
-}
+});

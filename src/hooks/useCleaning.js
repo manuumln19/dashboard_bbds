@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DEMO_MODE } from "../config";
 import { apiRequest, apiRequestWithMeta } from "../lib/api";
 import {
@@ -10,13 +10,16 @@ import {
 } from "../lib/cleaning";
 import { reportFailure, reportSync } from "../lib/freshness";
 import { loadDemoCleaning, saveDemoCleaning } from "../lib/localStore";
+import { useStableFns } from "./useStableFns";
+import { compareText } from "../lib/compare";
+import { onPollingResume, pollingPaused, pollInterval } from "../lib/polling";
 
 function sortTasks(tasks) {
   return [...tasks].sort(
     (a, b) =>
       Number(a.day) - Number(b.day) ||
       Number(a.position || 0) - Number(b.position || 0) ||
-      String(a.id).localeCompare(String(b.id))
+      compareText(a.id, b.id)
   );
 }
 
@@ -84,9 +87,13 @@ export function useCleaning(now) {
   const [tasks, setTasks] = useState(() => (demo ? demo.tasks : []));
   const [people, setPeople] = useState(() => (demo ? demo.people : []));
   const [week, setWeek] = useState(() => (demo ? demo.weekKey : weekKey(now)));
-  const [lastUpdated, setLastUpdated] = useState(() =>
-    demo ? demo.lastUpdated : null
-  );
+  // La hora de sincronización solo se ve en Limpieza, que se repinta con el
+  // reloj: como estado, cada escritura y cada sondeo repintaban toda la app.
+  const lastUpdatedRef = useRef(demo ? demo.lastUpdated : null);
+  const setLastUpdated = useCallback((value) => {
+    lastUpdatedRef.current = value;
+  }, []);
+  const snapshotKey = useRef(null);
   // En demo no hay historial: una racha y un mes inventados para ver cómo queda.
   const [streak, setStreak] = useState(DEMO_MODE ? 3 : 0);
   const [personStreaks, setPersonStreaks] = useState(DEMO_MODE ? { manu: 4, paco: 2 } : {});
@@ -103,6 +110,34 @@ export function useCleaning(now) {
 
   const applySnapshot = useCallback((payload, meta) => {
     const nextPeople = Array.isArray(payload.people) ? payload.people : [];
+    const at =
+      (meta && meta.cachedAt) ||
+      payload.updatedAt ||
+      new Date().toISOString();
+    const report = () =>
+      reportSync("cleaning", {
+        at,
+        cachedAt: meta && meta.offline ? at : null,
+        detail:
+          meta && meta.offline ? "Mostrando la última copia guardada" : null,
+      });
+    setLastUpdated(at);
+    // El sondeo de cada minuto casi nunca trae cambios: con los mismos datos
+    // no se toca el estado (cada set repintaba toda la app).
+    const key = JSON.stringify([
+      nextPeople,
+      payload.tasks,
+      payload.weekKey,
+      payload.streak,
+      payload.personStreaks,
+      payload.days,
+      payload.lastMonth,
+    ]);
+    if (key === snapshotKey.current) {
+      report();
+      return;
+    }
+    snapshotKey.current = key;
     if (nextPeople.length) setPeople(nextPeople);
     setTasks(
       attachPeople(
@@ -117,18 +152,8 @@ export function useCleaning(now) {
     }
     if (Array.isArray(payload.days)) setDaysState(validDays(payload.days));
     if (payload.lastMonth) setLastMonth(payload.lastMonth);
-    const at =
-      (meta && meta.cachedAt) ||
-      payload.updatedAt ||
-      new Date().toISOString();
-    setLastUpdated(at);
-    reportSync("cleaning", {
-      at,
-      cachedAt: meta && meta.offline ? at : null,
-      detail:
-        meta && meta.offline ? "Mostrando la última copia guardada" : null,
-    });
-  }, []);
+    report();
+  }, [setLastUpdated]);
 
   const load = useCallback(
     async (targetWeek, silent = false) => {
@@ -165,24 +190,38 @@ export function useCleaning(now) {
     [applySnapshot]
   );
 
+  // En demo no hay petición, pero el aviso de frescura también debe saber
+  // cuándo se cargó la limpieza.
+  // En demo no hay sondeo que lo renueve: se da por sincronizada cada minuto
+  // (si no, el aviso de frescura saltaba a los 3 minutos).
   useEffect(() => {
-    if (!DEMO_MODE || !lastUpdated) return undefined;
-    // En demo no hay petición, pero la pantalla también debe saber cuándo se
-    // actualizó la limpieza para el aviso de frescura.
-    reportSync("cleaning", { at: lastUpdated });
-    return undefined;
-  }, [lastUpdated]);
+    if (!DEMO_MODE) return undefined;
+    function report() {
+      const at = new Date().toISOString();
+      lastUpdatedRef.current = at;
+      reportSync("cleaning", { at });
+    }
+    report();
+    const timer = setInterval(report, 60 * 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     if (DEMO_MODE) return undefined;
     load(currentWeek, false);
-    const timer = setInterval(() => load(currentWeek, true), 60 * 1000);
+    // Sin sondeos con el salvapantallas abierto; al cerrarlo, uno al momento.
+    const tick = () => load(currentWeek, true);
+    const timer = setInterval(() => {
+      if (!pollingPaused()) tick();
+    }, pollInterval(60 * 1000));
+    const stopResume = onPollingResume(tick);
     function handleVisibility() {
       if (document.visibilityState === "visible") load(currentWeek, true);
     }
     document.addEventListener("visibilitychange", handleVisibility);
     return () => {
       clearInterval(timer);
+      stopResume();
       document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, [currentWeek, load]);
@@ -193,8 +232,11 @@ export function useCleaning(now) {
       current.map((task) => ({ ...task, done: false }))
     );
     setWeek(currentWeek);
-    setLastUpdated(new Date().toISOString());
-  }, [currentWeek, week]);
+    const at = new Date().toISOString();
+    setLastUpdated(at);
+    // En demo no hay petición, pero el aviso de frescura también debe saberlo.
+    reportSync("cleaning", { at });
+  }, [currentWeek, week, setLastUpdated]);
 
   useEffect(() => {
     if (!DEMO_MODE) return;
@@ -470,17 +512,29 @@ export function useCleaning(now) {
     }
   }
 
-  const activeTasks = tasks.filter((task) => days.includes(task.day));
+  const activeTasks = useMemo(() => tasks.filter((task) => days.includes(task.day)), [tasks, days]);
   const doneCount = activeTasks.filter((task) => task.done).length;
   const weekComplete = activeTasks.length > 0 && doneCount === activeTasks.length;
+  const actions = useStableFns({
+    setDays,
+    toggleTask,
+    resetWeek,
+    addTask,
+    updateTask,
+    removeTask,
+    updatePerson,
+    refresh: () => load(currentWeek, false),
+  });
 
-  return {
+  // Mismo objeto mientras no cambie nada: así las tarjetas memorizadas de Hoy
+  // no se repintan por un render de App que no las afecta.
+  return useMemo(() => ({
     // Solo las tareas de los días de limpieza; el editor usa `allTasks`.
     tasks: activeTasks,
     allTasks: tasks,
     people,
     days,
-    setDays,
+    setDays: actions.setDays,
     lastMonth,
     doneCount,
     totalCount: activeTasks.length,
@@ -490,15 +544,17 @@ export function useCleaning(now) {
     personStreaks,
     weekComplete,
     weekKey: week,
-    toggleTask,
-    resetWeek,
-    addTask,
-    updateTask,
-    removeTask,
-    updatePerson,
-    lastUpdated,
+    toggleTask: actions.toggleTask,
+    resetWeek: actions.resetWeek,
+    addTask: actions.addTask,
+    updateTask: actions.updateTask,
+    removeTask: actions.removeTask,
+    updatePerson: actions.updatePerson,
+    get lastUpdated() {
+      return lastUpdatedRef.current;
+    },
     error,
     loading,
-    refresh: () => load(currentWeek, false),
-  };
+    refresh: actions.refresh,
+  }), [activeTasks, tasks, people, days, lastMonth, doneCount, streak, personStreaks, weekComplete, week, error, loading, actions]);
 }

@@ -1,4 +1,6 @@
-import { getGreeting } from "./date";
+import { capitalize, eventStartDate, getGreeting, isSameDay } from "./date";
+import { dateFormat } from "./intl";
+import { isRainyHour, nextHours } from "./weather";
 import { cleaningDayIndex } from "./today";
 
 // El saludo de Hoy: «Buenos días» y, detrás, una frase según lo que pasa en
@@ -35,7 +37,36 @@ function pick(lines, seed) {
   return lines.length ? lines[seed % lines.length] : null;
 }
 
-export function greetingLine({ now, weather, season, lists, cleaning }) {
+const WEEKDAY = { weekday: "long" };
+
+function pad(value) {
+  return String(value).padStart(2, "0");
+}
+
+// El titular del día, como una portada: «Miércoles con clase de oboe a las
+// 11:58 y lluvia hacia las 19:00.» Solo con algo que contar y antes de la
+// noche; si no, el saludo sigue con sus frases de siempre.
+export function dayHeadline({ now, weather, events }) {
+  if (now.getHours() >= 20) return null;
+  const day = capitalize(dateFormat(WEEKDAY).format(now));
+  const next = (Array.isArray(events) ? events : [])
+    .filter((event) => !event.allDay && isSameDay(eventStartDate(event), now) && eventStartDate(event) > now)
+    .sort((a, b) => eventStartDate(a) - eventStartDate(b))[0];
+  // Lluvia que queda hoy (las horas son locales: «2026-10-28T19:00»).
+  const upcoming = nextHours(weather, now, 14);
+  const todayKey = upcoming[0] ? String(upcoming[0].time).slice(0, 10) : "";
+  const rain = upcoming.find((hour) => isRainyHour(hour) && String(hour.time).slice(0, 10) === todayKey);
+  const what = next ? String(next.summary || "").trim() : "";
+  const plan = what ? `${what.charAt(0).toLowerCase()}${what.slice(1)}` : "";
+  const at = next ? `${pad(eventStartDate(next).getHours())}:${pad(eventStartDate(next).getMinutes())}` : "";
+  const wet = rain ? `lluvia a las ${Number(String(rain.time).slice(11, 13))}` : "";
+  if (plan && wet) return `${day} con ${plan} a las ${at} y ${wet}.`;
+  if (plan) return `${day} con ${plan} a las ${at}.`;
+  if (wet) return `${day} con ${wet}.`;
+  return null;
+}
+
+export function greetingLine({ now, weather, season, lists, cleaning, events }) {
   const hour = now.getHours();
   const weekday = now.getDay();
   const seed = now.getDate() * 24 + hour;
@@ -51,6 +82,10 @@ export function greetingLine({ now, weather, season, lists, cleaning }) {
   if (rain !== null && rain >= 60) return "Hoy toca paraguas.";
   if (max !== null && max >= 34) return `Hoy aprieta: ${max}°. Persianas abajo.`;
   if (min !== null && min <= 2) return `Fresquito: mínima de ${min}°. Abrigaos.`;
+
+  // Después de lo importante, el titular del día.
+  const headline = dayHeadline({ now, weather, events });
+  if (headline) return headline;
 
   const lines = [];
   if (cleaning && cleaning.weekComplete) {

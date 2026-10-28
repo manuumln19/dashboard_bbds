@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { NIGHT } from "../config";
 import { minutesFromTime } from "../lib/date";
 
@@ -23,12 +23,15 @@ export function useNightMode(now) {
     override && override.expiresAt > now.getTime() ? override : null;
   const isNight = activeOverride ? activeOverride.value : automaticNight;
 
-  function toggleNight() {
+  // Estable para que la barra lateral (memorizada) no se repinte por ella.
+  const nightRef = useRef(isNight);
+  nightRef.current = isNight;
+  const toggleNight = useCallback(() => {
     setOverride({
-      value: !isNight,
+      value: !nightRef.current,
       expiresAt: Date.now() + 2 * 60 * 60 * 1000,
     });
-  }
+  }, []);
 
   return {
     isNight,

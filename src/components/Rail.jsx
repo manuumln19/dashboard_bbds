@@ -1,3 +1,4 @@
+import { memo } from "react";
 import {
   CalendarDays,
   CloudSun,
@@ -29,7 +30,7 @@ const TABS = [
     : []),
 ];
 
-export function Rail({
+export const Rail = memo(function Rail({
   now,
   view,
   onChange,
@@ -38,7 +39,6 @@ export function Rail({
   onOpenGallery,
   status,
   seasonId,
-  mascot,
 }) {
   const StatusIcon =
     status.tone === "bad"
@@ -66,7 +66,7 @@ export function Rail({
         ))}
       </nav>
 
-      {mascot ? <div className="rail__mascot">{mascot}</div> : <SeasonBadge seasonId={seasonId} />}
+      <SeasonBadge seasonId={seasonId} />
 
       <div className="rail__bottom">
         <time className="rail__clock" dateTime={now.toISOString()}>
@@ -109,4 +109,4 @@ export function Rail({
       </div>
     </aside>
   );
-}
+});

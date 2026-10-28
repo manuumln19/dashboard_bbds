@@ -10,6 +10,7 @@ import {
   X,
 } from "lucide-react";
 import { DEMO_MODE } from "../config";
+import { sheetPortal } from "../lib/sheetPortal";
 
 export function PhotoAlbumSheet({ photos, onClose }) {
   const [url, setUrl] = useState("");
@@ -34,7 +35,7 @@ export function PhotoAlbumSheet({ photos, onClose }) {
     <LoaderCircle className="feature-spin" size={16} strokeWidth={2} aria-hidden="true" />
   );
 
-  return (
+  return sheetPortal(
     <div
       className="ink-overlay feature-overlay"
       onClick={(event) => {

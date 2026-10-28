@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DEMO_MODE } from "../config";
 import { apiRequest, apiRequestWithMeta } from "../lib/api";
 import { DEMO_PEOPLE, loadDemoLists, saveDemoLists } from "../lib/localStore";
 import { reportFailure, reportSync } from "../lib/freshness";
+import { onPollingResume, pollingPaused, pollInterval } from "../lib/polling";
 
 const REFRESH_MS = 20 * 1000;
 
@@ -17,6 +18,18 @@ function personFor(people, personId) {
   return people.find((person) => person.id === personId) || null;
 }
 
+// Lo que se ve de una lista, sin la hora interna de cada elemento: el
+// servidor la renueva en cada escritura y no cambia nada en pantalla.
+function visibleKey(items) {
+  return JSON.stringify(
+    items.map((item) => [item.id, item.listId, item.text, item.done, item.dueOn, item.dueAt, item.person ? item.person.id : null, item.drawing ? item.drawing.length : 0])
+  );
+}
+
+function sameVisible(a, b) {
+  return visibleKey([a]) === visibleKey([b]);
+}
+
 export function useLists() {
   const [items, setItems] = useState(() =>
     DEMO_MODE ? loadDemoLists() : []
@@ -24,29 +37,26 @@ export function useLists() {
   const [people, setPeople] = useState(() => DEMO_MODE ? DEMO_PEOPLE : []);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(!DEMO_MODE);
-  const [lastUpdated, setLastUpdated] = useState(null);
+  // La hora de sincronización solo se ve en Listas, que se repinta con el
+  // reloj: guardarla como estado repintaba toda la app cada minuto.
+  const lastUpdated = useRef(null);
   const pending = useRef(0);
-  const lastSnapshot = useRef({ key: null, at: 0 });
+  const itemsRef = useRef(items);
+  itemsRef.current = items;
+  const peopleRef = useRef(people);
+  peopleRef.current = people;
 
   const applySnapshot = useCallback((payload, meta) => {
     const nextItems = Array.isArray(payload.items) ? payload.items : [];
     const nextPeople = Array.isArray(payload.people) ? payload.people : null;
     const at = (meta && meta.cachedAt) || new Date().toISOString();
     // El sondeo cada 20 s casi nunca trae cambios. Guardar arrays nuevos
-    // repintaba toda la app (en el marco, ~150 ms cada vez): solo se aplica
-    // si cambia algo, y la hora de sincronización como mucho una vez al minuto.
-    const key = JSON.stringify([nextItems, nextPeople]);
-    const changed = key !== lastSnapshot.current.key;
-    const stamp = Date.parse(at) || Date.now();
-    if (changed) {
-      setItems(nextItems);
-      if (nextPeople) setPeople(nextPeople);
-    }
-    if (changed || stamp - lastSnapshot.current.at >= 60000) {
-      setLastUpdated(at);
-      lastSnapshot.current.at = stamp;
-    }
-    lastSnapshot.current.key = key;
+    // repintaba toda la app (en el marco, ~150 ms cada vez): solo se aplica si
+    // cambia algo de lo que se ve respecto a lo que hay en pantalla, también
+    // justo después de una escritura local.
+    if (visibleKey(nextItems) !== visibleKey(itemsRef.current)) setItems(nextItems);
+    if (nextPeople && JSON.stringify(nextPeople) !== JSON.stringify(peopleRef.current)) setPeople(nextPeople);
+    lastUpdated.current = at;
     reportSync("lists", {
       at,
       cachedAt: meta && meta.offline ? at : null,
@@ -61,7 +71,7 @@ export function useLists() {
         setItems(loadDemoLists());
         setPeople(DEMO_PEOPLE);
         const at = new Date().toISOString();
-        setLastUpdated(at);
+        lastUpdated.current = at;
         setError(null);
         setLoading(false);
         reportSync("lists", { at });
@@ -92,7 +102,12 @@ export function useLists() {
     refresh(false);
     if (DEMO_MODE) return undefined;
 
-    const timer = setInterval(() => refresh(true), REFRESH_MS);
+    // Sin sondeos con el salvapantallas abierto; al cerrarlo, uno al momento.
+    const tick = () => refresh(true);
+    const timer = setInterval(() => {
+      if (!pollingPaused()) tick();
+    }, pollInterval(REFRESH_MS));
+    const stopResume = onPollingResume(tick);
     function handleVisibility() {
       if (document.visibilityState === "visible") refresh(true);
     }
@@ -100,6 +115,7 @@ export function useLists() {
 
     return () => {
       clearInterval(timer);
+      stopResume();
       document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, [refresh]);
@@ -108,7 +124,7 @@ export function useLists() {
     if (DEMO_MODE) saveDemoLists(items);
   }, [items]);
 
-  async function addItem(listId, rawText, meta = {}) {
+  const addItem = useCallback(async (listId, rawText, meta = {}) => {
     const text = String(rawText || "").replace(/\s+/g, " ").trim();
     if (!text) return;
     if (text.length > 160) {
@@ -127,7 +143,7 @@ export function useLists() {
       done: false,
       dueOn: listId === "tasks" ? meta.dueOn || null : null,
       dueAt: listId === "tasks" ? meta.dueAt || null : null,
-      person: personId ? personFor(people, personId) : null,
+      person: personId ? personFor(peopleRef.current, personId) : null,
       createdAt: new Date().toISOString(),
     };
     setItems((current) => [...current, optimistic]);
@@ -149,8 +165,6 @@ export function useLists() {
     }
 
     pending.current += 1;
-    // Tras una escritura local, la próxima respuesta del servidor se aplica siempre.
-    lastSnapshot.current.key = null;
     try {
       const payload = await apiRequest("/api/lists", {
         method: "POST",
@@ -180,26 +194,25 @@ export function useLists() {
     } finally {
       pending.current -= 1;
     }
-  }
+  }, []);
 
-  async function toggleItem(item) {
+  const toggleItem = useCallback(async (item) => {
     const nextDone = !item.done;
+    const optimistic = { ...item, done: nextDone, updatedAt: new Date().toISOString() };
     setError(null);
     setItems((current) =>
-      current.map((entry) =>
-        entry.id === item.id ? { ...entry, done: nextDone } : entry
-      )
+      current.map((entry) => (entry.id === item.id ? optimistic : entry))
     );
 
     if (DEMO_MODE) return;
     pending.current += 1;
-    lastSnapshot.current.key = null;
     try {
       const payload = await apiRequest(
         `/api/lists/${encodeURIComponent(item.id)}`,
         { method: "PATCH", body: { done: nextDone } }
       );
-      if (payload && payload.item) {
+      // Si lo que vuelve es lo mismo que ya se ve, no se repinta otra vez.
+      if (payload && payload.item && !sameVisible(payload.item, optimistic)) {
         setItems((current) =>
           current.map((entry) =>
             entry.id === item.id ? payload.item : entry
@@ -219,12 +232,12 @@ export function useLists() {
     } finally {
       pending.current -= 1;
     }
-  }
+  }, []);
 
-  async function updateItem(item, patch) {
+  const updateItem = useCallback(async (item, patch) => {
     const next = { ...item, ...patch };
     if (Object.prototype.hasOwnProperty.call(patch, "personId")) {
-      next.person = personFor(people, patch.personId);
+      next.person = personFor(peopleRef.current, patch.personId);
     }
     setError(null);
     setItems((current) =>
@@ -233,13 +246,12 @@ export function useLists() {
 
     if (DEMO_MODE) return;
     pending.current += 1;
-    lastSnapshot.current.key = null;
     try {
       const payload = await apiRequest(
         `/api/lists/${encodeURIComponent(item.id)}`,
         { method: "PATCH", body: patch }
       );
-      if (payload && payload.item) {
+      if (payload && payload.item && !sameVisible(payload.item, next)) {
         setItems((current) =>
           current.map((entry) =>
             entry.id === item.id ? payload.item : entry
@@ -257,15 +269,14 @@ export function useLists() {
     } finally {
       pending.current -= 1;
     }
-  }
+  }, []);
 
-  async function removeItem(item) {
+  const removeItem = useCallback(async (item) => {
     setError(null);
     setItems((current) => current.filter((entry) => entry.id !== item.id));
 
     if (DEMO_MODE) return;
     pending.current += 1;
-    lastSnapshot.current.key = null;
     try {
       await apiRequest(`/api/lists/${encodeURIComponent(item.id)}`, {
         method: "DELETE",
@@ -279,9 +290,9 @@ export function useLists() {
     } finally {
       pending.current -= 1;
     }
-  }
+  }, []);
 
-  async function clearDone(listId) {
+  const clearDone = useCallback(async (listId) => {
     setError(null);
     setItems((current) =>
       current.filter((item) => !(item.listId === listId && item.done))
@@ -289,7 +300,6 @@ export function useLists() {
 
     if (DEMO_MODE) return;
     pending.current += 1;
-    lastSnapshot.current.key = null;
     let failed = false;
     try {
       await apiRequest(
@@ -308,25 +318,32 @@ export function useLists() {
       // mientras hay una mutación en curso.
       if (failed) refresh(true);
     }
-  }
+  }, [refresh]);
 
   const byList = useCallback(
     (listId) => items.filter((item) => item.listId === listId),
     [items]
   );
 
-  return {
-    items,
-    byList,
-    people,
-    error,
-    loading,
-    lastUpdated,
-    refresh,
-    addItem,
-    toggleItem,
-    updateItem,
-    removeItem,
-    clearDone,
-  };
+  // Mismo objeto mientras no cambie nada: así las tarjetas memorizadas de
+  // Hoy no se repintan por un render de App que no las afecta.
+  return useMemo(
+    () => ({
+      items,
+      byList,
+      people,
+      error,
+      loading,
+      get lastUpdated() {
+        return lastUpdated.current;
+      },
+      refresh,
+      addItem,
+      toggleItem,
+      updateItem,
+      removeItem,
+      clearDone,
+    }),
+    [items, byList, people, error, loading, refresh, addItem, toggleItem, updateItem, removeItem, clearDone]
+  );
 }

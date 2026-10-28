@@ -73,7 +73,20 @@ export function parseAllDay(value) {
   return new Date(year, month - 1, day);
 }
 
+// Analizar la fecha de un evento es lo caro al ordenar (cientos de veces por
+// render en el marco); se guarda una vez por evento. Los eventos son los
+// mismos objetos entre sondeos mientras no cambian.
+const startCache = typeof WeakMap === "function" ? new WeakMap() : null;
+
 export function eventStartDate(event) {
+  if (startCache && event && typeof event === "object") {
+    let ms = startCache.get(event);
+    if (ms === undefined) {
+      ms = (event.allDay ? parseAllDay(event.start) : new Date(event.start)).getTime();
+      startCache.set(event, ms);
+    }
+    return new Date(ms);
+  }
   return event.allDay ? parseAllDay(event.start) : new Date(event.start);
 }
 
@@ -181,4 +194,14 @@ export function minutesFromTime(value) {
   const [hours, minutes] = String(value).split(":").map(Number);
   if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return null;
   return hours * 60 + minutes;
+}
+
+// Momento del día para el color y el énfasis de Hoy (la noche la lleva el
+// modo noche): amanecer 6–10, día 10–17, tarde 17–21 y noche el resto.
+export function dayPhase(date) {
+  const hour = date.getHours();
+  if (hour >= 6 && hour < 10) return "amanecer";
+  if (hour >= 10 && hour < 17) return "dia";
+  if (hour >= 17 && hour < 21) return "tarde";
+  return "noche";
 }

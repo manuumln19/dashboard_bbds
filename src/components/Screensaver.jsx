@@ -21,11 +21,20 @@ function fitFor(photo) {
     : "contain";
 }
 
-function photoDate(value) {
+const MONTH_YEAR = { month: "long", year: "numeric" };
+
+// La foto como recuerdo: «Tal día como hoy, hace 2 años» si coincide la
+// fecha; si no, «Hace 2 años · octubre de 2024» (o solo el mes si es de este año).
+function photoDate(value, now = new Date()) {
   if (!value) return "";
   const date = new Date(value);
   if (!Number.isFinite(date.getTime())) return "";
-  return dateFormat({ month: "long", year: "numeric" }).format(date);
+  const years = now.getFullYear() - date.getFullYear();
+  const sameDay = date.getMonth() === now.getMonth() && date.getDate() === now.getDate();
+  if (years > 0 && sameDay) return years === 1 ? "Tal día como hoy, hace un año" : `Tal día como hoy, hace ${years} años`;
+  const label = dateFormat(MONTH_YEAR).format(date);
+  if (years > 0) return `${years === 1 ? "Hace un año" : `Hace ${years} años`} · ${label}`;
+  return label;
 }
 
 // De noche, en vez de fotos: la luna, la mínima de esta noche y lo primero
@@ -81,17 +90,28 @@ export function Screensaver({ now, onClose, isNight, photos, weather, events }) 
     let cancelled = false;
     const image = new Image();
     image.decoding = "async";
-    image.onload = () => {
+    function show() {
       if (!cancelled) setShown(photo);
-    };
-    image.onerror = () => {
+    }
+    function fail() {
       if (cancelled) return;
       failed.current.add(photo.id);
       if (failed.current.size < count) setIndex((current) => (current + 1) % count);
+    }
+    // `onload` llega antes de decodificar y el marco decodificaba al pintar
+    // (un tirón en cada foto). Chrome 64 ya tiene decode(): se espera a él.
+    image.onload = () => {
+      if (typeof image.decode === "function") image.decode().then(show, show);
+      else show();
     };
+    image.onerror = fail;
     image.src = photoSrc(photo);
     return () => {
       cancelled = true;
+      // Corta la descarga si se cambia de foto o se cierra antes de tiempo.
+      image.onload = null;
+      image.onerror = null;
+      image.src = "";
     };
   }, [index, count, showPhotos, list]);
 
@@ -119,7 +139,7 @@ export function Screensaver({ now, onClose, isNight, photos, weather, events }) 
 
   const photo = showPhotos ? shown : null;
   const caption = photo ? photo.caption || (photos.album && photos.album.name) || "" : "";
-  const when = photo ? photoDate(photo.takenAt) : "";
+  const when = photo ? photoDate(photo.takenAt, now) : "";
 
   return (
     <div

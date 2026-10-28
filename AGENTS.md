@@ -1,6 +1,6 @@
 # AGENTS.md
 
-BBDS is a home dashboard for a 1280 x 800 wall touchscreen: React 18 + Vite SPA with Spanish UI, backed by a Cloudflare Worker/D1 API. Plain JSX, no TypeScript, no routing library, and no test/lint/CI setup.
+BBDS is a home dashboard for a 1280 x 800 wall touchscreen: React 18 + Vite SPA with Spanish UI (production builds alias React to `preact/compat`, see `vite.config.js`), backed by a Cloudflare Worker/D1 API. Plain JSX, no TypeScript, no routing library, and no test/lint/CI setup.
 
 `README.md` is the detailed source for setup, environment variables, API contract, and deployment. Keep it in sync with behavior changes.
 

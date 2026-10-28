@@ -1,5 +1,6 @@
 import { formatAge } from "./date.js";
 import { dateFormat, numberFormat } from "./intl.js";
+import { compareText } from "./compare.js";
 
 // Todo el cálculo vive aquí, sin DOM ni APIs del navegador, para poder
 // verificarlo con `npm run check:energy`. Las horas se interpretan siempre
@@ -12,7 +13,9 @@ export const HOUR_MS = 60 * 60 * 1000;
 export const MIN_REMAINING_MS = 30 * 60 * 1000;
 export const TAX_RATES = { iee: 0.0511, iva: 0.21 };
 
-const zonedFormatter = new Intl.DateTimeFormat("en-GB", {
+// Se crea al usarlo por primera vez (no al cargar el módulo) y se reutiliza
+// desde la caché de lib/intl.
+const ZONED_OPTIONS = {
   timeZone: PRICE_TIMEZONE,
   year: "numeric",
   month: "2-digit",
@@ -21,7 +24,11 @@ const zonedFormatter = new Intl.DateTimeFormat("en-GB", {
   minute: "2-digit",
   second: "2-digit",
   hour12: false,
-});
+};
+
+function zonedFormatter() {
+  return dateFormat(ZONED_OPTIONS, "en-GB");
+}
 
 export const FLEXIBILITY_OPTIONS = [
   { hours: 0, label: "Ahora" },
@@ -94,7 +101,7 @@ export function zonedParts(date) {
 }
 
 function computeZonedParts(date) {
-  const parts = zonedFormatter.formatToParts(date);
+  const parts = zonedFormatter().formatToParts(date);
   const result = {};
   for (let index = 0; index < parts.length; index += 1) {
     const part = parts[index];
@@ -340,7 +347,7 @@ export function latestDay(payload) {
     return null;
   }
   const sorted = payload.days.slice().sort((a, b) =>
-    String(a.date).localeCompare(String(b.date))
+    compareText(a.date, b.date)
   );
   return sorted[sorted.length - 1];
 }

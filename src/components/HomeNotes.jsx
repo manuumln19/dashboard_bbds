@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+import { memo, useEffect, useRef, useState } from "react";
 import { Check, Minus, Plus, RotateCcw, RotateCw, StickyNote, X } from "lucide-react";
 import { formatAge } from "../lib/date";
+import { sheetPortal } from "../lib/sheetPortal";
+import { compareText } from "../lib/compare";
 
 export const NOTE_COLORS = ["amber", "pink", "mint", "lilac"];
 export const NOTE_SHAPES = [
@@ -245,7 +246,6 @@ export function NoteComposer({ notes, people, onClose }) {
   const [personId, setPersonId] = useState(people[0] ? people[0].id : "");
   const [color, setColor] = useState("amber");
   const [error, setError] = useState(null);
-  const host = document.querySelector(".app") || document.body;
 
   async function submit(event) {
     event.preventDefault();
@@ -266,7 +266,7 @@ export function NoteComposer({ notes, people, onClose }) {
     }
   }
 
-  return createPortal(
+  return sheetPortal(
     <div
       className="ink-overlay feature-overlay"
       onPointerDown={(event) => {
@@ -331,17 +331,66 @@ export function NoteComposer({ notes, people, onClose }) {
           {error ? <p className="feature-alert">{error}</p> : null}
         </form>
       </section>
-    </div>,
-    host
+    </div>
   );
 }
 
 // La capa de pósits de Hoy: ocupa toda la vista pero solo los pósits y su
 // barra reciben el dedo; lo demás sigue funcionando debajo.
-export function HomeNotes({ notes, people, now }) {
+// Todas las notas en una hoja: las que no caben en Hoy se leen y se quitan aquí.
+function NotesSheet({ notes, people, now, onClose }) {
+  const ordered = [...notes.notes].sort((a, b) => compareText(b.createdAt, a.createdAt));
+  return sheetPortal(
+    <div
+      className="ink-overlay feature-overlay"
+      onPointerDown={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <section className="ink-sheet card notes-list" role="dialog" aria-modal="true" aria-labelledby="notes-list-title">
+        <header className="ink-head">
+          <span className="ink-head__icon" aria-hidden="true">
+            <StickyNote size={22} strokeWidth={1.7} />
+          </span>
+          <div>
+            <span className="eyebrow">La nevera</span>
+            <h2 id="notes-list-title">{ordered.length} notas</h2>
+            <p>En Hoy se ven las {MAX_VISIBLE} más recientes; aquí están todas.</p>
+          </div>
+          <button type="button" className="ink-close" onClick={onClose} aria-label="Cerrar">
+            <X size={18} strokeWidth={1.9} aria-hidden="true" />
+          </button>
+        </header>
+        <ul className="notes-list__items">
+          {ordered.map((note) => (
+            <li key={note.id} className={`notes-list__item postit--${note.color}`}>
+              <p>{note.text}</p>
+              <small>
+                — {authorName(people, note.personId)} · {formatAge(note.createdAt, now).toLowerCase()}
+              </small>
+              <button type="button" onClick={() => notes.removeNote(note.id)}>
+                <Check size={16} strokeWidth={2.2} aria-hidden="true" />
+                Visto
+              </button>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </div>
+  );
+}
+
+// Como mucho estas notas sueltas a la vez en Hoy; el resto, en un montón.
+const MAX_VISIBLE = 4;
+
+export const HomeNotes = memo(function HomeNotes({ notes, people, now }) {
   const layerRef = useRef(null);
   const [selectedId, setSelectedId] = useState(null);
-  const ordered = [...notes.notes].sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)));
+  const [listOpen, setListOpen] = useState(false);
+  const all = [...notes.notes].sort((a, b) => compareText(a.createdAt, b.createdAt));
+  // Las más recientes, en orden de antigüedad para que las nuevas queden encima.
+  const ordered = all.slice(-MAX_VISIBLE);
+  const hiddenCount = all.length - ordered.length;
   const selected = ordered.find((note) => note.id === selectedId) || null;
 
   // Tocar fuera de la nota (y de su barra) la suelta.
@@ -372,6 +421,13 @@ export function HomeNotes({ notes, people, now }) {
           onCommit={notes.updateNote}
         />
       ))}
+      {hiddenCount > 0 ? (
+        <button type="button" className="home-notes__pile" onClick={() => setListOpen(true)}>
+          <span aria-hidden="true" />
+          +{hiddenCount} {hiddenCount === 1 ? "nota" : "notas"}
+        </button>
+      ) : null}
+      {listOpen ? <NotesSheet notes={notes} people={people} now={now} onClose={() => setListOpen(false)} /> : null}
       {selected ? (
         <NoteTools
           note={selected}
@@ -385,4 +441,4 @@ export function HomeNotes({ notes, people, now }) {
       ) : null}
     </div>
   );
-}
+});

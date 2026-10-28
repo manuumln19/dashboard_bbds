@@ -3,6 +3,7 @@ import { DEMO_MODE } from "../config";
 import { apiRequestWithMeta } from "../lib/api";
 import { createDemoSensorSnapshot } from "../lib/demo";
 import { reportFailure, reportSync } from "../lib/freshness";
+import { onPollingResume, pollingPaused, pollInterval } from "../lib/polling";
 
 const REFRESH_MS = 60 * 1000;
 
@@ -104,7 +105,12 @@ export function useSensors(enabled = true) {
     }
 
     refresh(false);
-    const timer = setInterval(() => refresh(true), REFRESH_MS);
+    // Sin sondeos con el salvapantallas abierto; al cerrarlo, uno al momento.
+    const tick = () => refresh(true);
+    const timer = setInterval(() => {
+      if (!pollingPaused()) tick();
+    }, pollInterval(REFRESH_MS));
+    const stopResume = onPollingResume(tick);
 
     function handleVisibility() {
       if (document.visibilityState === "visible") refresh(true);
@@ -113,6 +119,7 @@ export function useSensors(enabled = true) {
 
     return () => {
       clearInterval(timer);
+      stopResume();
       document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, [refresh, enabled]);

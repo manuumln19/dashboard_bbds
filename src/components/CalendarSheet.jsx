@@ -13,6 +13,7 @@ import {
   X,
 } from "lucide-react";
 import { formatFreshnessTime } from "../lib/freshness";
+import { sheetPortal } from "../lib/sheetPortal";
 
 const TONES = [
   { id: "pink", label: "Rosa", person: "Manu" },
@@ -224,7 +225,7 @@ export function CalendarSheet({ open, onClose, calendar, people }) {
     }
   }
 
-  return (
+  return sheetPortal(
     <div
       className="ink-overlay feature-overlay"
       onPointerDown={(event) => {

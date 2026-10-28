@@ -4199,6 +4199,7 @@
    obliga a recomponer toda la pantalla. */
 
 .is-lite .ambient::before,
+.is-lite .ambient::after,
 .is-lite .ambient__grain {
   display: none;
 }
@@ -4209,15 +4210,117 @@
   animation: none;
 }
 
-/* El desenfoque de fondo de las hojas recalcula toda la pantalla en cada
-   fotograma; en el marco abrir una hoja se notaba a saltos. */
+/* Una sola regla universal para todo lo que el marco no se puede permitir:
+   desenfoques (recalculan la pantalla entera), animaciones y transiciones
+   (le obligan a pintar sin parar y, con 1 GB, deja de pintar fondos) y
+   sombras. Sin ::before/::after: duplicaban el trabajo de estilo de cada
+   elemento y ningún pseudo-elemento anima ni lleva sombra. */
 .is-lite * {
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
+  animation: none !important;
+  transition: none !important;
+  box-shadow: none !important;
 }
 
+/* Opaca: semitransparente obligaba a mezclar la pantalla entera cada vez que
+   algo de debajo se repintaba (el reloj, un dato…). */
 .is-lite .ink-overlay {
-  background: rgba(18, 16, 13, 0.78);
+  background: #12100d;
+}
+
+/* Letra en cortes fijos (fonts.css): mismo diseño, sin calcular cada grosor
+   de la fuente variable. Gana a :root por especificidad. */
+html.is-lite {
+  --font-sans: "Manrope Static", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Sin decoración de temporada: es una capa a pantalla completa por encima de
+   todo (y el detalle de la barra). La temporada se sigue notando en Yoshi, el
+   saludo y los colores. */
+.is-lite .season-decor,
+.is-lite .season-badge {
+  display: none;
+}
+
+/* Yoshi sigue vivo cambiando de pose (sprites), solo que sin saltar. */
+/* Lo que solo aparecía gracias a su animación, visible quieto. */
+.is-lite .yoshi__zzz i {
+  opacity: 0.7;
+}
+
+.is-lite .yoshi__zzz i:nth-child(2) {
+  top: -4%;
+}
+
+.is-lite .yoshi__zzz i:nth-child(3) {
+  top: -14%;
+}
+
+.is-lite .yoshi__hearts i {
+  opacity: 1;
+}
+
+.is-lite .yoshi__hearts i:nth-child(2) {
+  top: 8%;
+}
+
+/* Hojas opacas y sin la sombra enorme: pintarla en el marco cuesta más que
+   la hoja entera, y una hoja a medio pintar se veía «sin fondo». */
+.is-lite .ink-sheet,
+.is-lite .ink-sheet.card {
+  background: #1a1714 !important;
+  box-shadow: none !important;
+}
+
+/* Todo plano: fondo liso y tarjetas opacas, sin sombras. Cada repintado
+   (el reloj, un dato, un parpadeo de Yoshi) pinta un color en vez de mezclar
+   degradados y transparencias con el fondo. Los pósits guardan una sombra
+   mínima para que se vean pegados. */
+.is-lite .ambient {
+  background: var(--bg) !important;
+}
+
+.is-lite .card,
+.is-lite .list-panel,
+.is-lite .agenda-calendar,
+.is-lite .cleaning-board {
+  background: var(--paper) !important;
+}
+
+/* Las superficies que no son .card también, y --surface opaca para todo lo
+   que la usa (con !important no gana a .app.is-night: va en html). */
+html.is-lite .app {
+  --surface: var(--paper);
+}
+
+.is-lite .energy-card,
+.is-lite .weather-now,
+.is-lite .room-card {
+  background: var(--paper) !important;
+}
+
+.is-lite .weather-now::before,
+.is-lite .weather-now__glow,
+.is-lite .daylight-sun::after {
+  display: none;
+}
+
+/* Los pósits guardan una sombra mínima para que se vean pegados. */
+.is-lite .board-note {
+  box-shadow: 0 3px 6px rgba(40, 25, 5, 0.3) !important;
+}
+
+/* Salvapantallas: el velo sin el degradado radial. */
+.is-lite .screensaver__wash {
+  background: linear-gradient(180deg, rgba(6, 8, 8, 0.6), rgba(6, 8, 8, 0) 30%, rgba(6, 8, 8, 0) 60%, rgba(6, 8, 8, 0.7)) !important;
+}
+
+/* Filtros sueltos (cada uno es una pasada extra fuera de pantalla). */
+.is-lite .today-strip__person.is-mvp .egg-avatar,
+.is-lite .task-row__main > .task-drawing,
+.is-lite .board-note--tag.is-selected {
+  filter: none;
 }
 
 /* Álbum de fotos del salvapantallas --------------------------------------- */
@@ -4246,10 +4349,21 @@
   display: grid;
   flex: 1;
   min-height: 0;
-  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.75fr) minmax(0, 0.42fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    "now next yoshi"
+    "day shop shop"
+    "strip strip strip";
   gap: 16px;
 }
+
+.today-board > .today-now { grid-area: now; }
+.today-board > .today-next { grid-area: next; }
+.today-board > .yoshi-window { grid-area: yoshi; }
+.today-board > .today-timeline { grid-area: day; }
+.today-board > .today-side { grid-area: shop; }
+.today-board > .today-strip { grid-area: strip; }
 
 .today-board .card {
   min-width: 0;
@@ -4669,13 +4783,6 @@
   font-size: 13px;
 }
 
-.today-shopping__empty {
-  flex: 1;
-  margin: 0;
-  color: var(--faint);
-  font-size: 14px;
-}
-
 .today-shopping__add {
   display: flex;
   gap: 8px;
@@ -4715,40 +4822,6 @@
 
 .today-shopping__add button:disabled {
   opacity: 0.35;
-}
-
-.today-power {
-  display: flex;
-  flex: none;
-  align-items: center;
-  gap: 10px;
-  min-height: 58px;
-  padding: 0 18px;
-  color: var(--amber);
-  text-align: left;
-}
-
-.today-power__label {
-  color: var(--muted);
-  font-size: 14px;
-}
-
-.today-power strong {
-  margin-left: auto;
-  color: var(--text);
-  font-family: var(--font-serif);
-  font-size: 26px;
-  font-weight: 400;
-}
-
-.today-power strong small {
-  color: var(--muted);
-  font-family: inherit;
-  font-size: 13.5px;
-}
-
-.today-power > svg:last-child {
-  color: var(--muted);
 }
 
 /* En Hoy el reloj grande ya está en la tarjeta: el del rail sobra. */
@@ -5050,18 +5123,6 @@
 .postit--pink { --postit: #f7cfdc; }
 .postit--mint { --postit: #cfeadf; }
 .postit--lilac { --postit: #ded6f6; }
-
-.postit__tape {
-  position: absolute;
-  top: -8px;
-  left: 50%;
-  width: 62px;
-  height: 18px;
-  margin-left: -31px;
-  background: rgba(255, 255, 255, 0.55);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
-  transform: rotate(2deg);
-}
 
 .postit blockquote {
   display: -webkit-box;
@@ -5818,7 +5879,7 @@
 }
 
 .yoshi:not(:disabled):active {
-  filter: none;
+  opacity: 1;
 }
 
 /* De paseo: se va el cuerpo y queda el hueco con huellas. */
@@ -5882,7 +5943,6 @@
   bottom: 0;
   left: 0;
   transform-origin: 50% 98%;
-  animation: yoshi-breathe 3.4s ease-in-out infinite;
 }
 
 .yoshi__img {
@@ -5947,9 +6007,8 @@
   animation: yoshi-runaway 1.2s ease-in forwards;
 }
 
-.yoshi--sleep .yoshi__body,
 .yoshi--snore .yoshi__body {
-  animation: yoshi-breathe 4.8s ease-in-out infinite;
+  animation: yoshi-breathe 2.4s ease-in-out;
 }
 
 /* Bocadillo */
@@ -6095,89 +6154,6 @@
   0%, 100% { transform: translateY(0) rotate(-2deg); }
   50% { transform: translateY(-12px) rotate(3deg); }
 }
-/* Equipo de casa en Hoy ----------------------------------------------------- */
-
-.today-crew {
-  display: flex;
-  flex: 0 0 auto;
-  align-items: center;
-  padding: 8px 10px 8px 14px;
-}
-
-.today-crew__people {
-  display: flex;
-  flex: 1;
-  align-items: center;
-  min-width: 0;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-}
-
-.today-crew__person {
-  display: flex;
-  flex: 1;
-  align-items: center;
-  min-width: 0;
-}
-
-.today-crew__person + .today-crew__person {
-  margin-left: 12px;
-  padding-left: 12px;
-  border-left: 1px solid var(--line);
-}
-
-.today-crew__person .egg-avatar {
-  flex: 0 0 auto;
-  margin-right: 8px;
-}
-
-.today-crew__person.is-mvp .egg-avatar {
-  filter: drop-shadow(0 0 4px rgba(242, 180, 40, 0.8));
-}
-
-.today-crew__stats {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  line-height: 1.05;
-}
-
-.today-crew__stats strong {
-  color: var(--text);
-  font-family: var(--font-serif);
-  font-size: 24px;
-  font-variant-numeric: tabular-nums;
-}
-
-.today-crew__stats small {
-  overflow: hidden;
-  color: var(--muted);
-  font-size: 11px;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-.today-crew__streak {
-  display: inline-flex;
-  align-items: center;
-  margin-left: auto;
-  padding: 3px 8px 3px 6px;
-  border-radius: 999px;
-  background: rgba(242, 120, 30, 0.14);
-  color: #d0621a;
-  font-size: 13px;
-  font-weight: 800;
-}
-
-.today-crew__trophy {
-  flex: 0 0 auto;
-  margin-left: 8px;
-}
-
 /* Resumen semanal ---------------------------------------------------------- */
 /* Una hoja más, como Energía o Calendarios: tinta, serifa y líneas finas. */
 
@@ -6480,43 +6456,11 @@
 
 /* Brillo y no escala: hay botones colocados o girados con transform. */
 button:not(:disabled):active {
-  filter: brightness(0.92);
+  opacity: 0.82;
 }
 
 .board-tools button:not(:disabled):active {
   transform: scale(0.95);
-}
-
-/* Yoshi de pie en el hueco de la barra, apoyado abajo: llena el hueco y
-   puede asomar un poco por los lados (el lienzo del sprite es transparente). */
-.rail__mascot {
-  display: flex;
-  min-height: 0;
-  flex: 1 1 auto;
-  align-items: flex-end;
-  justify-content: center;
-  margin: 0 -8px;
-  padding-bottom: 6px;
-}
-
-.rail__mascot .yoshi {
-  margin: 0;
-}
-
-.rail__mascot .yoshi__apples {
-  right: 12px;
-  bottom: 2px;
-}
-
-.rail__mascot .yoshi__bubble {
-  left: 0;
-  font-size: 15px;
-  transform: none;
-  animation: none;
-}
-
-.rail__mascot .yoshi__bubble::after {
-  left: 40px;
 }
 
 /* Pósits: entrada, chinchetas y barra ---------------------------------------- */
@@ -6585,33 +6529,6 @@ button:not(:disabled):active {
 
 /* Equipo de Hoy: barra hasta el siguiente nivel */
 
-.today-crew__bar {
-  display: block;
-  width: 64px;
-  height: 4px;
-  margin-top: 3px;
-  overflow: hidden;
-  border-radius: 999px;
-  background: var(--track);
-}
-
-.today-crew__bar > span {
-  display: block;
-  height: 100%;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #8fe066, #3f9a2b);
-  transform-origin: 0 50%;
-  transition: transform 0.6s cubic-bezier(0.2, 0.9, 0.3, 1);
-}
-
-.today-crew__person.is-mvp .today-crew__stats strong {
-  color: #b07a0c;
-}
-
-.today-crew__person.is-mvp .egg-avatar {
-  animation: egg-wobble 2.6s ease-in-out infinite;
-}
-
 @keyframes egg-wobble {
   0%, 80%, 100% { transform: rotate(0); }
   85% { transform: rotate(-8deg); }
@@ -6673,4 +6590,936 @@ button:not(:disabled):active {
 
 .note-composer .board-new {
   padding: 16px 0 0;
+}
+
+
+/* Franja «Casa» -------------------------------------------------------------- */
+/* Limpieza, equipo, compra y luz en una línea a todo lo ancho de Hoy: lo que
+   antes eran dos tiras sueltas en la columna derecha. */
+.today-strip {
+  display: flex;
+  align-items: stretch;
+  padding: 0;
+  overflow: hidden;
+}
+
+.today-strip__item {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 0;
+  align-items: center;
+  padding: 12px 20px;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+}
+
+.today-strip__item + .today-strip__item {
+  border-left: 1px solid var(--line);
+}
+
+.today-strip__item > svg {
+  flex: none;
+  margin-right: 12px;
+  color: var(--muted);
+}
+
+.today-strip__text {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.today-strip__text strong {
+  display: flex;
+  align-items: baseline;
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.today-strip__text strong em {
+  margin-left: 4px;
+  color: var(--muted);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-style: normal;
+  letter-spacing: 0;
+}
+
+.today-strip__text strong .energy-band {
+  margin-left: 8px;
+  align-self: center;
+}
+
+.today-strip__text small {
+  overflow: hidden;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* Equipo: los huevos con sus puntos, y el trofeo que abre el resumen. */
+.today-strip__team {
+  flex-grow: 1.2;
+}
+
+.today-strip__person {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 16px;
+}
+
+.today-strip__person .egg-avatar {
+  flex: none;
+  margin-right: 7px;
+}
+
+.today-strip__person strong {
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 400;
+}
+
+.today-strip__person.is-mvp strong {
+  color: #b07a0c;
+}
+
+.app.is-night .today-strip__person.is-mvp strong {
+  color: #f0cf7a;
+}
+
+.today-strip__person.is-mvp .egg-avatar {
+  filter: drop-shadow(0 0 3px rgba(242, 180, 40, 0.75));
+}
+
+.today-strip__flame {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 6px;
+  color: #d0621a;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.today-strip__trophy {
+  margin-left: auto;
+  color: var(--muted);
+}
+
+.today-strip__people {
+  display: flex;
+  align-items: center;
+}
+
+/* Compra vacía: un estado tranquilo arriba, que deja el resto de la
+   tarjeta libre para los pósits que se pegan ahí. */
+.today-shopping__empty {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding-top: 6px;
+  margin: 0;
+  color: var(--muted);
+  text-align: left;
+}
+
+.today-shopping__empty svg {
+  margin-bottom: 8px;
+  padding: 8px;
+  border-radius: 50%;
+  background: var(--sage-soft);
+  color: var(--sage);
+  box-sizing: content-box;
+}
+
+.today-shopping__empty strong {
+  color: var(--text);
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 400;
+}
+
+.today-shopping__empty span {
+  margin-top: 2px;
+  font-size: 13px;
+}
+
+/* Línea del día: la marca de «ahora» separa lo pasado de lo que viene. */
+.today-now-mark {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 22px;
+  margin: 2px 0;
+}
+
+.today-now-mark::before {
+  content: "";
+  position: absolute;
+  right: 0;
+  left: 0;
+  top: 50%;
+  height: 2px;
+  background: var(--accent);
+  opacity: 0.55;
+}
+
+.today-now-mark span {
+  position: relative;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.today-timeline li.is-past .today-entry {
+  opacity: 0.5;
+}
+
+/* Montón de notas que no caben en Hoy (máximo 4 sueltas). */
+.home-notes__pile {
+  position: absolute;
+  right: 18px;
+  bottom: 92px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 16px 0 12px;
+  border: 0;
+  border-radius: 4px 4px 14px 4px;
+  background: #f8e3a0;
+  box-shadow: 4px 4px 0 #f7cfdc, 8px 8px 0 #cfeadf;
+  color: #3a2f1d;
+  font-family: var(--font-serif);
+  font-size: 17px;
+  font-style: italic;
+  pointer-events: auto;
+  transform: rotate(-3deg);
+}
+
+.home-notes__pile span {
+  width: 10px;
+  height: 10px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.notes-list {
+  width: 760px;
+}
+
+.notes-list__items {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.notes-list__item {
+  display: flex;
+  width: calc(50% - 8px);
+  box-sizing: border-box;
+  flex-direction: column;
+  margin: 0 16px 16px 0;
+  padding: 14px 16px 10px;
+  border-radius: 4px 4px 16px 4px;
+  background: var(--postit);
+  color: #3a2f1d;
+}
+
+.notes-list__item:nth-child(2n) {
+  margin-right: 0;
+}
+
+.notes-list__item p {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-style: italic;
+  line-height: 1.15;
+}
+
+.notes-list__item small {
+  margin-top: 8px;
+  color: rgba(58, 47, 29, 0.7);
+  font-size: 12px;
+}
+
+.notes-list__item button {
+  display: inline-flex;
+  align-self: flex-end;
+  align-items: center;
+  min-height: 40px;
+  margin-top: 6px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.55);
+  color: #3a2f1d;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.notes-list__item button svg {
+  margin-right: 6px;
+}
+
+/* El montón también en el marco: sombras de papel planas, sin difuminar. */
+.is-lite .home-notes__pile {
+  box-shadow: 4px 4px 0 #f7cfdc, 8px 8px 0 #cfeadf !important;
+}
+
+/* Hoy de noche ----------------------------------------------------------------- */
+/* La hora grande y lo de mañana; nada más. Sin tarjetas de cristal ni
+   pósits: menos luz a oscuras y menos trabajo para el marco. */
+.night-home {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  align-items: center;
+  padding: 0 40px 0 24px;
+}
+
+.night-home__time {
+  display: flex;
+  flex: 1.25;
+  flex-direction: column;
+}
+
+.night-home__hello {
+  display: inline-flex;
+  align-items: center;
+  color: var(--muted);
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-style: italic;
+}
+
+.night-home__hello svg {
+  margin-right: 10px;
+  color: #d9c27a;
+}
+
+.night-home__time time {
+  margin: 6px 0 10px;
+  color: var(--text);
+  font-family: var(--font-serif);
+  font-size: 200px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.05em;
+  line-height: 0.8;
+}
+
+.night-home__date {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 15px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.night-home__tomorrow {
+  flex: 1;
+  max-width: 460px;
+  padding: 26px 28px;
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background: var(--paper);
+}
+
+.night-home__tomorrow h2 {
+  margin: 0 0 14px;
+  color: var(--text);
+  font-family: var(--font-serif);
+  font-size: 36px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+.night-home__weather {
+  display: flex;
+  align-items: center;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+}
+
+.night-home__weather svg {
+  flex: none;
+  margin-right: 12px;
+}
+
+.night-home__weather strong {
+  margin-right: 12px;
+  color: var(--text);
+  font-family: var(--font-serif);
+  font-size: 30px;
+  font-weight: 400;
+}
+
+.night-home__weather strong small {
+  color: var(--muted);
+  font-size: 20px;
+}
+
+.night-home__list {
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.night-home__list li {
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--text);
+  font-size: 16px;
+}
+
+.night-home__list li:last-child {
+  border-bottom: 0;
+}
+
+.night-home__list li svg {
+  flex: none;
+  margin-right: 10px;
+  color: var(--muted);
+}
+
+.night-home__when {
+  flex: none;
+  min-width: 64px;
+  margin-right: 10px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.night-home__list strong {
+  min-width: 0;
+  overflow: hidden;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.night-home__free {
+  color: var(--muted) !important;
+  font-family: var(--font-serif);
+  font-size: 19px !important;
+  font-style: italic;
+}
+
+.night-home__yoshi {
+  position: absolute;
+  right: 40px;
+  bottom: 6px;
+}
+
+.night-home__yoshi .yoshi__bubble {
+  right: 82%;
+  bottom: 52%;
+  left: auto;
+  transform: none;
+}
+
+/* Agenda: tablero semanal ------------------------------------------------------ */
+/* Siete columnas con lo de cada día, sin rejilla de horas: se lee de lejos y
+   pinta una fracción de lo que pintaba la rejilla. */
+.agenda-board {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  margin-top: 4px;
+}
+
+.agenda-board__day {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 0;
+  flex-direction: column;
+  padding: 14px 10px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: var(--surface);
+}
+
+.agenda-board__day + .agenda-board__day {
+  margin-left: 10px;
+}
+
+.agenda-board__day.is-today {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.agenda-board__day header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 0 4px 10px;
+}
+
+.agenda-board__day header span {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+}
+
+.agenda-board__day header strong {
+  color: var(--text);
+  font-family: var(--font-serif);
+  font-size: 34px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.agenda-board__day.is-today header strong {
+  color: var(--accent);
+}
+
+.agenda-board__day ul {
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.agenda-board__day li + li {
+  margin-top: 6px;
+}
+
+.agenda-board__event {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  padding: 8px 10px;
+  border: 0;
+  border-left: 3px solid var(--tone, var(--line-strong));
+  border-radius: 10px;
+  background: var(--tone-soft, var(--surface-2));
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+}
+
+.agenda-board__event small {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.agenda-board__event strong {
+  display: -webkit-box;
+  overflow: hidden;
+  margin-top: 2px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.agenda-board__event.is-past {
+  opacity: 0.5;
+}
+
+.agenda-board__free {
+  margin: 4px;
+  color: var(--faint);
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-style: italic;
+}
+
+/* Momento del día ------------------------------------------------------------ */
+/* El papel cambia de temperatura con la hora (la noche la lleva el modo
+   noche) y cambia qué destaca. Solo colores y tamaños fijos: en el marco no
+   cuesta nada porque nada se anima. */
+.app.phase-amanecer:not(.is-night) {
+  --bg: #f6ebdf;
+  --paper: #fdf5ec;
+}
+
+.app.phase-tarde:not(.is-night) {
+  --bg: #f1e4d2;
+  --paper: #fbf1e3;
+}
+
+.app.phase-amanecer:not(.is-night) .ambient::after,
+.app.phase-tarde:not(.is-night) .ambient::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+/* Amanecer: luz rosada desde arriba. Tarde: ámbar desde abajo. */
+.app.phase-amanecer:not(.is-night) .ambient::after {
+  background: linear-gradient(180deg, rgba(255, 176, 150, 0.16), transparent 55%);
+}
+
+.app.phase-tarde:not(.is-night) .ambient::after {
+  background: linear-gradient(0deg, rgba(240, 160, 70, 0.16), transparent 60%);
+}
+
+/* Por la mañana manda lo que viene; por la tarde, la compra. */
+.app.phase-amanecer .today-next__title {
+  font-size: 40px;
+}
+
+.app.phase-tarde .today-shopping {
+  border-color: var(--amber);
+}
+
+/* Sello al marcar en Hoy: una marca de tinta girada, como un tampón. */
+.today-entry.is-done .check-mark.is-checked {
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--accent);
+  transform: rotate(-12deg);
+}
+
+.today-entry.is-done .check-mark.is-checked svg {
+  width: 13px;
+  height: 13px;
+}
+
+/* Menos mayúsculas espaciadas: de lejos no se leen. Una etiqueta por
+   tarjeta como mucho; los enlaces, en minúscula normal. */
+.today-link {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Buenos días de Yoshi --------------------------------------------------------- */
+.morning-brief {
+  width: 620px;
+}
+
+.morning-brief .ink-head {
+  align-items: center;
+}
+
+.morning-brief__yoshi {
+  flex: none;
+  margin: -16px 4px -12px -10px;
+}
+
+.morning-brief .ink-head h2 {
+  font-size: 44px;
+}
+
+.morning-brief__list {
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.morning-brief__list li {
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+}
+
+.morning-brief__list li > svg {
+  flex: none;
+  margin-right: 16px;
+  color: var(--muted);
+}
+
+.morning-brief__list span {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.morning-brief__list strong {
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.morning-brief__list small {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.morning-brief__go {
+  display: block;
+  width: 100%;
+  min-height: 52px;
+  margin-top: 16px;
+  border: 0;
+  border-radius: 16px;
+  background: var(--sage);
+  color: #10231d;
+  font: inherit;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.list-panel__fold {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--muted);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+
+/* La ventana de Yoshi ------------------------------------------------------------ */
+/* Su rincón en Hoy: por la ventana se ve el cielo de verdad (hora y tiempo) y
+   él está delante, en el alféizar. Fondos fijos, nada animado. */
+.yoshi-window {
+  position: relative;
+  z-index: 3;
+  min-height: 0;
+  padding: 0;
+  overflow: visible;
+}
+
+.yoshi-window__sky,
+.yoshi-window__frame {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  bottom: 40px;
+  left: 12px;
+  border-radius: 18px;
+}
+
+.yoshi-window__sky {
+  overflow: hidden;
+  background: linear-gradient(180deg, #9fd3ff 0%, #dff1ff 100%);
+}
+
+.yoshi-window--amanecer .yoshi-window__sky { background: linear-gradient(180deg, #ffbfa0 0%, #ffe6cf 100%); }
+.yoshi-window--tarde .yoshi-window__sky { background: linear-gradient(180deg, #ff9f6e 0%, #ffd7a8 100%); }
+.yoshi-window--noche .yoshi-window__sky { background: linear-gradient(180deg, #141a3e 0%, #34396e 100%); }
+.yoshi-window--cloud .yoshi-window__sky { filter: saturate(0.6); }
+.yoshi-window--rain .yoshi-window__sky,
+.yoshi-window--snow .yoshi-window__sky { background: linear-gradient(180deg, #8a99ab 0%, #c9d3dd 100%); }
+.yoshi-window--noche.yoshi-window--rain .yoshi-window__sky,
+.yoshi-window--noche.yoshi-window--snow .yoshi-window__sky { background: linear-gradient(180deg, #1d2333 0%, #3a4256 100%); }
+
+/* Sol (o luna de noche), arriba a la derecha. */
+.yoshi-window__light {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff6c4 0%, #ffd34d 60%, rgba(255, 211, 77, 0) 72%);
+}
+
+.yoshi-window--noche .yoshi-window__light {
+  background: radial-gradient(circle at 40% 40%, #fffbe8 0%, #f1e5b5 55%, rgba(241, 229, 181, 0) 72%);
+  box-shadow: none;
+}
+
+.yoshi-window--rain .yoshi-window__light,
+.yoshi-window--snow .yoshi-window__light,
+.yoshi-window--cloud .yoshi-window__light {
+  opacity: 0.35;
+}
+
+/* Tiempo: nubes, lluvia, nieve o estrellas, pintadas una vez. */
+.yoshi-window__weather {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.yoshi-window--cloud .yoshi-window__weather {
+  background:
+    radial-gradient(28px 14px at 30% 28%, rgba(255, 255, 255, 0.9) 98%, transparent),
+    radial-gradient(22px 12px at 42% 24%, rgba(255, 255, 255, 0.9) 98%, transparent),
+    radial-gradient(26px 12px at 72% 44%, rgba(255, 255, 255, 0.8) 98%, transparent);
+}
+
+.yoshi-window--rain .yoshi-window__weather {
+  background-image: repeating-linear-gradient(105deg, transparent 0, transparent 9px, rgba(220, 235, 255, 0.55) 9px, rgba(220, 235, 255, 0.55) 10px, transparent 10px, transparent 18px);
+}
+
+.yoshi-window--snow .yoshi-window__weather {
+  background-image:
+    radial-gradient(circle, #fff 1.4px, transparent 2px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.8) 1px, transparent 1.6px);
+  background-position: 0 0, 9px 11px;
+  background-size: 18px 22px, 20px 18px;
+}
+
+.yoshi-window--noche.yoshi-window--clear .yoshi-window__weather,
+.yoshi-window--noche.yoshi-window--cloud .yoshi-window__weather {
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.9) 1px, transparent 1.4px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.6) 0.8px, transparent 1.2px);
+  background-position: 0 0, 13px 17px;
+  background-size: 31px 29px, 23px 27px;
+}
+
+/* Colina verde al fondo, donde se apoya la escena. */
+.yoshi-window__hill {
+  position: absolute;
+  right: -20%;
+  bottom: -38%;
+  left: -20%;
+  height: 62%;
+  border-radius: 50%;
+  background: #7fc96b;
+}
+
+.yoshi-window--noche .yoshi-window__hill { background: #2f5a3a; }
+.yoshi-window--snow .yoshi-window__hill { background: #eef3f6; }
+
+/* Marco de madera con su cruceta. */
+.yoshi-window__frame {
+  border: 6px solid #c99b6b;
+  box-sizing: border-box;
+}
+
+.yoshi-window__frame::before,
+.yoshi-window__frame::after {
+  content: "";
+  position: absolute;
+  background: #c99b6b;
+}
+
+.yoshi-window__frame::before {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 5px;
+  margin-left: -2px;
+}
+
+.yoshi-window__frame::after {
+  top: 44%;
+  right: 0;
+  left: 0;
+  height: 5px;
+}
+
+.app.is-night .yoshi-window__frame,
+.app.is-night .yoshi-window__frame::before,
+.app.is-night .yoshi-window__frame::after {
+  border-color: #6d5238;
+}
+
+.app.is-night .yoshi-window__frame::before,
+.app.is-night .yoshi-window__frame::after {
+  background: #6d5238;
+}
+
+/* Yoshi, delante de la ventana, de pie en el alféizar. */
+.yoshi-window__yoshi {
+  position: absolute;
+  bottom: 36px;
+  left: 50%;
+  z-index: 2;
+  transform: translateX(-50%);
+}
+
+.yoshi-window__sill {
+  position: absolute;
+  right: 6px;
+  bottom: 30px;
+  left: 6px;
+  z-index: 1;
+  height: 12px;
+  border-radius: 6px;
+  background: #b3804f;
+}
+
+.yoshi-window__label {
+  position: absolute;
+  right: 14px;
+  bottom: 8px;
+  left: 14px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 0;
+  font-size: 12px;
+}
+
+.yoshi-window__label strong {
+  color: var(--text);
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 400;
+}
+
+.yoshi-window__label span {
+  color: var(--muted);
+}
+
+/* Bocadillo hacia la izquierda, por encima de «Lo siguiente». */
+.yoshi-window .yoshi__bubble {
+  right: 62%;
+  bottom: 62%;
+  left: auto;
+  transform: none;
+}
+
+.yoshi-window .yoshi__bubble::after {
+  top: 50%;
+  right: -12px;
+  left: auto;
+  margin: -6px 0 0;
+  border-color: transparent;
+  border-left-color: #3f9a2b;
+}
+
+.yoshi-window .yoshi__apples {
+  right: 4px;
+  bottom: 4px;
+}
+
+/* La escena de temporada de la tarjeta de la hora sobra: la temporada la
+   lleva Yoshi disfrazado en su ventana, y con la tarjeta más estrecha se salía. */
+.today-now__main .season-scene {
+  display: none;
 }

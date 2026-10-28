@@ -120,12 +120,25 @@ function demoIcsProxy() {
 
 // El marco usa un WebView moderno (Chrome 64+). Sin plugin-legacy evitamos
 // polyfills y un segundo bundle que nunca se ejecuta en el dispositivo.
-export default defineConfig(({ mode }) => {
+// En el build, Preact (preact/compat) en lugar de React: ~120 KB menos que
+// leer y compilar al arrancar y menos memoria en el marco (Cortex-A7, 1 GB).
+// El código sigue siendo React; en desarrollo se usa React de verdad para la
+// recarga en caliente. Para probar el build: `npm run build && npm run preview`.
+const PREACT_ALIASES = [
+  { find: /^react-dom\/client$/, replacement: "preact/compat/client" },
+  { find: /^react-dom$/, replacement: "preact/compat" },
+  { find: /^react\/jsx-runtime$/, replacement: "preact/jsx-runtime" },
+  { find: /^react\/jsx-dev-runtime$/, replacement: "preact/jsx-dev-runtime" },
+  { find: /^react$/, replacement: "preact/compat" },
+];
+
+export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   const demoMode = env.VITE_DEMO_MODE === "true";
 
   return {
     plugins: [react(), ...(demoMode ? [demoIcsProxy()] : [])],
+    resolve: command === "build" ? { alias: PREACT_ALIASES } : undefined,
     build: {
       target: "chrome64",
       cssTarget: "chrome64",

@@ -1,7 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { DEMO_MODE } from "../config";
 import { apiRequest } from "../lib/api";
 import { loadDemoMenu, saveDemoMenu } from "../lib/localStore";
+import { useStableFns } from "./useStableFns";
+import { onPollingResume, pollingPaused, pollInterval } from "../lib/polling";
 
 const EMPTY = Array.from({ length: 7 }, () => ({ dish: "", ingredients: [] }));
 
@@ -24,10 +26,16 @@ export function useMenu(enabled) {
       }
     }
     load();
-    const timer = setInterval(load, 5 * 60 * 1000);
+    // Sin sondeos con el salvapantallas abierto; al cerrarlo, uno al momento.
+    const tick = load;
+    const timer = setInterval(() => {
+      if (!pollingPaused()) tick();
+    }, pollInterval(5 * 60 * 1000));
+    const stopResume = onPollingResume(tick);
     return () => {
       cancelled = true;
       clearInterval(timer);
+      stopResume();
     };
   }, [enabled]);
 
@@ -52,5 +60,6 @@ export function useMenu(enabled) {
     }
   }
 
-  return { days, error, saveMenu };
+  const actions = useStableFns({ saveMenu });
+  return useMemo(() => ({ days, error, saveMenu: actions.saveMenu }), [days, error, actions]);
 }

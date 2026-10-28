@@ -17,6 +17,7 @@ import {
   X,
 } from "lucide-react";
 import { getCompatReport } from "../lib/compat";
+import { measureFps, perfSnapshot } from "../lib/perfMeter";
 import { formatClock } from "../lib/date";
 import {
   formatFreshnessAge,
@@ -307,6 +308,14 @@ export function DemoPanel({
 export function Diagnostics({ open, onClose, data, onOpenDemo }) {
   const [env, setEnv] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [fps, setFps] = useState(null);
+  const [measuring, setMeasuring] = useState(false);
+
+  async function runFps() {
+    setMeasuring(true);
+    setFps(await measureFps(3000));
+    setMeasuring(false);
+  }
 
   useEffect(() => {
     if (!open) return undefined;
@@ -371,6 +380,7 @@ export function Diagnostics({ open, onClose, data, onOpenDemo }) {
   if (!open) return null;
 
   const now = data && data.now ? data.now : new Date();
+  const perf = perfSnapshot();
   const rows = [
     ["Vista", data ? data.view : "—"],
     ["Conexión", data && data.online ? "En línea" : "Sin conexión"],
@@ -384,6 +394,24 @@ export function Diagnostics({ open, onClose, data, onOpenDemo }) {
     [
       "Modo ligero",
       document.documentElement.classList.contains("is-lite") ? "Activo" : "No",
+    ],
+    [
+      "Bloqueos (5 min)",
+      perf.longTaskSupported
+        ? perf.longTasks
+          ? `${perf.longTasks} · peor ${Math.round(perf.longTaskWorst)} ms · ${Math.round(perf.longTaskTotal)} ms en total`
+          : "Ninguno"
+        : "No medible en este navegador",
+    ],
+    [
+      "Retraso al tocar",
+      perf.taps
+        ? `mediana ${Math.round(perf.tapMedian)} ms · peor ${Math.round(perf.tapWorst)} ms (${perf.taps} toques)`
+        : "Toca la pantalla unas veces",
+    ],
+    [
+      "Fotogramas",
+      fps ? `${fps.fps} por segundo · peor ${fps.worstFrame} ms` : measuring ? "Midiendo 3 s…" : "Pulsa «Medir fluidez»",
     ],
     ["Compilación", document.lastModified || "—"],
     [
@@ -574,6 +602,10 @@ export function Diagnostics({ open, onClose, data, onOpenDemo }) {
           ) : null}
 
           <div className="demo-panel__actions">
+            <button type="button" className="demo-action" onClick={runFps} disabled={measuring}>
+              <Gauge size={15} strokeWidth={1.9} aria-hidden="true" />
+              {measuring ? "Midiendo…" : "Medir fluidez"}
+            </button>
             <button type="button" className="demo-action" onClick={copy}>
               {copied ? (
                 <Check size={15} strokeWidth={2} aria-hidden="true" />

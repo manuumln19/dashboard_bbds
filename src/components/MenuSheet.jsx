@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { UtensilsCrossed, X } from "lucide-react";
+import { sheetPortal } from "../lib/sheetPortal";
 
 const DAYS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
 
@@ -29,7 +30,7 @@ export function MenuSheet({ menu, onClose }) {
     }
   }
 
-  return (
+  return sheetPortal(
     <div
       className="ink-overlay feature-overlay"
       onPointerDown={(event) => {

@@ -23,8 +23,9 @@ const LEVELS = [
 export function levelFor(points) {
   let level = LEVELS[0];
   for (const item of LEVELS) if (points >= item.min) level = item;
-  const next = LEVELS[LEVELS.indexOf(level) + 1] || null;
-  return { ...level, next: next ? next.min : null };
+  const index = LEVELS.indexOf(level);
+  const next = LEVELS[index + 1] || null;
+  return { ...level, index, next: next ? next.min : null };
 }
 
 export function weeklyScores({ cleaning, lists, now }) {

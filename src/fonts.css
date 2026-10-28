@@ -38,3 +38,46 @@
   font-display: swap;
   src: url("/fonts/ibm-plex-mono-normal-500.woff2") format("woff2");
 }
+
+/* Manrope en cortes fijos para el marco (modo ligero, ver features.css): la
+   variable obliga a calcular cada grosor y en el Cortex-A7 el texto se pinta
+   más lento. Solo se descargan los grosores que se usan. */
+@font-face {
+  font-family: "Manrope Static";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/manrope-static-400.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Manrope Static";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/manrope-static-500.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Manrope Static";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/manrope-static-600.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Manrope Static";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/manrope-static-700.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Manrope Static";
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("/fonts/manrope-static-800.woff2") format("woff2");
+}

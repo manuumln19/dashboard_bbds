@@ -24,6 +24,7 @@ import { EventQR } from "./EventQR";
 import { dateFormat } from "../lib/intl";
 
 const MODES = [
+  { id: "board", label: "Tablero" },
   { id: "day", label: "Hoy" },
   { id: "three", label: "3 días" },
   { id: "week", label: "Semana" },
@@ -39,8 +40,55 @@ const HOURS = Array.from(
 
 function modeDays(mode) {
   if (mode === "day") return 1;
+  if (mode === "board") return 7;
   if (mode === "three") return 3;
   return 7;
+}
+
+function clockOf(date) {
+  return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+}
+
+// La semana como tablero: siete columnas con lo de cada día en orden, sin
+// rejilla de horas. Se lee mejor de lejos y pesa mucho menos que la rejilla
+// (en el marco es lo que más tardaba en abrir).
+function AgendaBoard({ days, events, now, onSelect }) {
+  return (
+    <div className="agenda-board">
+      {days.map((day) => {
+        const items = eventsForDay(events, day).sort(
+          (a, b) => (a.allDay === b.allDay ? a.start - b.start : a.allDay ? -1 : 1)
+        );
+        const isToday = isSameDay(day, now);
+        return (
+          <section className={`agenda-board__day${isToday ? " is-today" : ""}`} key={day.toISOString()}>
+            <header>
+              <span>{weekdayShort(day)}</span>
+              <strong>{day.getDate()}</strong>
+            </header>
+            {items.length ? (
+              <ul>
+                {items.map(({ event, allDay, start }) => (
+                  <li key={`${event.id || event.summary}-${event.start}`}>
+                    <button
+                      type="button"
+                      className={`agenda-board__event tone-${eventTone(event)}${!allDay && isToday && start < now ? " is-past" : ""}`}
+                      onClick={() => onSelect(event)}
+                    >
+                      <small>{allDay ? "Todo el día" : clockOf(start)}</small>
+                      <strong>{event.summary || "Sin título"}</strong>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="agenda-board__free">Libre</p>
+            )}
+          </section>
+        );
+      })}
+    </div>
+  );
 }
 
 function weekdayShort(date) {
@@ -146,7 +194,7 @@ export function AgendaView({
   calendar,
   people = [],
 }) {
-  const [mode, setMode] = useState("week");
+  const [mode, setMode] = useState("board");
   const [anchor, setAnchor] = useState(() => startOfDay(now));
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [calendarsOpen, setCalendarsOpen] = useState(false);
@@ -300,6 +348,8 @@ export function AgendaView({
             Añadir calendario
           </button>
         </div>
+      ) : mode === "board" ? (
+        <AgendaBoard days={days} events={events} now={now} onSelect={setSelectedEvent} />
       ) : (
         <div className={`agenda-calendar agenda-calendar--${mode}`}>
           <div className="agenda-axis" aria-hidden="true">

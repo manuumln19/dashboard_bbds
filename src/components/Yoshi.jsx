@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
+import { LITE_MODE } from "../lib/perf";
 import { listenYoshi } from "../lib/yoshiTalk";
 import blinkSrc from "../assets/yoshi/blink.webp";
 import cheerSrc from "../assets/yoshi/cheer.webp";
@@ -113,6 +114,11 @@ function todayApples() {
   return saved && saved.day === dayKey() ? Number(saved.apples) || 0 : 0;
 }
 
+// Cada cuánto parpadea y hace algo solo. En el marco (modo ligero), menos:
+// cada cambio de pose es un repintado.
+const BLINK_MS = LITE_MODE ? [9000, 7000] : [3200, 3600];
+const IDLE_MS = LITE_MODE ? [35000, 30000] : [12000, 13000];
+
 // Gestos por su cuenta cuando nadie le hace caso.
 const IDLE_ACTIONS = ["hop", "turn", "stretch", "hop", "turn", "talk"];
 const LONG_PRESS_MS = 650;
@@ -123,7 +129,7 @@ const LONG_PRESS_MS = 650;
 // `onWander` lo manda de paseo cuando se harta de toques. El Yoshi de la
 // barra es el de casa (`main`): habla de lo que pasa (`house`), come una
 // manzana por tarea, da los buenos días y se alegra con las notas nuevas.
-export function Yoshi({
+export const Yoshi = memo(function Yoshi({
   mood = "idle",
   seasonId,
   cheer = 0,
@@ -177,7 +183,7 @@ export function Yoshi({
               : blinking && resting === "idle"
                 ? "blink"
                 : resting;
-  const canBlink = resting === "idle" && !action && !away;
+  const canBlink = lively && resting === "idle" && !action && !away;
 
   function act(next, text, ms = 2400) {
     window.clearTimeout(actionTimer.current);
@@ -240,7 +246,7 @@ export function Yoshi({
     lastGreet.current = greet;
   }, [greet, asleep]);
 
-  // Vida propia: cada 12–25 s hace algo, si nadie le está tocando.
+  // Vida propia: cada 12–25 s (35–65 s en el marco) hace algo, si nadie le toca.
   useEffect(() => {
     if (!lively || away) return undefined;
     function schedule() {
@@ -263,7 +269,7 @@ export function Yoshi({
           }
         }
         schedule();
-      }, 12000 + Math.random() * 13000);
+      }, IDLE_MS[0] + Math.random() * IDLE_MS[1]);
     }
     schedule();
     return () => window.clearTimeout(idleTimer.current);
@@ -281,7 +287,7 @@ export function Yoshi({
           setBlinking(false);
           next();
         }, 140);
-      }, 3200 + Math.random() * 3600);
+      }, BLINK_MS[0] + Math.random() * BLINK_MS[1]);
     }
     next();
     return () => {
@@ -290,6 +296,20 @@ export function Yoshi({
       setBlinking(false);
     };
   }, [canBlink]);
+
+  // Las poses se precargan un rato después de arrancar: la primera vez que
+  // cambiaba de pose decodificaba la imagen justo al tocarlo.
+  useEffect(() => {
+    if (!main) return undefined;
+    const timer = window.setTimeout(() => {
+      Object.keys(YOSHI_SPRITES).forEach((name) => {
+        const image = new Image();
+        image.src = YOSHI_SPRITES[name];
+        if (typeof image.decode === "function") image.decode().catch(() => {});
+      });
+    }, 12000);
+    return () => window.clearTimeout(timer);
+  }, [main]);
 
   useEffect(
     () => () => {
@@ -427,7 +447,7 @@ export function Yoshi({
       </span>
     </button>
   );
-}
+});
 
 // El paseo: Yoshi sale de la barra y cruza la pantalla corriendo por abajo.
 export function YoshiStroll({ onDone }) {

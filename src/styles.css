@@ -217,55 +217,11 @@ textarea:focus-visible {
   transition: opacity 1s ease, background 1s ease;
 }
 
-.aurora {
-  width: 60vw;
-  height: 60vw;
-  filter: blur(82px);
-  mix-blend-mode: multiply;
-  opacity: 0.13;
-}
-
-.aurora--mint {
-  top: -32vw;
-  left: -22vw;
-  background: radial-gradient(circle, rgba(42, 155, 128, 0.7), transparent 68%);
-}
-
-.aurora--violet {
-  top: -30vw;
-  right: -20vw;
-  background: radial-gradient(circle, rgba(114, 95, 193, 0.55), transparent 68%);
-}
-
-.aurora--peach {
-  bottom: -44vw;
-  left: 8vw;
-  background: radial-gradient(circle, rgba(217, 35, 99, 0.45), transparent 68%);
-}
-
-.aurora--blue {
-  right: -10vw;
-  bottom: -48vw;
-  width: 52vw;
-  height: 52vw;
-  background: radial-gradient(circle, rgba(61, 126, 179, 0.34), transparent 70%);
-}
-
 .ambient__grain {
   background-image: radial-gradient(rgba(38, 31, 23, 0.52) 0.55px, transparent 0.7px);
   background-size: 3px 3px;
   mix-blend-mode: multiply;
   opacity: 0.11;
-}
-
-.ambient__rule {
-  position: absolute;
-  top: 0;
-  right: 7vw;
-  bottom: 0;
-  width: 1px;
-  background: linear-gradient(180deg, transparent, rgba(35, 29, 22, 0.07) 18%, rgba(35, 29, 22, 0.07) 82%, transparent);
-  opacity: 0.65;
 }
 
 .app.is-night .ambient {
@@ -275,28 +231,10 @@ textarea:focus-visible {
     linear-gradient(160deg, #141412 0%, #111110 58%, #0e0e0d 100%);
 }
 
-.app.is-night .aurora {
-  animation-play-state: paused;
-  filter: blur(98px);
-  opacity: 0.2;
-}
-
 .app.is-night .ambient__grain {
   background-image: radial-gradient(rgba(255, 248, 238, 0.5) 0.55px, transparent 0.7px);
   mix-blend-mode: soft-light;
   opacity: 0.08;
-}
-
-.app.is-night .ambient__rule {
-  background: linear-gradient(180deg, transparent, rgba(255, 248, 238, 0.06) 18%, rgba(255, 248, 238, 0.06) 82%, transparent);
-}
-
-.screen-dim {
-  opacity: 0;
-}
-
-.is-night .screen-dim {
-  opacity: 0.12;
 }
 
 /* Rail ------------------------------------------------------------------- */

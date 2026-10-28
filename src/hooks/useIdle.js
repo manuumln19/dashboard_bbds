@@ -1,19 +1,30 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-const WAKE_EVENTS = ["pointerdown", "keydown", "wheel", "touchstart"];
+// Sin `touchstart`: en pantalla táctil ya llega `pointerdown` y se reiniciaba
+// dos veces por toque.
+const WAKE_EVENTS = ["pointerdown", "keydown", "wheel"];
 
 // Devuelve `idle` y una función para reiniciar el contador desde fuera.
 // No escucha `pointermove` a propósito: en una pantalla de pared el roce de
 // una manga no debería cerrar el salvapantallas.
 export function useIdle(timeoutMs) {
   const [idle, setIdle] = useState(false);
+  const idleRef = useRef(false);
   const timer = useRef(null);
 
+  // Solo se toca el estado si de verdad cambia: cada setState, aunque sea al
+  // mismo valor, podía volver a ejecutar App entera tras un toque.
   const reset = useCallback(() => {
-    setIdle(false);
+    if (idleRef.current) {
+      idleRef.current = false;
+      setIdle(false);
+    }
     window.clearTimeout(timer.current);
     if (timeoutMs > 0) {
-      timer.current = window.setTimeout(() => setIdle(true), timeoutMs);
+      timer.current = window.setTimeout(() => {
+        idleRef.current = true;
+        setIdle(true);
+      }, timeoutMs);
     }
   }, [timeoutMs]);
 

@@ -86,7 +86,7 @@ export function useIdleReturn(view, onHome, minutes = 10) {
       }, minutes * 60 * 1000);
     }
 
-    const events = ["pointerdown", "keydown", "wheel", "touchstart"];
+    const events = ["pointerdown", "keydown", "wheel"];
     events.forEach((name) =>
       window.addEventListener(name, arm, { passive: true })
     );

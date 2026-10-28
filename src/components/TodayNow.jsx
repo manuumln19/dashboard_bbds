@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { LOCATION } from "../config";
 import { capitalize, formatClock, formatLongDate } from "../lib/date";
 import { greetingFor } from "../lib/greeting";
@@ -11,11 +12,11 @@ function round(value) {
 }
 
 // Lo que se mira de pasada: hora, fecha y tiempo, con las próximas horas.
-export function TodayNow({ now, weather, season, lists, cleaning, onOpenWeather }) {
+export const TodayNow = memo(function TodayNow({ now, weather, season, lists, cleaning, events, onOpenWeather }) {
   const current = weather && weather.current ? weather.current : null;
   const today = weather && weather.today ? weather.today : null;
   const hours = nextHours(weather, now, 6).slice(1);
-  const greeting = greetingFor({ now, weather, season, lists, cleaning });
+  const greeting = greetingFor({ now, weather, season, lists, cleaning, events });
   const countdown = nextFestivity(now, cleaning ? cleaning.people : []);
 
   return (
@@ -72,4 +73,4 @@ export function TodayNow({ now, weather, season, lists, cleaning, onOpenWeather 
       ) : null}
     </article>
   );
-}
+});

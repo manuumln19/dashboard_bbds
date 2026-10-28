@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CALENDAR_DAYS, DEMO_MODE } from "../config";
 import { apiRequest, apiRequestWithMeta } from "../lib/api";
+import { useStableFns } from "./useStableFns";
 import { createDemoEvents } from "../lib/demo";
 import { reportFailure, reportSync } from "../lib/freshness";
 import { normalizeIcsUrl } from "../lib/icsUrl";
@@ -9,6 +10,7 @@ import {
   loadDemoCalendars,
   saveDemoCalendars,
 } from "../lib/localStore";
+import { onPollingResume, pollingPaused, pollInterval } from "../lib/polling";
 
 const REFRESH_MS = 5 * 60 * 1000;
 const DEMO_FEED_HOST = "example.com";
@@ -276,6 +278,7 @@ export function useCalendar() {
   const [configured, setConfigured] = useState(true);
   const [loading, setLoading] = useState(!DEMO_MODE);
   const [calendarsLoading, setCalendarsLoading] = useState(false);
+  const eventsKey = useRef(null);
   const [lastUpdated, setLastUpdated] = useState(() =>
     initial ? nowIso() : null
   );
@@ -332,8 +335,14 @@ export function useCalendar() {
         );
         const nextEvents = Array.isArray(data.events) ? data.events : [];
         const nextFeeds = Array.isArray(data.feeds) ? data.feeds : [];
-        setEvents(nextEvents);
-        setFeeds(nextFeeds);
+        // Cada 5 min casi siempre llega lo mismo: sin cambios no se toca el
+        // estado (cada set repintaba toda la app).
+        const key = JSON.stringify([nextEvents, nextFeeds]);
+        if (key !== eventsKey.current) {
+          eventsKey.current = key;
+          setEvents(nextEvents);
+          setFeeds(nextFeeds);
+        }
         setConfigured(true);
         const at = meta.cachedAt || data.updatedAt || nowIso();
         setLastUpdated(at);
@@ -390,13 +399,19 @@ export function useCalendar() {
 
   useEffect(() => {
     refresh(false);
-    const timer = setInterval(() => refresh(true), REFRESH_MS);
+    // Sin sondeos con el salvapantallas abierto; al cerrarlo, uno al momento.
+    const tick = () => refresh(true);
+    const timer = setInterval(() => {
+      if (!pollingPaused()) tick();
+    }, pollInterval(REFRESH_MS));
+    const stopResume = onPollingResume(tick);
     function handleVisibility() {
       if (document.visibilityState === "visible") refresh(true);
     }
     document.addEventListener("visibilitychange", handleVisibility);
     return () => {
       clearInterval(timer);
+      stopResume();
       document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, [refresh]);
@@ -515,21 +530,24 @@ export function useCalendar() {
     }
   }
 
-  return {
-    events,
-    feeds,
-    calendars,
-    error,
-    calendarsError,
-    configured,
-    loading,
-    calendarsLoading,
-    lastUpdated,
-    refresh,
-    refreshCalendars,
-    createCalendar,
-    updateCalendar,
-    deleteCalendar,
-    syncCalendar,
-  };
+  const actions = useStableFns({ createCalendar, updateCalendar, deleteCalendar, syncCalendar });
+
+  // Mismo objeto mientras no cambie nada: Hoy solo se repinta si cambia.
+  return useMemo(
+    () => ({
+      events,
+      feeds,
+      calendars,
+      error,
+      calendarsError,
+      configured,
+      loading,
+      calendarsLoading,
+      lastUpdated,
+      refresh,
+      refreshCalendars,
+      ...actions,
+    }),
+    [events, feeds, calendars, error, calendarsError, configured, loading, calendarsLoading, lastUpdated, refresh, refreshCalendars, actions]
+  );
 }

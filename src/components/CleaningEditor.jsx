@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import {
   Cake,
   Check,
@@ -10,6 +10,8 @@ import {
   Users,
   X,
 } from "lucide-react";
+import { useStableFns } from "../hooks/useStableFns";
+import { sheetPortal } from "../lib/sheetPortal";
 
 const DAYS = [
   "Lunes",
@@ -78,6 +80,111 @@ function BirthdayPicker({ name, value, onChange }) {
     </span>
   );
 }
+
+// Una fila del cuadrante, memorizada: escribir en una tarea (o en la nueva) no
+// redibuja las otras trece. En el marco, cada tecla repintaba el editor entero.
+const TaskEditRow = memo(function TaskEditRow({ task, draft: edited, people, busy, done, onPatch, onSave, onRemove }) {
+  const draft = edited || draftFromTask(task);
+  return (
+    <div className="cleaning-edit-row">
+      <select
+        aria-label={`Día de ${task.title}`}
+        value={draft.day}
+        onChange={(event) =>
+          onPatch(task.id, {
+            day: event.target.value,
+          })
+        }
+      >
+        {DAYS.map((label, index) => (
+          <option key={label} value={String(index)}>
+            {label}
+          </option>
+        ))}
+      </select>
+      <select
+        aria-label={`Persona de ${task.title}`}
+        value={draft.personId}
+        onChange={(event) =>
+          onPatch(task.id, {
+            personId: event.target.value,
+          })
+        }
+      >
+        {people.map((person) => (
+          <option key={person.id} value={person.id}>
+            {person.name}
+          </option>
+        ))}
+      </select>
+      <input
+        aria-label={`Zona de ${task.title}`}
+        type="text"
+        maxLength={40}
+        placeholder="Zona"
+        value={draft.area}
+        onChange={(event) =>
+          onPatch(task.id, {
+            area: event.target.value,
+          })
+        }
+      />
+      <input
+        aria-label={`Nombre de ${task.title}`}
+        type="text"
+        maxLength={80}
+        placeholder="Tarea"
+        value={draft.title}
+        onChange={(event) =>
+          onPatch(task.id, {
+            title: event.target.value,
+          })
+        }
+      />
+      <button
+        type="button"
+        className="feature-icon-button"
+        onClick={() => onSave(task)}
+        disabled={busy}
+        aria-label={`Guardar ${task.title}`}
+      >
+        {busy ? (
+          <LoaderCircle
+            className="feature-spin"
+            size={16}
+            strokeWidth={2}
+            aria-hidden="true"
+          />
+        ) : done ? (
+          <Check
+            size={16}
+            strokeWidth={2}
+            aria-hidden="true"
+          />
+        ) : (
+          <Save
+            size={16}
+            strokeWidth={1.9}
+            aria-hidden="true"
+          />
+        )}
+      </button>
+      <button
+        type="button"
+        className="feature-icon-button feature-icon-button--danger"
+        onClick={() => onRemove(task)}
+        disabled={busy}
+        aria-label={`Borrar ${task.title}`}
+      >
+        <Trash2
+          size={16}
+          strokeWidth={1.9}
+          aria-hidden="true"
+        />
+      </button>
+    </div>
+    );
+});
 
 export function CleaningEditor({ open, onClose, cleaning }) {
   const { people, addTask, updateTask, removeTask, updatePerson, days, setDays } =
@@ -164,6 +271,10 @@ export function CleaningEditor({ open, onClose, cleaning }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
+  // Estables para que las filas memorizadas no se repinten por ellas. Antes
+  // del `return` temprano: los hooks no pueden depender de si está abierto.
+  const rowActions = useStableFns({ patchDraft, saveTask, remove });
+
   if (!open) return null;
 
   function patchDraft(id, patch) {
@@ -225,6 +336,7 @@ export function CleaningEditor({ open, onClose, cleaning }) {
     }
   }
 
+
   async function add() {
     if (!newTask.area.trim() || !newTask.title.trim() || !newTask.personId) {
       setLocalError("Para añadir una tarea, completa zona, nombre y persona.");
@@ -275,7 +387,7 @@ export function CleaningEditor({ open, onClose, cleaning }) {
     }
   }
 
-  return (
+  return sheetPortal(
     <div
       className="ink-overlay feature-overlay"
       onPointerDown={(event) => {
@@ -455,108 +567,19 @@ export function CleaningEditor({ open, onClose, cleaning }) {
                       <span>{dayTasks.length}</span>
                     </h4>
                     {dayTasks.length ? (
-                      dayTasks.map((task) => {
-                        const draft = drafts[task.id] || draftFromTask(task);
-                        return (
-                          <div className="cleaning-edit-row" key={task.id}>
-                            <select
-                              aria-label={`Día de ${task.title}`}
-                              value={draft.day}
-                              onChange={(event) =>
-                                patchDraft(task.id, {
-                                  day: event.target.value,
-                                })
-                              }
-                            >
-                              {DAYS.map((label, index) => (
-                                <option key={label} value={String(index)}>
-                                  {label}
-                                </option>
-                              ))}
-                            </select>
-                            <select
-                              aria-label={`Persona de ${task.title}`}
-                              value={draft.personId}
-                              onChange={(event) =>
-                                patchDraft(task.id, {
-                                  personId: event.target.value,
-                                })
-                              }
-                            >
-                              {people.map((person) => (
-                                <option key={person.id} value={person.id}>
-                                  {person.name}
-                                </option>
-                              ))}
-                            </select>
-                            <input
-                              aria-label={`Zona de ${task.title}`}
-                              type="text"
-                              maxLength={40}
-                              placeholder="Zona"
-                              value={draft.area}
-                              onChange={(event) =>
-                                patchDraft(task.id, {
-                                  area: event.target.value,
-                                })
-                              }
-                            />
-                            <input
-                              aria-label={`Nombre de ${task.title}`}
-                              type="text"
-                              maxLength={80}
-                              placeholder="Tarea"
-                              value={draft.title}
-                              onChange={(event) =>
-                                patchDraft(task.id, {
-                                  title: event.target.value,
-                                })
-                              }
-                            />
-                            <button
-                              type="button"
-                              className="feature-icon-button"
-                              onClick={() => saveTask(task)}
-                              disabled={saving === task.id}
-                              aria-label={`Guardar ${task.title}`}
-                            >
-                              {saving === task.id ? (
-                                <LoaderCircle
-                                  className="feature-spin"
-                                  size={16}
-                                  strokeWidth={2}
-                                  aria-hidden="true"
-                                />
-                              ) : saved === task.id ? (
-                                <Check
-                                  size={16}
-                                  strokeWidth={2}
-                                  aria-hidden="true"
-                                />
-                              ) : (
-                                <Save
-                                  size={16}
-                                  strokeWidth={1.9}
-                                  aria-hidden="true"
-                                />
-                              )}
-                            </button>
-                            <button
-                              type="button"
-                              className="feature-icon-button feature-icon-button--danger"
-                              onClick={() => remove(task)}
-                              disabled={saving === task.id}
-                              aria-label={`Borrar ${task.title}`}
-                            >
-                              <Trash2
-                                size={16}
-                                strokeWidth={1.9}
-                                aria-hidden="true"
-                              />
-                            </button>
-                          </div>
-                        );
-                      })
+                      dayTasks.map((task) => (
+                        <TaskEditRow
+                          key={task.id}
+                          task={task}
+                          draft={drafts[task.id]}
+                          people={people}
+                          busy={saving === task.id}
+                          done={saved === task.id}
+                          onPatch={rowActions.patchDraft}
+                          onSave={rowActions.saveTask}
+                          onRemove={rowActions.remove}
+                        />
+                      ))
                     ) : (
                       <p className="cleaning-editor__empty">
                         Sin tareas este día.

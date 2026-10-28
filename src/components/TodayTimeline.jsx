@@ -1,3 +1,4 @@
+import { Fragment, memo } from "react";
 import { ArrowUpRight, CalendarDays, ListChecks, SprayCan } from "lucide-react";
 import { useRecentlyDone } from "../hooks/useRecentlyDone";
 import { timelineDays } from "../lib/today";
@@ -5,10 +6,24 @@ import { CheckMark } from "./CheckMark";
 import { SeasonMark } from "./SeasonDecor";
 
 const KIND_ICONS = { event: CalendarDays, task: ListChecks, cleaning: SprayCan };
+const CLOCK = /^\d\d:\d\d$/;
+
+function pad(value) {
+  return String(value).padStart(2, "0");
+}
+
+// Dónde va la marca de «ahora» en la lista de hoy: antes de la primera
+// entrada con hora que aún no ha llegado. Lo que tiene hora y ya pasó se
+// atenúa; lo que no tiene hora (limpieza, tareas sin hora) no se toca.
+function splitAtNow(entries, nowKey) {
+  const index = entries.findIndex((entry) => CLOCK.test(entry.time) && entry.sort >= nowKey);
+  const hasTimedBefore = entries.some((entry, i) => CLOCK.test(entry.time) && (index < 0 || i < index));
+  return { index: index < 0 ? (hasTimedBefore ? entries.length : -1) : index };
+}
 
 // Hoy y mañana en una lista por orden de hora. Las tareas y la limpieza se
 // marcan aquí mismo; los eventos abren la agenda.
-export function TodayTimeline({ now, events, lists, cleaning, onOpenAgenda, onOpenLists }) {
+export const TodayTimeline = memo(function TodayTimeline({ now, events, lists, cleaning, onOpenAgenda, onOpenLists }) {
   const recent = useRecentlyDone();
   const days = timelineDays({
     now,
@@ -21,6 +36,8 @@ export function TodayTimeline({ now, events, lists, cleaning, onOpenAgenda, onOp
   const undated = lists.items.filter(
     (item) => item.listId === "tasks" && !item.done && !item.dueOn
   ).length;
+
+  const nowKey = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
 
   function activate(entry) {
     if (entry.kind === "task") {
@@ -46,16 +63,26 @@ export function TodayTimeline({ now, events, lists, cleaning, onOpenAgenda, onOp
       </header>
 
       <div className="today-timeline__days">
-        {days.map((day) => (
+        {days.map((day) => {
+          const isToday = day.label === "Hoy";
+          const mark = isToday ? splitAtNow(day.entries, nowKey).index : -1;
+          return (
           <section key={day.key} className="today-day" aria-label={day.label}>
             <h3>{day.label}</h3>
             {day.entries.length ? (
               <ul>
-                {day.entries.map((entry) => {
+                {day.entries.map((entry, index) => {
                   const Icon = KIND_ICONS[entry.kind];
                   const checkable = entry.kind !== "event";
+                  const past = isToday && CLOCK.test(entry.time) && entry.sort < nowKey;
                   return (
-                    <li key={entry.id}>
+                    <Fragment key={entry.id}>
+                    {index === mark ? (
+                      <li className="today-now-mark" aria-label={`Ahora, ${nowKey}`}>
+                        <span>Ahora · {nowKey}</span>
+                      </li>
+                    ) : null}
+                    <li className={past ? "is-past" : undefined}>
                       <button
                         type="button"
                         className={`today-entry tone-${entry.tone}${entry.done ? " is-done" : ""}${
@@ -80,6 +107,12 @@ export function TodayTimeline({ now, events, lists, cleaning, onOpenAgenda, onOp
                         {entry.meta ? <span className="today-entry__meta">{entry.meta}</span> : null}
                       </button>
                     </li>
+                    {isToday && index === day.entries.length - 1 && mark === day.entries.length ? (
+                      <li className="today-now-mark" aria-label={`Ahora, ${nowKey}`}>
+                        <span>Ahora · {nowKey}</span>
+                      </li>
+                    ) : null}
+                    </Fragment>
                   );
                 })}
               </ul>
@@ -89,7 +122,8 @@ export function TodayTimeline({ now, events, lists, cleaning, onOpenAgenda, onOp
               </p>
             )}
           </section>
-        ))}
+          );
+        })}
       </div>
 
       {undated ? (
@@ -100,4 +134,4 @@ export function TodayTimeline({ now, events, lists, cleaning, onOpenAgenda, onOp
       ) : null}
     </article>
   );
-}
+});

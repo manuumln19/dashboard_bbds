@@ -154,11 +154,6 @@ body {
   opacity: 0.04;
 }
 
-.aurora,
-.ambient__rule {
-  display: none;
-}
-
 .app.is-night .ambient {
   background:
     radial-gradient(38% 44% at 8% -6%, rgba(255, 140, 99, 0.12), transparent 72%),
@@ -178,14 +173,6 @@ body {
   background-image: radial-gradient(rgba(255, 248, 238, 0.5) 0.38px, transparent 0.58px);
   mix-blend-mode: soft-light;
   opacity: 0.055;
-}
-
-.screen-dim {
-  opacity: 0;
-}
-
-.is-night .screen-dim {
-  opacity: 0.12;
 }
 
 /* Rail -------------------------------------------------------------------- */

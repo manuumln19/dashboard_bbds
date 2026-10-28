@@ -10,6 +10,7 @@ import {
   X,
 } from "lucide-react";
 import { recognizeHandwriting } from "../lib/handwriting";
+import { sheetPortal } from "../lib/sheetPortal";
 
 const CANVAS_WIDTH = 1600;
 const CANVAS_HEIGHT = 512;
@@ -355,7 +356,7 @@ export function HandwritingSheet({ open, listTitle, onClose, onSave }) {
     onSave(value);
   }
 
-  return (
+  return sheetPortal(
     <div
       className="ink-overlay"
       onPointerDown={(event) => {

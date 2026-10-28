@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   CalendarClock,
   Check,
@@ -33,7 +33,11 @@ export function ListCard({
   onClear,
   onDraw,
 }) {
-  const [text, setText] = useState("");
+  // El campo no es controlado: escribir no redibuja la lista entera (en el
+  // marco cada tecla repintaba todas las tareas y se notaba retraso). React
+  // solo sabe si está vacío, para activar «Añadir».
+  const inputRef = useRef(null);
+  const [hasText, setHasText] = useState(false);
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const [addMeta, setAddMeta] = useState({
     dueOn: null,
@@ -57,13 +61,17 @@ export function ListCard({
     }
     return new Date(a.createdAt) - new Date(b.createdAt);
   });
+  // Lo hecho se pliega: por defecto solo lo pendiente; el pie lo despliega.
+  const [showDone, setShowDone] = useState(false);
+  const visible = showDone ? sorted : sorted.filter((item) => !item.done);
   const openCount = items.filter((item) => !item.done).length;
   const doneCount = items.length - openCount;
   const progress = items.length ? Math.round((doneCount / items.length) * 100) : 0;
 
   function handleSubmit(event) {
     event.preventDefault();
-    const value = text.trim();
+    const input = inputRef.current;
+    const value = input ? input.value.trim() : "";
     if (!value) return;
     const meta = isTasks
       ? {
@@ -73,7 +81,8 @@ export function ListCard({
         }
       : {};
     onAdd(listId, value, meta);
-    setText("");
+    if (input) input.value = "";
+    setHasText(false);
   }
 
   function openMeta(item) {
@@ -132,8 +141,9 @@ export function ListCard({
         </label>
         <input
           id={`add-${listId}`}
-          value={text}
-          onChange={(event) => setText(event.target.value)}
+          ref={inputRef}
+          defaultValue=""
+          onChange={(event) => setHasText(event.target.value.trim() !== "")}
           placeholder={
             listId === "shopping" ? "Añadir a la compra…" : "Añadir una tarea…"
           }
@@ -165,7 +175,7 @@ export function ListCard({
         <button
           type="submit"
           className="list-panel__submit"
-          disabled={!text.trim()}
+          disabled={!hasText}
           aria-label={`Añadir a ${title}`}
         >
           <Plus size={21} strokeWidth={2.2} aria-hidden="true" />
@@ -188,9 +198,9 @@ export function ListCard({
       ) : null}
 
       <div className="list-panel__body">
-        {sorted.length ? (
+        {visible.length ? (
           <ul className="task-list">
-            {sorted.map((item) => (
+            {visible.map((item) => (
               <li className="task-item" key={item.id}>
                 <div
                   className={`task-row${item.done ? " is-done" : ""}${
@@ -294,18 +304,25 @@ export function ListCard({
         ) : (
           <div className="empty-state empty-state--list">
             <Icon size={35} strokeWidth={1.25} aria-hidden="true" />
-            <strong>La lista está vacía</strong>
-            <span>Escribe arriba para añadir lo primero.</span>
+            <strong>{items.length ? "Todo hecho" : "La lista está vacía"}</strong>
+            <span>{items.length ? "Lo hecho está plegado abajo." : "Escribe arriba para añadir lo primero."}</span>
           </div>
         )}
       </div>
 
       <footer className="list-panel__foot">
-        <span>
-          {doneCount
-            ? `${doneCount} ${doneCount === 1 ? "hecho" : "hechos"}`
-            : "Nada hecho todavía"}
-        </span>
+        {doneCount ? (
+          <button
+            type="button"
+            className="list-panel__fold"
+            onClick={() => setShowDone((value) => !value)}
+            aria-expanded={showDone}
+          >
+            {showDone ? "Ocultar hechos" : `Ver ${doneCount} ${doneCount === 1 ? "hecho" : "hechos"}`}
+          </button>
+        ) : (
+          <span>Nada hecho todavía</span>
+        )}
         {doneCount > 0 ? (
           <button
             type="button"

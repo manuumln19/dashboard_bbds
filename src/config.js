@@ -11,7 +11,10 @@ function asFlag(value, fallback = false) {
 }
 
 export const APP_NAME = "BBDS";
-export const DEMO_MODE = env.VITE_DEMO_MODE === "true";
+// Leído directamente (no a través de `env`) para que Vite lo sustituya por una
+// constante al compilar: así todo el código y los datos de la demo desaparecen
+// del paquete de producción.
+export const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === "true";
 
 // Permite publicar el dashboard sin la vista Casa, sus tarjetas ni las
 // llamadas a /api/sensors hasta que haya sensores instalados.

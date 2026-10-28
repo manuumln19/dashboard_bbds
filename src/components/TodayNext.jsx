@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useState } from "react";
 import { BellRing, Cake, CalendarDays, Plus, Sparkles, SprayCan, Trophy, Umbrella, UtensilsCrossed, Zap } from "lucide-react";
 import { getWeatherAdvice } from "../lib/weather";
 import { nextItems } from "../lib/today";
@@ -41,7 +41,7 @@ function AddToShopping({ text, lists }) {
 }
 
 // Una sola tarjeta de color: lo más importante ahora, y debajo lo demás.
-export function TodayNext({ now, events, weather, electricity, cleaning, lists, menu, onOpenAgenda }) {
+export const TodayNext = memo(function TodayNext({ now, events, weather, electricity, cleaning, lists, menu, onOpenAgenda }) {
   const items = nextItems({ now, events, weather, electricity, cleaning, menu });
   const [lead, ...rest] = items;
 
@@ -95,4 +95,4 @@ export function TodayNext({ now, events, weather, electricity, cleaning, lists, 
       ) : null}
     </article>
   );
-}
+});

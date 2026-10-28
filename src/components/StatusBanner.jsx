@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import {
   AlertTriangle,
   ChevronDown,
@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import { formatFreshnessTime } from "../lib/freshness";
 
-export function StatusBanner({ online, health, onOpenDiagnostics }) {
+export const StatusBanner = memo(function StatusBanner({ online, health, onOpenDiagnostics }) {
   const [expanded, setExpanded] = useState(false);
   const [dismissedKey, setDismissedKey] = useState(null);
   const issues = health.issues;
@@ -101,4 +101,4 @@ export function StatusBanner({ online, health, onOpenDiagnostics }) {
       ) : null}
     </aside>
   );
-}
+});

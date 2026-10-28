@@ -8,6 +8,7 @@ import {
 } from "./energy";
 import { houseReminders } from "./reminders";
 import { hourLabel, isRainyHour, nextHours } from "./weather";
+import { compareText } from "./compare";
 
 // Lógica de la pantalla Hoy: qué es «lo siguiente» y qué entra en la línea
 // de tiempo de hoy y mañana. Sin JSX, para que las tarjetas solo pinten.
@@ -218,7 +219,7 @@ export function timelineDays({ now, events, items, cleaning, people, keep = new 
         });
     }
 
-    entries.sort((a, b) => a.sort.localeCompare(b.sort));
+    entries.sort((a, b) => compareText(a.sort, b.sort));
     return { ...day, entries };
   });
 }

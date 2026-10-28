@@ -1,32 +1,14 @@
 import { useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
 import { Cake, Crown, Flame, X } from "lucide-react";
 import { weekRangeLabel } from "../lib/cleaning";
 import { addDays, eventStartDate, eventTimeLabel, relativeDayLabel, startOfWeek } from "../lib/date";
+import { LITE_MODE } from "../lib/perf";
+import { sheetPortal } from "../lib/sheetPortal";
 import { weeklyScores } from "../lib/points";
+import { markSummarySeen } from "../lib/summary";
 import { upcomingBirthday } from "../lib/season";
 import { EggAvatar } from "./EggAvatar";
 import { Yoshi } from "./Yoshi";
-
-const SEEN_KEY = "bbds.summary.seen";
-
-// El domingo desde las 20:00 el resumen se abre solo, una vez por semana.
-export function summaryDue(now, weekKey) {
-  if (now.getDay() !== 0 || now.getHours() < 20) return false;
-  try {
-    return window.localStorage.getItem(SEEN_KEY) !== weekKey;
-  } catch {
-    return false;
-  }
-}
-
-function markSeen(weekKey) {
-  try {
-    window.localStorage.setItem(SEEN_KEY, weekKey);
-  } catch {
-    // Sin almacenamiento, se volverá a abrir el domingo que viene igual.
-  }
-}
 
 function headline({ cleaning, mvp, scores }) {
   if (cleaning.weekComplete && mvp) return `Semana redonda. ${mvp.person.name} se lleva la corona.`;
@@ -62,11 +44,12 @@ function nextWeekEvents(events, now) {
 }
 
 // Cuenta hasta `value` escribiendo en el DOM: sin re-render por fotograma.
+// En el marco (modo ligero) sale la cifra directamente.
 function CountUp({ value, delay = 0 }) {
   const ref = useRef(null);
   useEffect(() => {
     const el = ref.current;
-    if (!el) return undefined;
+    if (!el || LITE_MODE) return undefined;
     let frame = 0;
     const startAt = performance.now() + delay;
     const duration = 700;
@@ -93,13 +76,12 @@ export function WeeklySummary({ now, cleaning, lists, events, seasonId, onClose 
   const coming = nextWeekEvents(events, now);
   const birthday = upcomingBirthday(now, cleaning.people, 8);
   const total = cleaning.totalCount || 0;
-  const host = document.querySelector(".app") || document.body;
 
   useEffect(() => {
-    markSeen(cleaning.weekKey);
+    markSummarySeen(cleaning.weekKey);
   }, [cleaning.weekKey]);
 
-  return createPortal(
+  return sheetPortal(
     <div
       className="ink-overlay feature-overlay"
       onPointerDown={(event) => {
@@ -128,7 +110,7 @@ export function WeeklySummary({ now, cleaning, lists, events, seasonId, onClose 
               return (
                 <article key={entry.person.id} className={`week-summary__player tone-${entry.person.tone}${isMvp ? " is-mvp" : ""}`}>
                   <div className="week-summary__who">
-                    <EggAvatar person={entry.person} size={38} cracked={entry.ownWeek} />
+                    <EggAvatar person={entry.person} size={38} cracked={entry.ownWeek} level={entry.level.index} />
                     <div>
                       <strong>
                         {entry.person.name}
@@ -218,7 +200,6 @@ export function WeeklySummary({ now, cleaning, lists, events, seasonId, onClose 
           </section>
         </div>
       </section>
-    </div>,
-    host
+    </div>
   );
 }

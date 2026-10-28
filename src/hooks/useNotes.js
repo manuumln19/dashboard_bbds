@@ -1,8 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DEMO_MODE } from "../config";
 import { apiRequest } from "../lib/api";
 import { loadDemoNotes, saveDemoNotes } from "../lib/localStore";
 import { tellYoshi } from "../lib/yoshiTalk";
+import { useStableFns } from "./useStableFns";
+import { onPollingResume, pollingPaused, pollInterval } from "../lib/polling";
 
 const REFRESH_MS = 60 * 1000;
 
@@ -36,8 +38,14 @@ export function useNotes() {
   useEffect(() => {
     if (DEMO_MODE) return undefined;
     load();
-    const timer = setInterval(load, REFRESH_MS);
+    // Sin sondeos con el salvapantallas abierto; al cerrarlo, uno al momento.
+    const tick = load;
+    const timer = setInterval(() => {
+      if (!pollingPaused()) tick();
+    }, pollInterval(REFRESH_MS));
+    const stopResume = onPollingResume(tick);
     return () => clearInterval(timer);
+    return () => stopResume();
   }, [load]);
 
   useEffect(() => {
@@ -113,5 +121,7 @@ export function useNotes() {
     }
   }
 
-  return { notes, error, addNote, removeNote, updateNote };
+  const actions = useStableFns({ addNote, removeNote, updateNote });
+  // Mismo objeto mientras no cambie nada (las tarjetas de Hoy van memorizadas).
+  return useMemo(() => ({ notes, error, ...actions }), [notes, error, actions]);
 }
