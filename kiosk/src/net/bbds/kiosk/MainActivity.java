@@ -4,6 +4,11 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.NetworkInfo;
+import android.net.NetworkRequest;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -28,6 +33,8 @@ public class MainActivity extends Activity {
 
     private WebView web;
     private WifiManager.WifiLock wifiLock;
+    private ConnectivityManager.NetworkCallback networkCallback;
+    private boolean waitingForNetwork = false;
     private final Handler handler = new Handler();
     private final Runnable retry = new Runnable() {
         @Override public void run() { if (web != null) web.loadUrl(savedUrl()); }
@@ -72,7 +79,52 @@ public class MainActivity extends Activity {
         });
         setContentView(web);
         if (state != null) web.restoreState(state);
-        else web.loadUrl(savedUrl());
+        else if (isOnline()) web.loadUrl(savedUrl());
+        else showWaiting();
+        watchNetwork();
+    }
+
+    // Android arranca el kiosco unos 30 s antes de conectar el Wi-Fi. Cargar
+    // sin red dejaba la pantalla de «sin conexión»: se espera a la red y se
+    // carga en cuanto llega. Si el Wi-Fi se cae y vuelve, también se recarga.
+    private boolean isOnline() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+        NetworkInfo info = cm != null ? cm.getActiveNetworkInfo() : null;
+        return info != null && info.isConnected();
+    }
+
+    private void showWaiting() {
+        waitingForNetwork = true;
+        web.loadData(
+            "<body style='margin:0;display:flex;height:100vh;align-items:center;justify-content:center;"
+                + "background:#f3ece2;color:#5f574c;font:22px sans-serif'>Conectando al Wi-Fi…</body>",
+            "text/html; charset=utf-8", null);
+    }
+
+    private void watchNetwork() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+        if (cm == null) return;
+        networkCallback = new ConnectivityManager.NetworkCallback() {
+            @Override
+            public void onAvailable(Network network) {
+                runOnUiThread(new Runnable() {
+                    @Override public void run() {
+                        if (!waitingForNetwork) return;
+                        waitingForNetwork = false;
+                        handler.removeCallbacks(retry);
+                        web.loadUrl(savedUrl());
+                    }
+                });
+            }
+
+            @Override
+            public void onLost(Network network) {
+                waitingForNetwork = true;
+            }
+        };
+        cm.registerNetworkCallback(
+            new NetworkRequest.Builder().addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET).build(),
+            networkCallback);
     }
 
     @Override
@@ -161,6 +213,10 @@ public class MainActivity extends Activity {
     protected void onDestroy() {
         handler.removeCallbacksAndMessages(null);
         if (wifiLock != null && wifiLock.isHeld()) wifiLock.release();
+        if (networkCallback != null) {
+            ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+            if (cm != null) cm.unregisterNetworkCallback(networkCallback);
+        }
         web.destroy();
         super.onDestroy();
     }
