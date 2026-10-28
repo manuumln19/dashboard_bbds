@@ -7811,17 +7811,14 @@ button:not(:disabled):active {
   font-size: 15px;
 }
 
-/* La baldosa protagonista: la hora. Crema como el papel, pero con un marco
-   de tinta y el reloj en terracota: manda por el color de las cifras y el
-   trazo, sin oscurecer la pantalla. Solo de día; de noche Hoy pasa a
-   NightHome. */
+/* La baldosa protagonista: la hora. Crema como el papel, con el reloj en
+   terracota: manda por el color de las cifras, sin oscurecer la pantalla.
+   Solo de día; de noche Hoy pasa a NightHome. */
 .app:not(.is-night) .today-now {
-  --hero-ink: #1f1c18;
   --hero-accent: #b0571c;
 }
 
 .app:not(.is-night) .card.today-now {
-  border: 2px solid var(--hero-ink);
   box-shadow: none;
 }
 

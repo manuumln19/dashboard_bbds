@@ -26,20 +26,15 @@
   src: url("/fonts/manrope-normal-200-800.woff2") format("woff2");
 }
 
+/* Etiquetas: versalitas de Manrope en negrita (antes, IBM Plex Mono). Una
+   familia propia con el corte fijo 700 para cualquier grosor que pidan las
+   reglas: las etiquetas salen siempre igual, sin otra fuente que descargar. */
 @font-face {
-  font-family: "IBM Plex Mono";
+  font-family: "BBDS Label";
   font-style: normal;
-  font-weight: 400;
+  font-weight: 100 900;
   font-display: swap;
-  src: url("/fonts/ibm-plex-mono-normal-400.woff2") format("woff2");
-}
-
-@font-face {
-  font-family: "IBM Plex Mono";
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url("/fonts/ibm-plex-mono-normal-500.woff2") format("woff2");
+  src: url("/fonts/manrope-static-700.woff2") format("woff2");
 }
 
 /* Manrope en cortes fijos para el marco (modo ligero, ver features.css): la

@@ -42,7 +42,7 @@
   --danger-soft: rgba(183, 71, 61, 0.1);
   --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Fraunces", Georgia, serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --font-mono: "BBDS Label", "Manrope", ui-sans-serif, system-ui, sans-serif;
   --radius: 28px;
   --glass-blur: 0px;
   --shadow: none;
