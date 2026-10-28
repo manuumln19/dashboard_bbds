@@ -187,11 +187,13 @@ self.addEventListener("fetch", (event) => {
           await cacheResponse(SHELL_CACHE, OFFLINE_URL, response.clone());
           return response;
         } catch {
+          // Tras un reinicio el Wi-Fi tarda en volver: la página se recarga sola
+          // en vez de quedarse aquí hasta que alguien la toque.
           const shell = await cachedShell();
           return (
             shell ||
             new Response(
-              "<!doctype html><meta charset=utf-8><title>BBDS</title><body style='font:16px system-ui;padding:2rem'>Sin conexión y sin copia guardada. Vuelve a abrir BBDS cuando haya red.</body>",
+              "<!doctype html><meta charset=utf-8><title>BBDS</title><body style='font:16px system-ui;padding:2rem'>Sin conexión y sin copia guardada. Se reintenta solo cada 15 segundos.<script>setTimeout(function(){location.reload()},15000)</script></body>",
               { status: 200, headers: { "Content-Type": "text/html; charset=utf-8" } }
             )
           );
