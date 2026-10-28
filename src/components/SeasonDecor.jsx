@@ -199,6 +199,13 @@ Object.entries(import.meta.glob("../assets/pegatinas/*.webp", { eager: true, imp
   }
 );
 
+// Una pegatina suelta, como imagen (cabeceras de las listas, vacíos…).
+export function Sticker({ name, size = 40, className = "" }) {
+  const sticker = STICKERS[name];
+  if (!sticker) return null;
+  return <img className={`sticker ${className}`.trim()} src={sticker} width={size} height={size} alt="" aria-hidden="true" />;
+}
+
 // El dibujo de una forma dentro de una caja de 24 × 24. La pegatina se sale un
 // poco de la caja porque su borde blanco ocupa sitio.
 function Art({ shape }) {

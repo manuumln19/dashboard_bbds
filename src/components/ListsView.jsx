@@ -28,10 +28,7 @@ export function ListsView({ lists, menu, now = new Date() }) {
         <div>
           <span className="eyebrow">Compartido · BBDS</span>
           <h1 id="lists-title">Listas</h1>
-          <p>
-            La compra y lo que ronda por casa. Escribe rápido; el lápiz queda
-            para cuando apetezca.
-          </p>
+          <p>La compra y lo que ronda por casa.</p>
         </div>
 
         <div className="lists-head__aside">
@@ -71,6 +68,7 @@ export function ListsView({ lists, menu, now = new Date() }) {
           title="La compra"
           subtitle="Para la nevera y el súper"
           Icon={ShoppingBasket}
+          sticker="lemon"
           items={lists.byList("shopping")}
           people={lists.people}
           now={now}
@@ -86,6 +84,7 @@ export function ListsView({ lists, menu, now = new Date() }) {
           title="Tareas"
           subtitle="Cosas pequeñas de la casa"
           Icon={ListChecks}
+          sticker="star"
           items={lists.byList("tasks")}
           people={lists.people}
           now={now}

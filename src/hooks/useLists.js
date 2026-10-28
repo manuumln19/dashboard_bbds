@@ -4,6 +4,7 @@ import { apiRequest, apiRequestWithMeta } from "../lib/api";
 import { DEMO_PEOPLE, loadDemoLists, saveDemoLists } from "../lib/localStore";
 import { reportFailure, reportSync } from "../lib/freshness";
 import { onPollingResume, pollingPaused, pollInterval } from "../lib/polling";
+import { rememberShopping } from "../lib/usualShopping";
 
 const REFRESH_MS = 20 * 1000;
 
@@ -133,6 +134,7 @@ export function useLists() {
     }
 
     setError(null);
+    if (listId === "shopping") rememberShopping(text);
     const tempId = `tmp-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     const personId =
       listId === "tasks" && meta.personId ? String(meta.personId) : null;

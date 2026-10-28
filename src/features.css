@@ -7860,3 +7860,443 @@ button:not(:disabled):active {
 .postit blockquote {
   font-size: 19px;
 }
+
+
+/* Listas: la compra en etiquetas, las tareas por cuándo -------------------- */
+/* La compra se lleva dos tercios: sus cosas son etiquetas de mercado (caben
+   varias por línea y se tocan fácil), con «Lo de siempre» para volver a
+   apuntar de un toque. Las tareas, en una columna estrecha agrupada por
+   cuándo tocan. Papel y un único acento terracota para «Hoy». */
+.lists-view .lists-grid {
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+}
+
+.lists-view .list-panel__sticker {
+  flex: none;
+  transform: rotate(-6deg);
+}
+
+.lists-view .list-panel__add input {
+  min-height: 50px;
+  font-size: 17px;
+}
+
+.shop-chips {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -5px;
+}
+
+.shop-chip {
+  display: inline-flex;
+  align-items: center;
+  margin: 5px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--text);
+}
+
+.shop-chip__main,
+.shop-chip.is-usual {
+  padding: 10px 6px 10px 18px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-family: var(--font-serif);
+  font-size: 21px;
+  line-height: 1.1;
+}
+
+.shop-chip__remove {
+  display: flex;
+  width: 38px;
+  height: 38px;
+  align-items: center;
+  justify-content: center;
+  margin-right: 4px;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--muted);
+}
+
+.shop-chip.is-usual {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px 8px 12px;
+  border: 1px dashed var(--line-strong);
+  background: transparent;
+  color: var(--muted);
+  font-size: 18px;
+}
+
+.shop-chip.is-usual svg {
+  margin-right: 6px;
+}
+
+.shop-chip.is-done {
+  border-style: dashed;
+  background: transparent;
+}
+
+.shop-chip.is-done .shop-chip__main {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.lists-view .list-panel__usual h3,
+.lists-view .list-panel__done h3,
+.lists-view .list-panel__group h3 {
+  margin: 20px 0 6px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.lists-view .list-panel__group:first-child h3 {
+  margin-top: 4px;
+}
+
+.lists-view .list-panel__group.is-today h3 {
+  color: #b0571c;
+}
+
+.lists-view .task-row__content > span:first-child {
+  font-family: var(--font-serif);
+  font-size: 19px;
+  font-weight: 400;
+  line-height: 1.15;
+}
+
+.lists-view .task-row .check-mark {
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+}
+
+.lists-view .task-row.is-done .task-row__content > span:first-child {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.lists-view .empty-state--list .sticker {
+  transform: rotate(-8deg);
+}
+
+.lists-view .empty-state--list strong {
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-weight: 400;
+}
+
+/* Limpieza: hoy en grande, la semana en una tira y el marcador ------------- */
+/* El día elegido (hoy, si no se toca otro) ocupa la izquierda con sus tareas
+   en grande; a la derecha, la semana en puntos (cada punto, una tarea; lleno
+   si está hecha) y el marcador. Cada persona es solo un punto de color. */
+.view.cleaning-view {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+}
+
+.cleaning-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cleaning-layout {
+  display: grid;
+  min-height: 0;
+  flex: 1 1 auto;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 16px;
+  margin-top: 14px;
+}
+
+.cleaning-focus {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  grid-row: span 2;
+  padding: 24px 26px;
+}
+
+.cleaning-focus__head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+}
+
+.cleaning-focus__head span {
+  width: 100%;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.cleaning-focus__head span.is-today {
+  color: #b0571c;
+}
+
+.cleaning-focus__head h2 {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 40px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+.cleaning-focus__head .today-link {
+  margin-left: auto;
+}
+
+.cleaning-focus__tasks {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 14px;
+  margin: 22px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cleaning-focus__tasks li {
+  display: flex;
+  flex: 1 1 0;
+  max-height: 200px;
+}
+
+.cleaning-focus__task {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  padding: 0 24px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: var(--paper);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+}
+
+.cleaning-focus__task .check-mark {
+  width: 36px;
+  height: 36px;
+  margin-right: 20px;
+  border-radius: 11px;
+}
+
+.cleaning-focus__copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.cleaning-focus__copy strong {
+  margin-bottom: 8px;
+  font-family: var(--font-serif);
+  font-size: 32px;
+  font-weight: 400;
+  line-height: 1.05;
+}
+
+.cleaning-focus__copy > span {
+  display: flex;
+  align-items: center;
+  color: var(--muted);
+  font-size: 16px;
+}
+
+.cleaning-focus__copy > span svg {
+  margin-right: 6px;
+}
+
+.cleaning-focus__copy .person-dot {
+  margin: 0 6px 0 14px;
+}
+
+.person-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--tone, var(--muted));
+}
+
+.cleaning-focus__task.is-done {
+  border-style: dashed;
+  background: transparent;
+}
+
+.cleaning-focus__task.is-done strong {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.cleaning-focus__off {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  margin: 22px 0 0;
+  border: 1px dashed var(--line-strong);
+  border-radius: 22px;
+  color: var(--muted);
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-style: italic;
+}
+
+.cleaning-strip {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+  padding: 12px;
+}
+
+.cleaning-strip__day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 0;
+  border: 1px solid transparent;
+  border-radius: 16px;
+  background: none;
+  color: var(--text);
+  font: inherit;
+}
+
+.cleaning-strip__day > span:first-child {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.cleaning-strip__day strong {
+  margin: 4px 0 6px;
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.cleaning-strip__day.is-today > span:first-child,
+.cleaning-strip__day.is-today strong {
+  color: #b0571c;
+}
+
+.cleaning-strip__day.is-selected {
+  border-color: var(--line-strong);
+  background: var(--paper);
+}
+
+.cleaning-strip__day.is-off {
+  color: var(--muted);
+}
+
+.cleaning-strip__dots {
+  display: flex;
+  min-height: 10px;
+  align-items: center;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.cleaning-strip__dots i {
+  width: 9px;
+  height: 9px;
+  margin: 0 2px;
+  border: 1.5px solid var(--tone);
+  border-radius: 50%;
+}
+
+.cleaning-strip__dots i.is-done {
+  background: var(--tone);
+}
+
+.cleaning-score {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  justify-content: center;
+  padding: 20px 24px;
+}
+
+.cleaning-score__people {
+  display: flex;
+}
+
+.cleaning-score__person {
+  display: flex;
+  align-items: baseline;
+  margin-right: 32px;
+}
+
+.cleaning-score__person .person-dot {
+  margin-right: 8px;
+}
+
+.cleaning-score__person > span {
+  margin-right: 10px;
+  font-size: 17px;
+}
+
+.cleaning-score__person strong {
+  font-family: var(--font-serif);
+  font-size: 44px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.cleaning-score__person small {
+  color: var(--muted);
+  font-size: 20px;
+}
+
+.cleaning-score__bar {
+  height: 8px;
+  margin: 18px 0;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--surface-3);
+}
+
+.cleaning-score__bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #b0571c;
+}
+
+.cleaning-score__note {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 20px;
+}
+
+.cleaning-score__note span {
+  display: inline-flex;
+  align-items: center;
+  color: var(--muted);
+  font-family: var(--font-sans);
+  font-size: 15px;
+}
+
+.cleaning-score__note span svg {
+  margin-right: 5px;
+}

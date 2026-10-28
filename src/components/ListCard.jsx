@@ -8,7 +8,9 @@ import {
   X,
 } from "lucide-react";
 import { isLegacyDrawing } from "../lib/listItems";
+import { usualShopping } from "../lib/usualShopping";
 import { CheckMark } from "./CheckMark";
+import { Sticker } from "./SeasonDecor";
 import { TodoBadges, TodoMetaFields } from "./TodoFields";
 
 function dueTimestamp(item) {
@@ -18,11 +20,36 @@ function dueTimestamp(item) {
   return Number.isFinite(time) ? time : Infinity;
 }
 
+function dayKey(date) {
+  const pad = (value) => String(value).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+// Las tareas, por cuándo tocan: lo atrasado entra en «Hoy».
+function groupByWhen(items, now) {
+  const today = dayKey(now);
+  const tomorrow = dayKey(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1));
+  const groups = [
+    { label: "Hoy", items: [] },
+    { label: "Mañana", items: [] },
+    { label: "Más adelante", items: [] },
+    { label: "Sin fecha", items: [] },
+  ];
+  items.forEach((item) => {
+    if (!item.dueOn) groups[3].items.push(item);
+    else if (item.dueOn <= today) groups[0].items.push(item);
+    else if (item.dueOn === tomorrow) groups[1].items.push(item);
+    else groups[2].items.push(item);
+  });
+  return groups.filter((group) => group.items.length);
+}
+
 export function ListCard({
   listId,
   title,
   subtitle,
   Icon,
+  sticker,
   items,
   people = [],
   now = new Date(),
@@ -61,11 +88,14 @@ export function ListCard({
     }
     return new Date(a.createdAt) - new Date(b.createdAt);
   });
-  // Lo hecho se pliega: por defecto solo lo pendiente; el pie lo despliega.
-  const [showDone, setShowDone] = useState(false);
-  const visible = showDone ? sorted : sorted.filter((item) => !item.done);
-  const openCount = items.filter((item) => !item.done).length;
-  const doneCount = items.length - openCount;
+  // Lo pendiente arriba y lo hecho debajo, siempre a la vista pero atenuado:
+  // se deshace con un toque y la lista no se queda vacía.
+  const openItems = sorted.filter((item) => !item.done);
+  const doneItems = sorted.filter((item) => item.done);
+  const openCount = openItems.length;
+  const doneCount = doneItems.length;
+  const groups = isTasks ? groupByWhen(openItems, now) : [];
+  const usual = isTasks ? [] : usualShopping(openItems.map((item) => item.text), 8);
   const progress = items.length ? Math.round((doneCount / items.length) * 100) : 0;
 
   function handleSubmit(event) {
@@ -112,13 +142,148 @@ export function ListCard({
     setEditingMetaId(null);
   }
 
+  // La compra va en etiquetas: se marca tocándola y se borra con la cruz.
+  function renderChip(item) {
+    return (
+      <span key={item.id} className={`shop-chip${item.done ? " is-done" : ""}`}>
+        <button
+          type="button"
+          className="shop-chip__main"
+          onClick={() => onToggle(item)}
+          aria-pressed={item.done}
+          aria-label={`${item.done ? "Desmarcar" : "Marcar como comprado"}: ${item.text}`}
+        >
+          {isLegacyDrawing(item) ? <img className="task-drawing" src={item.drawing} alt={item.text} /> : item.text}
+        </button>
+        <button type="button" className="shop-chip__remove" onClick={() => onRemove(item)} aria-label={`Borrar: ${item.text}`}>
+          <X size={15} strokeWidth={2} aria-hidden="true" />
+        </button>
+      </span>
+    );
+  }
+
+  const emptyState = (
+    <div className="empty-state empty-state--list">
+      {sticker ? <Sticker name={sticker} size={72} /> : <Icon size={35} strokeWidth={1.25} aria-hidden="true" />}
+      <strong>{items.length ? "Todo hecho" : "La lista está vacía"}</strong>
+      <span>{items.length ? "Nada pendiente. Bien." : "Escribe arriba para añadir lo primero."}</span>
+    </div>
+  );
+
+  function renderItem(item) {
+    return (
+      <li className="task-item" key={item.id}>
+        <div
+          className={`task-row${item.done ? " is-done" : ""}${
+            editingMetaId === item.id ? " is-editing" : ""
+          }`}
+        >
+          <button
+            type="button"
+            className="task-row__main"
+            onClick={() => onToggle(item)}
+            aria-pressed={item.done}
+            aria-label={`${item.done ? "Desmarcar" : "Marcar"}: ${
+              item.text
+            }`}
+          >
+            <CheckMark checked={item.done} />
+            <span className="task-row__content">
+              {isLegacyDrawing(item) ? (
+                <img
+                  className="task-drawing"
+                  src={item.drawing}
+                  alt={item.text}
+                />
+              ) : (
+                <span>{item.text}</span>
+              )}
+              {isTasks ? (
+                <TodoBadges item={item} now={now} people={people} />
+              ) : null}
+            </span>
+          </button>
+          {isTasks ? (
+            <button
+              type="button"
+              className={`task-row__meta${
+                item.dueOn || item.person ? " is-set" : ""
+              }`}
+              onClick={() =>
+                editingMetaId === item.id
+                  ? closeMeta()
+                  : openMeta(item)
+              }
+              aria-label={`Cambiar fecha y persona de ${item.text}`}
+              aria-expanded={editingMetaId === item.id}
+            >
+              <CalendarClock
+                size={16}
+                strokeWidth={1.9}
+                aria-hidden="true"
+              />
+            </button>
+          ) : null}
+          <button
+            type="button"
+            className="task-row__delete"
+            onClick={() => onRemove(item)}
+            aria-label={`Borrar: ${item.text}`}
+          >
+            <X size={17} strokeWidth={2} aria-hidden="true" />
+          </button>
+        </div>
+  
+        {isTasks && editingMetaId === item.id ? (
+          <div className="task-row__meta-editor">
+            <TodoMetaFields
+              dueOn={metaDraft.dueOn}
+              dueAt={metaDraft.dueAt}
+              personId={metaDraft.personId}
+              people={people}
+              idPrefix={`task-${item.id}`}
+              onChange={(patch) =>
+                setMetaDraft((current) => ({
+                  ...current,
+                  ...patch,
+                }))
+              }
+            />
+            <div className="task-row__meta-actions">
+              <button
+                type="button"
+                className="feature-mini-button"
+                onClick={() => clearMeta(item)}
+              >
+                <X size={14} strokeWidth={2} aria-hidden="true" />
+                Quitar
+              </button>
+              <button
+                type="button"
+                className="feature-button"
+                onClick={() => saveMeta(item)}
+              >
+                <Check size={15} strokeWidth={2.2} aria-hidden="true" />
+                Guardar
+              </button>
+            </div>
+          </div>
+        ) : null}
+      </li>
+    );
+  }
+
   return (
     <article className={`list-panel list-panel--${listId}`}>
       <header className="list-panel__head">
         <div className="list-panel__title">
-          <span className="list-panel__icon" aria-hidden="true">
-            <Icon size={23} strokeWidth={1.7} />
-          </span>
+          {sticker ? (
+            <Sticker name={sticker} size={54} className="list-panel__sticker" />
+          ) : (
+            <span className="list-panel__icon" aria-hidden="true">
+              <Icon size={23} strokeWidth={1.7} />
+            </span>
+          )}
           <div>
             <span className="eyebrow">Lista compartida</span>
             <h2>{title}</h2>
@@ -198,131 +363,53 @@ export function ListCard({
       ) : null}
 
       <div className="list-panel__body">
-        {visible.length ? (
-          <ul className="task-list">
-            {visible.map((item) => (
-              <li className="task-item" key={item.id}>
-                <div
-                  className={`task-row${item.done ? " is-done" : ""}${
-                    editingMetaId === item.id ? " is-editing" : ""
-                  }`}
-                >
-                  <button
-                    type="button"
-                    className="task-row__main"
-                    onClick={() => onToggle(item)}
-                    aria-pressed={item.done}
-                    aria-label={`${item.done ? "Desmarcar" : "Marcar"}: ${
-                      item.text
-                    }`}
-                  >
-                    <CheckMark checked={item.done} />
-                    <span className="task-row__content">
-                      {isLegacyDrawing(item) ? (
-                        <img
-                          className="task-drawing"
-                          src={item.drawing}
-                          alt={item.text}
-                        />
-                      ) : (
-                        <span>{item.text}</span>
-                      )}
-                      {isTasks ? (
-                        <TodoBadges item={item} now={now} people={people} />
-                      ) : null}
-                    </span>
-                  </button>
-                  {isTasks ? (
-                    <button
-                      type="button"
-                      className={`task-row__meta${
-                        item.dueOn || item.person ? " is-set" : ""
-                      }`}
-                      onClick={() =>
-                        editingMetaId === item.id
-                          ? closeMeta()
-                          : openMeta(item)
-                      }
-                      aria-label={`Cambiar fecha y persona de ${item.text}`}
-                      aria-expanded={editingMetaId === item.id}
-                    >
-                      <CalendarClock
-                        size={16}
-                        strokeWidth={1.9}
-                        aria-hidden="true"
-                      />
-                    </button>
-                  ) : null}
-                  <button
-                    type="button"
-                    className="task-row__delete"
-                    onClick={() => onRemove(item)}
-                    aria-label={`Borrar: ${item.text}`}
-                  >
-                    <X size={17} strokeWidth={2} aria-hidden="true" />
-                  </button>
-                </div>
-
-                {isTasks && editingMetaId === item.id ? (
-                  <div className="task-row__meta-editor">
-                    <TodoMetaFields
-                      dueOn={metaDraft.dueOn}
-                      dueAt={metaDraft.dueAt}
-                      personId={metaDraft.personId}
-                      people={people}
-                      idPrefix={`task-${item.id}`}
-                      onChange={(patch) =>
-                        setMetaDraft((current) => ({
-                          ...current,
-                          ...patch,
-                        }))
-                      }
-                    />
-                    <div className="task-row__meta-actions">
-                      <button
-                        type="button"
-                        className="feature-mini-button"
-                        onClick={() => clearMeta(item)}
-                      >
-                        <X size={14} strokeWidth={2} aria-hidden="true" />
-                        Quitar
-                      </button>
-                      <button
-                        type="button"
-                        className="feature-button"
-                        onClick={() => saveMeta(item)}
-                      >
-                        <Check size={15} strokeWidth={2.2} aria-hidden="true" />
-                        Guardar
-                      </button>
-                    </div>
-                  </div>
-                ) : null}
-              </li>
-            ))}
-          </ul>
+        {isTasks ? (
+          openItems.length ? (
+            groups.map((group) => (
+              <section key={group.label} className={`list-panel__group${group.label === "Hoy" ? " is-today" : ""}`}>
+                <h3>{group.label}</h3>
+                <ul className="task-list">{group.items.map(renderItem)}</ul>
+              </section>
+            ))
+          ) : (
+            emptyState
+          )
+        ) : openItems.length ? (
+          <div className="shop-chips">{openItems.map(renderChip)}</div>
         ) : (
-          <div className="empty-state empty-state--list">
-            <Icon size={35} strokeWidth={1.25} aria-hidden="true" />
-            <strong>{items.length ? "Todo hecho" : "La lista está vacía"}</strong>
-            <span>{items.length ? "Lo hecho está plegado abajo." : "Escribe arriba para añadir lo primero."}</span>
-          </div>
+          emptyState
         )}
+
+        {!isTasks && usual.length ? (
+          <section className="list-panel__usual" aria-label="Lo de siempre">
+            <h3>Lo de siempre</h3>
+            <div className="shop-chips">
+              {usual.map((text) => (
+                <button key={text} type="button" className="shop-chip is-usual" onClick={() => onAdd(listId, text)}>
+                  <Plus size={15} strokeWidth={2.2} aria-hidden="true" />
+                  {text}
+                </button>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {doneItems.length ? (
+          <section className="list-panel__done" aria-label="Hecho">
+            <h3>Hecho</h3>
+            {isTasks ? (
+              <ul className="task-list">{doneItems.map(renderItem)}</ul>
+            ) : (
+              <div className="shop-chips">{doneItems.map(renderChip)}</div>
+            )}
+          </section>
+        ) : null}
       </div>
 
       <footer className="list-panel__foot">
-        {doneCount ? (
-          <button
-            type="button"
-            className="list-panel__fold"
-            onClick={() => setShowDone((value) => !value)}
-            aria-expanded={showDone}
-          >
-            {showDone ? "Ocultar hechos" : `Ver ${doneCount} ${doneCount === 1 ? "hecho" : "hechos"}`}
-          </button>
-        ) : (
-          <span>Nada hecho todavía</span>
-        )}
+        <span>
+          {doneCount ? `${doneCount} ${doneCount === 1 ? "hecho" : "hechos"}` : "Nada hecho todavía"}
+        </span>
         {doneCount > 0 ? (
           <button
             type="button"
