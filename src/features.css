@@ -4273,11 +4273,12 @@ html.is-lite {
   background: var(--bg) !important;
 }
 
+/* `--tile`: el color propio de una baldosa de Hoy (ver «Hoy en baldosas»). */
 .is-lite .card,
 .is-lite .list-panel,
 .is-lite .agenda-calendar,
 .is-lite .cleaning-board {
-  background: var(--paper) !important;
+  background: var(--tile, var(--paper)) !important;
 }
 
 /* Las superficies que no son .card también, y --surface opaca para todo lo
@@ -7680,4 +7681,185 @@ button:not(:disabled):active {
 /* Semana Santa: atardecer morado y oro. */
 .yoshi-window.yoshi-window--season-semanasanta .yoshi-window__sky {
   background: linear-gradient(180deg, #7e6aa8 0%, #d7b4a4 70%, #f1cf96 100%);
+}
+
+/* Hoy en baldosas --------------------------------------------------------- */
+/* Hoy como un bento: cada baldosa tiene un trabajo y, las que no son el
+   reloj ni la agenda, un color según su papel (compra en salvia, limpieza en
+   agua, equipo en lila, luz en mantequilla). Color macizo, sin transparencia
+   ni degradado: se distingue desde el sofá y en el marco cuesta lo mismo que
+   el crema. Solo de día; de noche manda el modo noche. */
+.app:not(.is-night) .today-shopping { --tile: #e1e9d5; }
+.app:not(.is-night) .today-strip__item--cleaning { --tile: #d9e8e4; }
+.app:not(.is-night) .today-strip__team { --tile: #e6e0ee; }
+.app:not(.is-night) .today-strip__item--power { --tile: #f4e9c6; }
+
+.app:not(.is-night) .card.today-shopping {
+  border-color: rgba(70, 96, 52, 0.2);
+  background: var(--tile);
+  box-shadow: none;
+}
+
+/* La franja deja de ser una tarjeta: tres baldosas sueltas. */
+.app .card.today-strip,
+.app:not(.is-night) .card.today-strip {
+  --tile: transparent;
+  gap: 16px;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.today-board .today-strip__item {
+  padding: 12px 22px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--tile, var(--surface));
+}
+
+.today-board .today-strip__item + .today-strip__item {
+  border-left: 1px solid var(--line);
+}
+
+.today-board .today-strip__item > svg {
+  color: var(--text);
+  opacity: 0.7;
+}
+
+.today-board .today-strip__text strong {
+  font-size: 30px;
+}
+
+.today-board .today-strip__text strong em {
+  font-size: 14px;
+}
+
+.today-board .today-strip__text strong .energy-band {
+  font-size: 13px;
+}
+
+.today-board .today-strip__text small {
+  margin-top: 4px;
+  font-size: 15px;
+}
+
+.today-board .today-strip__person strong {
+  font-size: 28px;
+}
+
+.today-board .today-strip__flame {
+  font-size: 13px;
+}
+
+/* Lo que se lee desde lejos no baja de 14–16 px: las etiquetas en versalitas
+   a 14, los datos a 15–16. Las casillas, un poco más grandes. */
+.today-now .today-now__head .today-now__date {
+  font-size: 14px;
+}
+
+.today-board .today-now__countdown {
+  font-size: 13px;
+}
+
+.today-board .today-next__kicker {
+  font-size: 15px;
+}
+
+.today-board .today-next__detail {
+  font-size: 16px;
+}
+
+.today-board .today-link {
+  font-size: 15px;
+}
+
+.today-board .today-day h3 {
+  font-size: 14px;
+}
+
+.today-board .today-entry__time {
+  font-size: 15px;
+}
+
+.today-board .today-entry__meta {
+  font-size: 14px;
+}
+
+.today-board .today-now-mark span {
+  font-size: 13px;
+}
+
+.today-board .today-count {
+  font-size: 15px;
+}
+
+.today-board .yoshi-window__label span,
+.today-board .yoshi__apples {
+  font-size: 14px;
+}
+
+.today-board .check-mark--small {
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+}
+
+.today-board .today-now__sky span {
+  font-size: 15px;
+}
+
+/* La baldosa protagonista: la hora. Crema como el papel, pero con un marco
+   de tinta y el reloj en terracota: manda por el color de las cifras y el
+   trazo, sin oscurecer la pantalla. Solo de día; de noche Hoy pasa a
+   NightHome. */
+.app:not(.is-night) .today-now {
+  --hero-ink: #1f1c18;
+  --hero-accent: #b0571c;
+}
+
+.app:not(.is-night) .card.today-now {
+  border: 2px solid var(--hero-ink);
+  box-shadow: none;
+}
+
+.app:not(.is-night) .today-now .today-now__clock {
+  color: var(--hero-accent);
+}
+
+/* «Lo siguiente» es la tarjeta de color del tono de lo que anuncia: maciza,
+   para que también lo sea en el marco (antes, en lite, quedaba crema). */
+.app:not(.is-night) .today-next.tone-pink { --tile: #f6dde0; }
+.app:not(.is-night) .today-next.tone-mint { --tile: #dbe8e2; }
+.app:not(.is-night) .today-next.tone-amber { --tile: #f2e6cf; }
+.app:not(.is-night) .today-next.tone-lilac { --tile: #e6e1f1; }
+
+.app:not(.is-night) .card.today-next[class*="tone-"]:not(.tone-ink) {
+  border-color: transparent;
+  background: var(--tile);
+  box-shadow: none;
+}
+
+/* Fraunces es más ancha que la serif de antes: el reloj y la temperatura
+   bajan un punto para que el tiempo quepa, y si aun así no cabe, su línea
+   pequeña pasa a dos renglones en vez de cortarse. */
+.today-board .today-now__clock {
+  font-size: 88px;
+}
+
+.today-board .today-now__temp {
+  font-size: 48px;
+}
+
+.today-board .today-now__weather {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+/* Las notas, en la cursiva de Fraunces (más ancha): un punto menos para que
+   sigan cabiendo tres líneas, también en las redondas. */
+.postit blockquote {
+  font-size: 19px;
 }

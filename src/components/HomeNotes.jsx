@@ -37,10 +37,17 @@ function slotFor(index) {
   return { x: clamp(0.8 - index * 0.025, 0.4, 0.8), y: clamp(0.55 + index * 0.035, 0.1, 0.72) };
 }
 
+// Parte del pósit que queda para el texto: las redondas y las nube pierden
+// más por el relleno y la curva.
+const TEXT_AREA = { round: 0.34, cloud: 0.34 };
+
 // El texto crece con el pósit: lo que quepa en el área, entre 14 y 46 px.
-function noteFontSize(text, w, h) {
+// 0,74 es lo que ocupa de media cada letra en la cursiva de Fraunces (en em,
+// contando el interlineado).
+function noteFontSize(text, w, h, shape) {
   const chars = Math.max(String(text || "").length, 10);
-  return Math.round(clamp(Math.sqrt((w * h * 0.42) / (chars * 0.62)), 14, 46));
+  const area = w * h * (TEXT_AREA[shape] || 0.42);
+  return Math.round(clamp(Math.sqrt(area / (chars * 0.74)), 14, 46));
 }
 
 function authorName(people, id) {
@@ -94,7 +101,7 @@ function HomeNote({ note, index, people, now, position, selected, layerRef, onSe
       const nextH = clamp(g.h + g.dy, MIN_H, MAX_H);
       ref.current.style.width = `${nextW}px`;
       ref.current.style.height = `${nextH}px`;
-      if (textRef.current) textRef.current.style.fontSize = `${noteFontSize(note.text, nextW, nextH)}px`;
+      if (textRef.current) textRef.current.style.fontSize = `${noteFontSize(note.text, nextW, nextH, shape)}px`;
     }
   }
 
@@ -156,7 +163,7 @@ function HomeNote({ note, index, people, now, position, selected, layerRef, onSe
         <span className={`board-note__pin board-note__pin--${note.color}`} aria-hidden="true" />
       ) : null}
       {shape === "square" || shape === "lined" ? <span className="postit__tape" aria-hidden="true" /> : null}
-      <blockquote ref={textRef} style={{ fontSize: `${noteFontSize(note.text, w, h)}px` }}>
+      <blockquote ref={textRef} style={{ fontSize: `${noteFontSize(note.text, w, h, shape)}px` }}>
         {note.text}
       </blockquote>
       <figcaption>

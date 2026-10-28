@@ -40,9 +40,15 @@ function AddToShopping({ text, lists }) {
   );
 }
 
+// La limpieza de hoy y la luz ya tienen su baldosa abajo (y la limpieza, sus
+// tareas en «Hoy y mañana»): aquí no se repiten.
+const SHOWN_ELSEWHERE = new Set(["cleaning", "power"]);
+
 // Una sola tarjeta de color: lo más importante ahora, y debajo lo demás.
 export const TodayNext = memo(function TodayNext({ now, events, weather, electricity, cleaning, lists, menu, onOpenAgenda }) {
-  const items = nextItems({ now, events, weather, electricity, cleaning, menu });
+  const items = nextItems({ now, events, weather, electricity, cleaning, menu }).filter(
+    (item) => !SHOWN_ELSEWHERE.has(item.kind)
+  );
   const [lead, ...rest] = items;
 
   if (!lead) {

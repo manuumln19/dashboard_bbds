@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Flame, ShoppingBasket, SprayCan, Trophy, Zap } from "lucide-react";
+import { Flame, SprayCan, Trophy, Zap } from "lucide-react";
 import {
   bandForPrice,
   classifyPriceBands,
@@ -10,9 +10,10 @@ import { weeklyScores } from "../lib/points";
 import { cheapPower, cleaningDayIndex } from "../lib/today";
 import { EggAvatar } from "./EggAvatar";
 
-// «Casa» en una línea, a todo lo ancho de Hoy: limpieza de hoy, el equipo con
-// sus puntos y rachas, lo que falta por comprar y la luz. Se lee de un
-// vistazo desde lejos; cada bloque lleva a su vista.
+// «Casa» a todo lo ancho de Hoy, en tres baldosas de color: limpieza de hoy,
+// el equipo con sus puntos y rachas, y la luz. Número grande para leerlo desde
+// lejos; cada baldosa lleva a su vista. La compra no va aquí: su tarjeta ya
+// lleva la cuenta.
 export const TodayStrip = memo(function TodayStrip({
   now,
   cleaning,
@@ -20,14 +21,12 @@ export const TodayStrip = memo(function TodayStrip({
   electricity,
   onOpenCleaning,
   onOpenSummary,
-  onOpenLists,
   onOpenEnergy,
 }) {
   const today = cleaningDayIndex(now);
   const todayTasks = cleaning.tasks.filter((task) => task.day === today);
   const todayDone = todayTasks.filter((task) => task.done).length;
   const { scores, mvp } = weeklyScores({ cleaning, lists, now });
-  const toBuy = lists.items.filter((item) => item.listId === "shopping" && !item.done).length;
 
   const data = electricity.data;
   const state = data ? currentPriceState(data, now) : null;
@@ -37,7 +36,7 @@ export const TodayStrip = memo(function TodayStrip({
 
   return (
     <nav className="card today-strip" aria-label="Casa">
-      <button type="button" className="today-strip__item" onClick={onOpenCleaning}>
+      <button type="button" className="today-strip__item today-strip__item--cleaning" onClick={onOpenCleaning}>
         <SprayCan size={18} strokeWidth={1.8} aria-hidden="true" />
         <span className="today-strip__text">
           <strong>
@@ -73,15 +72,7 @@ export const TodayStrip = memo(function TodayStrip({
         <Trophy className="today-strip__trophy" size={16} strokeWidth={1.9} aria-label="Resumen de la semana" />
       </button>
 
-      <button type="button" className="today-strip__item" onClick={onOpenLists}>
-        <ShoppingBasket size={18} strokeWidth={1.8} aria-hidden="true" />
-        <span className="today-strip__text">
-          <strong>{toBuy || "Nada"}</strong>
-          <small>{toBuy ? "por comprar" : "que comprar"}</small>
-        </span>
-      </button>
-
-      <button type="button" className="today-strip__item" onClick={onOpenEnergy}>
+      <button type="button" className="today-strip__item today-strip__item--power" onClick={onOpenEnergy}>
         <Zap size={18} strokeWidth={1.8} aria-hidden="true" />
         <span className="today-strip__text">
           <strong>

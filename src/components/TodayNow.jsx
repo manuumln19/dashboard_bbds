@@ -1,6 +1,5 @@
 import { memo } from "react";
-import { LOCATION } from "../config";
-import { capitalize, formatClock, formatLongDate } from "../lib/date";
+import { formatClock, formatLongDate } from "../lib/date";
 import { greetingFor } from "../lib/greeting";
 import { isFiesta, nextFestivity } from "../lib/season";
 import { SeasonScene } from "./SeasonDecor";
@@ -23,12 +22,13 @@ export const TodayNow = memo(function TodayNow({ now, weather, season, lists, cl
   return (
     <article className="card today-now" aria-label="Hora y tiempo">
       {/* Fecha como antetítulo y, debajo, el saludo a todo el ancho: era la
-          frase más personal de la pantalla y a media tarjeta se cortaba. */}
+          frase más personal de la pantalla y a media tarjeta se cortaba. La
+          ciudad ya sale en el rail. */}
       <header className="today-now__head">
         <span className="today-now__date">
           <span>
             {season && season.note ? <em>{season.note} · </em> : null}
-            {formatLongDate(now)} · {capitalize(LOCATION.name)}
+            {formatLongDate(now)}
           </span>
           {countdown ? <small className="today-now__countdown">{countdown.label}</small> : null}
         </span>

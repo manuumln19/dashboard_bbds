@@ -1,18 +1,21 @@
 /* Tipografía editorial del almanaque. Solo los cortes que usa la app. */
+/* Fraunces (OFL) en dos cortes fijos, 400 normal y cursiva, sacados de la
+   variable con óptica 60 y SOFT 100 (la versión blandita): sin calcular ejes
+   en el marco y solo con el juego latino. */
 @font-face {
-  font-family: "Instrument Serif";
+  font-family: "Fraunces";
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url("/fonts/instrument-serif-normal.woff2") format("woff2");
+  src: url("/fonts/fraunces-normal.woff2") format("woff2");
 }
 
 @font-face {
-  font-family: "Instrument Serif";
+  font-family: "Fraunces";
   font-style: italic;
   font-weight: 400;
   font-display: swap;
-  src: url("/fonts/instrument-serif-italic.woff2") format("woff2");
+  src: url("/fonts/fraunces-italic.woff2") format("woff2");
 }
 
 @font-face {

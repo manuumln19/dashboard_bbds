@@ -189,6 +189,24 @@ const SHAPES = {
   ),
 };
 
+// Pegatinas dibujadas (src/assets/pegatinas: estilo Yoshi's Island, de una
+// hoja de Gemini recortada a WebP con transparencia). Donde hay pegatina para
+// una forma se usa ella; si no (confeti, chispas), el dibujo SVG de arriba.
+const STICKERS = {};
+Object.entries(import.meta.glob("../assets/pegatinas/*.webp", { eager: true, import: "default" })).forEach(
+  ([file, url]) => {
+    STICKERS[file.replace(/^.*\/(.*)\.webp$/, "$1")] = url;
+  }
+);
+
+// El dibujo de una forma dentro de una caja de 24 × 24. La pegatina se sale un
+// poco de la caja porque su borde blanco ocupa sitio.
+function Art({ shape }) {
+  const sticker = STICKERS[shape];
+  if (sticker) return <image href={sticker} x="-2" y="-2" width="28" height="28" />;
+  return <g fill="currentColor">{SHAPES[shape]}</g>;
+}
+
 // Composición de cada temporada, colocada a mano sobre el marco que dejan
 // libres las vistas: la columna entre el rail y las tarjetas (unos 30 px), el
 // margen derecho (26 px) y las esquinas. Las piezas van por detrás de las
@@ -353,8 +371,8 @@ function Piece({ piece }) {
     <svg className="season-decor__piece" width={size} height={hang + size} style={style}>
       {hang ? <path d={`M${size / 2} 0V${hang + size * 0.3}`} stroke="currentColor" strokeWidth="1" opacity="0.55" /> : null}
       <svg y={hang} width={size} height={size} viewBox="0 0 24 24" overflow="visible">
-        <g fill="currentColor" transform={rot ? `rotate(${rot} 12 12)` : undefined}>
-          {SHAPES[s]}
+        <g transform={rot ? `rotate(${rot} 12 12)` : undefined}>
+          <Art shape={s} />
         </g>
       </svg>
     </svg>
@@ -475,8 +493,8 @@ export function SeasonBadge({ seasonId }) {
   if (!badge) return null;
   return (
     <div className="season-badge" aria-hidden="true">
-      <svg viewBox="0 0 24 24" width="46" height="46" style={{ color: badge[1] }}>
-        <g fill="currentColor">{SHAPES[badge[0]]}</g>
+      <svg viewBox="0 0 24 24" width="46" height="46" overflow="visible" style={{ color: badge[1] }}>
+        <Art shape={badge[0]} />
       </svg>
     </div>
   );
@@ -507,7 +525,7 @@ export function SeasonScene({ seasonId }) {
       {scene.map(([shape, x, y, size, color, rotate], index) => (
         <g key={index} transform={`rotate(${rotate} ${x + size / 2} ${y + size / 2})`} style={{ color }}>
           <svg x={x} y={y} width={size} height={size} viewBox="0 0 24 24" overflow="visible">
-            <g fill="currentColor">{SHAPES[shape]}</g>
+            <Art shape={shape} />
           </svg>
         </g>
       ))}
@@ -631,7 +649,7 @@ function placed(items) {
   return items.map(([shape, x, y, size, color, rotate], index) => (
     <g key={index} transform={rotate ? `rotate(${rotate} ${x + size / 2} ${y + size / 2})` : undefined} style={{ color }}>
       <svg x={x} y={y} width={size} height={size} viewBox="0 0 24 24" overflow="visible">
-        <g fill="currentColor">{SHAPES[shape]}</g>
+        <Art shape={shape} />
       </svg>
     </g>
   ));
@@ -660,10 +678,11 @@ export function WindowProps({ seasonId }) {
       viewBox="0 0 24 24"
       width={size}
       height={size}
+      overflow="visible"
       style={{ color }}
       aria-hidden="true"
     >
-      <g fill="currentColor">{SHAPES[shape]}</g>
+      <Art shape={shape} />
     </svg>
   ));
 }
@@ -674,8 +693,8 @@ export function SeasonMark() {
   const badge = BADGES[seasonId];
   if (!badge) return null;
   return (
-    <svg className="season-mark" viewBox="0 0 24 24" width="22" height="22" style={{ color: badge[1] }} aria-hidden="true">
-      <g fill="currentColor">{SHAPES[badge[0]]}</g>
+    <svg className="season-mark" viewBox="0 0 24 24" width="22" height="22" overflow="visible" style={{ color: badge[1] }} aria-hidden="true">
+      <Art shape={badge[0]} />
     </svg>
   );
 }

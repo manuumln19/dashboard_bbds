@@ -114,7 +114,6 @@ export const HomeView = memo(function HomeView({
             electricity={electricity}
             onOpenCleaning={onOpenCleaning}
             onOpenSummary={openSummary}
-            onOpenLists={onOpenLists}
             onOpenEnergy={onOpenEnergy}
           />
         </div>
