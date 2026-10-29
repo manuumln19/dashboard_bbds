@@ -2,7 +2,7 @@
  * Guarda el shell de la app y la última respuesta buena de cada fuente.
  * Cuando la red falla, la pantalla arranca con esa copia y avisa con la hora.
  */
-const VERSION = "bbds-v2";
+const VERSION = "bbds-v3";
 const SHELL_CACHE = `${VERSION}-shell`;
 const RUNTIME_CACHE = `${VERSION}-runtime`;
 const OFFLINE_URL = "/index.html";
@@ -76,6 +76,17 @@ async function cacheResponse(cacheName, request, response) {
     // Si el WebView no deja guardar una respuesta, la app sigue online.
   }
   return response;
+}
+
+// Cada despliegue trae nombres nuevos en /assets/: se guardan como mucho
+// MAX_ASSETS y se borran los más antiguos (las claves salen por orden de
+// entrada). Solo corre al guardar uno nuevo, que es raro.
+const MAX_ASSETS = 160;
+
+async function trimAssets(cache) {
+  const keys = (await cache.keys()).filter((key) => new URL(key.url).pathname.startsWith("/assets/"));
+  const extra = keys.length - MAX_ASSETS;
+  for (let index = 0; index < extra; index += 1) await cache.delete(keys[index]);
 }
 
 async function fromCache(request) {
@@ -220,7 +231,30 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Estáticos propios: primero la copia, y se actualiza en segundo plano.
+  // Lo que lleva hash en el nombre (/assets/) y las fuentes no cambian nunca:
+  // la copia tal cual, sin leerla entera ni volver a descargarla y guardarla
+  // en cada arranque (en el marco, con 1 GB, eso era lo más caro de abrir).
+  if (isSameOrigin(url) && (url.pathname.startsWith("/assets/") || url.pathname.startsWith("/fonts/"))) {
+    event.respondWith(
+      (async () => {
+        const cached = await caches.match(request);
+        if (cached) return cached;
+        const response = await fetch(request);
+        if (response.ok) {
+          const copy = response.clone();
+          caches
+            .open(RUNTIME_CACHE)
+            .then((cache) => cache.put(request, copy).then(() => trimAssets(cache)))
+            .catch(() => {});
+        }
+        return response;
+      })()
+    );
+    return;
+  }
+
+  // El resto de estáticos propios: primero la copia, y se actualiza en
+  // segundo plano.
   event.respondWith(
     (async () => {
       const cached = await fromCache(request);

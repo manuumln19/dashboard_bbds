@@ -162,7 +162,13 @@ export default function App() {
   const electricity = useElectricity();
   const notes = useNotes();
   // Memorizados: objetos nuevos en cada render repintaban todo Hoy y la barra.
-  const season = useMemo(() => seasonOverride() || seasonFor(now, cleaning.people), [now, cleaning.people]);
+  // La temporada cambia como mucho una vez al día: con el minuto en las
+  // dependencias salía un objeto nuevo en cada tic y repintaba lo que la usa.
+  const today = now.toDateString();
+  const season = useMemo(
+    () => seasonOverride() || seasonFor(new Date(today), cleaning.people),
+    [today, cleaning.people]
+  );
   const { idle, reset: resetIdle } = useIdle(idleMs);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const { isNight, toggleNight } = useNightMode(now);
