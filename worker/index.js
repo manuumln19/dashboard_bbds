@@ -110,6 +110,7 @@ function rowToListItem(row) {
     dueAt: row.due_at || null,
     points: row.points == null ? null : Number(row.points),
     doneBy: row.done_by || null,
+    doneAt: row.done_at || null,
     person: row.person_id
       ? {
           id: row.person_id,
@@ -250,14 +251,15 @@ function normalizeBirthday(raw) {
   return value;
 }
 
-// Lo que vale una tarea: poco, normal o mucho. Sin valor, la de siempre.
-const TASK_POINTS = new Set([5, 10, 20]);
-const TASK_POINTS_DEFAULT = 10;
+// Lo que vale una tarea: 1 (bajar la basura), 2 (fregar), 3 (sábanas) o 5
+// (el horno). La rutina, sin valor, vale 2.
+const TASK_POINTS = new Set([1, 2, 3, 5]);
+const TASK_POINTS_DEFAULT = 2;
 
 function normalizePoints(raw) {
   if (raw === null || raw === undefined || raw === "") return null;
   const value = Number(raw);
-  if (!TASK_POINTS.has(value)) throw new HttpError(400, "Los puntos deben ser 5, 10 o 20");
+  if (!TASK_POINTS.has(value)) throw new HttpError(400, "Los puntos deben ser 1, 2, 3 o 5");
   return value;
 }
 
@@ -743,7 +745,7 @@ async function handleSensors(request, env, url) {
 
 const LIST_ITEM_SELECT = `SELECT li.id, li.list_id, li.text, li.drawing, li.done,
        li.created_at, li.updated_at, li.due_on, li.due_at, li.person_id,
-       li.points, li.done_by,
+       li.points, li.done_by, li.done_at,
        p.name AS person_name, p.tone AS person_tone, p.initials AS person_initials
   FROM list_items li
   LEFT JOIN people p ON p.id = li.person_id`;
@@ -907,13 +909,19 @@ async function handleLists(request, env, url) {
       }
 
       const done = hasDone ? (body.done ? 1 : 0) : existing.done;
-      // Desmarcada, ya no la ha hecho nadie.
-      if (!done) doneBy = null;
+      const nowIso = new Date().toISOString();
+      // Cuándo se hizo: al marcarla; desmarcada, ya no la ha hecho nadie.
+      let doneAt = existing.done_at || null;
+      if (done && !existing.done) doneAt = nowIso;
+      if (!done) {
+        doneBy = null;
+        doneAt = null;
+      }
 
       await env.DB.prepare(
         `UPDATE list_items
          SET done = ?, text = ?, due_on = ?, due_at = ?, person_id = ?,
-             points = ?, done_by = ?, updated_at = ?
+             points = ?, done_by = ?, done_at = ?, updated_at = ?
          WHERE id = ?`
       )
         .bind(
@@ -924,7 +932,8 @@ async function handleLists(request, env, url) {
           personId,
           points,
           doneBy,
-          new Date().toISOString(),
+          doneAt,
+          nowIso,
           id
         )
         .run();
@@ -1369,8 +1378,8 @@ async function handlePoints(request, env, url) {
     const person = await getPerson(env, body.personId);
     if (!person) throw new HttpError(400, "¿Para quién son los puntos?");
     const points = Number(body.points);
-    if (!Number.isInteger(points) || points === 0 || points < -20 || points > 50) {
-      throw new HttpError(400, "Los puntos deben ir de −20 a 50");
+    if (!Number.isInteger(points) || points === 0 || points < -5 || points > 10) {
+      throw new HttpError(400, "Los puntos deben ir de −5 a 10");
     }
     const reason = normalizeText(body.reason).slice(0, 60) || null;
     await env.DB.batch([

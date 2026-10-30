@@ -9,8 +9,8 @@ import { CleaningEditor } from "./CleaningEditor";
 const UNDO_MS = 6000;
 // En el marco un toque lento llega a veces dos veces: el segundo se ignora.
 const DOUBLE_TAP_MS = 800;
-const TASK_POINTS = [5, 10, 20];
-const MANUAL_POINTS = [5, 10, 20, -5];
+const TASK_POINTS = [1, 2, 3, 5];
+const MANUAL_POINTS = [1, 2, 3, 5, -1];
 const REASONS = ["Hizo la cena", "Fregó", "Bajó la basura", "Hizo la compra", "Puso lavadoras"];
 
 function dayKey(date) {
@@ -35,7 +35,7 @@ function buildEntries({ cleaning, lists, now }) {
     title: task.title,
     meta: `${task.area} · cada ${weekdayLong(weekDays(now)[task.day]).toLowerCase()}`,
     person: task.person,
-    points: task.points || 10,
+    points: task.points || 2,
     done: task.done,
     when: task.day === today ? "today" : task.day < today ? (task.done ? "past" : "late") : "week",
   }));
@@ -60,7 +60,7 @@ function buildEntries({ cleaning, lists, now }) {
             : item.dueOn.slice(8, 10) + "/" + item.dueOn.slice(5, 7)
         : "cuando sea",
       person: item.person,
-      points: item.points || 5,
+      points: item.points || 1,
       done: item.done,
       doneBy: item.doneBy,
       when,
@@ -225,7 +225,7 @@ export function TasksView({ now, cleaning, lists, points }) {
         <aside className="tasks-side">
           <Scoreboard scores={scores} mvp={mvp} />
           <ManualPoints people={people} points={points} />
-          <NewTask people={people} lists={lists} now={now} />
+          <NewTask people={people} lists={lists} cleaning={cleaning} now={now} />
         </aside>
       </div>
 
@@ -348,25 +348,40 @@ function ManualPoints({ people, points }) {
 }
 
 // Apuntar una tarea suelta: qué, quién (o libre), cuándo y cuánto vale.
-function NewTask({ people, lists, now }) {
+// «Cada semana» la apunta en la rutina (como la limpieza), un día por cada
+// día elegido; la rutina necesita dueño, así que ahí no vale «Libre».
+function NewTask({ people, lists, cleaning, now }) {
   const inputRef = useRef(null);
   const [personId, setPersonId] = useState("");
   const [when, setWhen] = useState("today");
-  const [value, setValue] = useState(5);
+  const [days, setDays] = useState(() => [cleaningDayIndex(now)]);
+  const [value, setValue] = useState(1);
+  const weekly = when === "weekly";
+  const needsOwner = weekly && !personId;
+
+  function toggleDay(day) {
+    setDays((current) => (current.includes(day) ? current.filter((entry) => entry !== day) : [...current, day].sort()));
+  }
 
   function submit(event) {
     event.preventDefault();
     const text = inputRef.current ? inputRef.current.value.trim() : "";
-    if (!text) return;
-    const dueOn = when === "today" ? dayKey(now) : when === "tomorrow" ? dayKey(addDays(now, 1)) : null;
-    lists.addItem("tasks", text, { personId: personId || null, dueOn, points: value });
+    if (!text || needsOwner || (weekly && !days.length)) return;
+    if (weekly) {
+      days.forEach((day) => {
+        cleaning.addTask({ day, personId, area: "Casa", title: text.slice(0, 80), points: value }).catch(() => {});
+      });
+    } else {
+      const dueOn = when === "today" ? dayKey(now) : when === "tomorrow" ? dayKey(addDays(now, 1)) : null;
+      lists.addItem("tasks", text, { personId: personId || null, dueOn, points: value });
+    }
     inputRef.current.value = "";
   }
 
   return (
     <form className="card tasks-new" onSubmit={submit} aria-label="Nueva tarea">
       <div className="tasks-new__row">
-        <input ref={inputRef} maxLength={160} placeholder="Nueva tarea…" aria-label="Nueva tarea" enterKeyHint="done" />
+        <input ref={inputRef} maxLength={weekly ? 80 : 160} placeholder="Nueva tarea…" aria-label="Nueva tarea" enterKeyHint="done" />
         <button type="submit" className="tasks-new__add" aria-label="Apuntar tarea">
           <Plus size={20} strokeWidth={2.2} aria-hidden="true" />
         </button>
@@ -387,17 +402,33 @@ function NewTask({ people, lists, now }) {
           ["today", "Hoy"],
           ["tomorrow", "Mañana"],
           ["someday", "Cuando sea"],
+          ["weekly", "Cada semana"],
         ].map(([id, label]) => (
           <button key={id} type="button" className={`tasks-chip is-small${when === id ? " is-on" : ""}`} aria-pressed={when === id} onClick={() => setWhen(id)}>
             {label}
           </button>
         ))}
+        {weekly
+          ? weekDays(now).map((date, day) => (
+              <button
+                key={day}
+                type="button"
+                className={`tasks-chip is-small is-day${days.includes(day) ? " is-on" : ""}`}
+                aria-pressed={days.includes(day)}
+                aria-label={weekdayLong(date)}
+                onClick={() => toggleDay(day)}
+              >
+                {weekdayLong(date).slice(0, 2)}
+              </button>
+            ))
+          : null}
         {TASK_POINTS.map((amount) => (
           <button key={amount} type="button" className={`tasks-chip is-small${value === amount ? " is-on" : ""}`} aria-pressed={value === amount} onClick={() => setValue(amount)}>
-            {amount} pts
+            {amount} {amount === 1 ? "pt" : "pts"}
           </button>
         ))}
       </div>
+      {needsOwner ? <p className="tasks-new__hint">Las que se repiten necesitan dueño: elige Manu o Paco.</p> : null}
     </form>
   );
 }

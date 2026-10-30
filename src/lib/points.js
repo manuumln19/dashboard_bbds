@@ -1,25 +1,26 @@
 import { startOfWeek } from "./date";
 
-// Puntos de la semana (se reinician el lunes, como la limpieza):
-//   lo que valga cada tarea de limpieza hecha (10 si no se dice otra cosa),
-//   lo que valga cada tarea de la lista hecha esta semana (5 por defecto),
+// Puntos de la semana (se reinician el lunes, como la limpieza), en escala
+// pequeña: 1 bajar la basura, 2 fregar, 3 sábanas, 5 el horno.
+//   lo que valga cada tarea de limpieza hecha (2 si no se dice otra cosa),
+//   lo que valga cada tarea de la lista hecha esta semana (1 por defecto),
 //     para quien la hizo o, si nadie lo dijo, para su dueño,
 //   los puntos a mano de esta semana («hizo la cena»),
-//   +20 si alguien termina todo lo suyo de limpieza,
-//   +10 a cada uno si la casa completa la semana.
+//   +4 si alguien termina todo lo suyo de limpieza,
+//   +2 a cada uno si la casa completa la semana.
 export const POINTS = {
-  cleaning: 10,
-  task: 5,
-  ownWeek: 20,
-  houseWeek: 10,
+  cleaning: 2,
+  task: 1,
+  ownWeek: 4,
+  houseWeek: 2,
 };
 
 const LEVELS = [
   { min: 0, label: "Huevo" },
-  { min: 40, label: "Cría" },
-  { min: 90, label: "Saltarín" },
-  { min: 150, label: "Lengua rápida" },
-  { min: 220, label: "Leyenda de casa" },
+  { min: 8, label: "Cría" },
+  { min: 18, label: "Saltarín" },
+  { min: 30, label: "Lengua rápida" },
+  { min: 44, label: "Leyenda de casa" },
 ];
 
 export function levelFor(points) {
@@ -34,10 +35,12 @@ export function weeklyScores({ cleaning, lists, now, pointEvents = [] }) {
   const people = (cleaning && cleaning.people) || [];
   const tasks = (cleaning && cleaning.tasks) || [];
   const weekStart = startOfWeek(now).getTime();
-  const listTasks = (lists && lists.byList ? lists.byList("tasks") : []).filter(
-    (item) =>
-      item.done && (item.doneBy || item.person) && item.updatedAt && new Date(item.updatedAt).getTime() >= weekStart
-  );
+  // Cuenta en la semana en que se hizo (`doneAt`), no en la de su última
+  // edición; lo anterior a `doneAt` solo tiene `updatedAt`.
+  const listTasks = (lists && lists.byList ? lists.byList("tasks") : []).filter((item) => {
+    const at = item.doneAt || item.updatedAt;
+    return item.done && (item.doneBy || item.person) && at && new Date(at).getTime() >= weekStart;
+  });
   const manual = (pointEvents || []).filter((event) => new Date(event.createdAt).getTime() >= weekStart);
   const streaks = (cleaning && cleaning.personStreaks) || {};
 

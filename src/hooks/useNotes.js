@@ -44,8 +44,10 @@ export function useNotes() {
       if (!pollingPaused()) tick();
     }, pollInterval(REFRESH_MS));
     const stopResume = onPollingResume(tick);
-    return () => clearInterval(timer);
-    return () => stopResume();
+    return () => {
+      clearInterval(timer);
+      stopResume();
+    };
   }, [load]);
 
   useEffect(() => {

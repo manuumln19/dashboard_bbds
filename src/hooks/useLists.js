@@ -205,7 +205,8 @@ export function useLists() {
   const toggleItem = useCallback(async (item, doneBy = null) => {
     const nextDone = !item.done;
     const by = nextDone && doneBy ? String(doneBy) : null;
-    const optimistic = { ...item, done: nextDone, doneBy: by, updatedAt: new Date().toISOString() };
+    const at = new Date().toISOString();
+    const optimistic = { ...item, done: nextDone, doneBy: by, doneAt: nextDone ? at : null, updatedAt: at };
     setError(null);
     setItems((current) =>
       current.map((entry) => (entry.id === item.id ? optimistic : entry))
@@ -229,7 +230,7 @@ export function useLists() {
     } catch (caught) {
       setItems((current) =>
         current.map((entry) =>
-          entry.id === item.id ? { ...entry, done: item.done, doneBy: item.doneBy || null } : entry
+          entry.id === item.id ? { ...entry, done: item.done, doneBy: item.doneBy || null, doneAt: item.doneAt || null } : entry
         )
       );
       const message =

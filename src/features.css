@@ -23,6 +23,14 @@
   color: var(--text);
 }
 
+/* Fuera de Hoy, arriba a la derecha pisaba los botones de cada cabecera:
+   abajo, donde solo hay pies de página. En Hoy cae sobre la ventana de Yoshi. */
+.app:not(.app--home) .status-banner {
+  top: auto;
+  bottom: 18px;
+  width: 460px;
+}
+
 .status-banner.is-offline {
   border-color: rgba(207, 31, 94, 0.28);
   background: #fff7f9;
@@ -8380,4 +8388,15 @@ button:not(:disabled):active {
 
 .tasks-undo button svg {
   margin-right: 6px;
+}
+
+.tasks-chip.is-day {
+  min-width: 44px;
+  justify-content: center;
+}
+
+.tasks-new__hint {
+  margin: 6px 0 0;
+  color: #b0571c;
+  font-size: 14px;
 }

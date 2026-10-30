@@ -139,8 +139,8 @@ export function loadDemoPoints() {
   if (saved) return saved;
   const hour = 60 * 60 * 1000;
   return [
-    { id: "pt-demo-1", personId: "manu", points: 10, reason: "Hizo la cena", createdAt: new Date(Date.now() - 20 * hour).toISOString() },
-    { id: "pt-demo-2", personId: "paco", points: 5, reason: "Bajó la basura", createdAt: new Date(Date.now() - 3 * hour).toISOString() },
+    { id: "pt-demo-1", personId: "manu", points: 3, reason: "Hizo la cena", createdAt: new Date(Date.now() - 20 * hour).toISOString() },
+    { id: "pt-demo-2", personId: "paco", points: 1, reason: "Bajó la basura", createdAt: new Date(Date.now() - 3 * hour).toISOString() },
   ];
 }
 
