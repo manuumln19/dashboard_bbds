@@ -1,8 +1,10 @@
 import { startOfWeek } from "./date";
 
 // Puntos de la semana (se reinician el lunes, como la limpieza):
-//   10 por cada tarea de limpieza hecha,
-//   5 por cada tarea de la lista con dueño marcada esta semana,
+//   lo que valga cada tarea de limpieza hecha (10 si no se dice otra cosa),
+//   lo que valga cada tarea de la lista hecha esta semana (5 por defecto),
+//     para quien la hizo o, si nadie lo dijo, para su dueño,
+//   los puntos a mano de esta semana («hizo la cena»),
 //   +20 si alguien termina todo lo suyo de limpieza,
 //   +10 a cada uno si la casa completa la semana.
 export const POINTS = {
@@ -28,24 +30,29 @@ export function levelFor(points) {
   return { ...level, index, next: next ? next.min : null };
 }
 
-export function weeklyScores({ cleaning, lists, now }) {
+export function weeklyScores({ cleaning, lists, now, pointEvents = [] }) {
   const people = (cleaning && cleaning.people) || [];
   const tasks = (cleaning && cleaning.tasks) || [];
   const weekStart = startOfWeek(now).getTime();
   const listTasks = (lists && lists.byList ? lists.byList("tasks") : []).filter(
     (item) =>
-      item.done && item.person && item.updatedAt && new Date(item.updatedAt).getTime() >= weekStart
+      item.done && (item.doneBy || item.person) && item.updatedAt && new Date(item.updatedAt).getTime() >= weekStart
   );
+  const manual = (pointEvents || []).filter((event) => new Date(event.createdAt).getTime() >= weekStart);
   const streaks = (cleaning && cleaning.personStreaks) || {};
 
   const scores = people.map((person) => {
     const mine = tasks.filter((task) => task.personId === person.id);
-    const done = mine.filter((task) => task.done).length;
-    const listDone = listTasks.filter((item) => item.person.id === person.id).length;
+    const doneTasks = mine.filter((task) => task.done);
+    const done = doneTasks.length;
+    const listMine = listTasks.filter((item) => (item.doneBy || item.person.id) === person.id);
+    const listDone = listMine.length;
+    const extra = manual.filter((event) => event.personId === person.id).reduce((sum, event) => sum + event.points, 0);
     const ownWeek = mine.length > 0 && done === mine.length;
     const points =
-      done * POINTS.cleaning +
-      listDone * POINTS.task +
+      doneTasks.reduce((sum, task) => sum + (task.points || POINTS.cleaning), 0) +
+      listMine.reduce((sum, item) => sum + (item.points || POINTS.task), 0) +
+      extra +
       (ownWeek ? POINTS.ownWeek : 0) +
       (cleaning && cleaning.weekComplete ? POINTS.houseWeek : 0);
     return {
@@ -54,6 +61,7 @@ export function weeklyScores({ cleaning, lists, now }) {
       done,
       owed: mine.length,
       listDone,
+      extra,
       ownWeek,
       // Como la de la casa: semanas anteriores seguidas, más esta si ya está.
       streak: (Number(streaks[person.id]) || 0) + (ownWeek ? 1 : 0),

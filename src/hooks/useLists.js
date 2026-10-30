@@ -23,7 +23,7 @@ function personFor(people, personId) {
 // servidor la renueva en cada escritura y no cambia nada en pantalla.
 function visibleKey(items) {
   return JSON.stringify(
-    items.map((item) => [item.id, item.listId, item.text, item.done, item.dueOn, item.dueAt, item.person ? item.person.id : null, item.drawing ? item.drawing.length : 0])
+    items.map((item) => [item.id, item.listId, item.text, item.done, item.dueOn, item.dueAt, item.person ? item.person.id : null, item.points, item.doneBy, item.drawing ? item.drawing.length : 0])
   );
 }
 
@@ -146,6 +146,8 @@ export function useLists() {
       dueOn: listId === "tasks" ? meta.dueOn || null : null,
       dueAt: listId === "tasks" ? meta.dueAt || null : null,
       person: personId ? personFor(peopleRef.current, personId) : null,
+      points: listId === "tasks" && meta.points ? Number(meta.points) : null,
+      doneBy: null,
       createdAt: new Date().toISOString(),
     };
     setItems((current) => [...current, optimistic]);
@@ -178,6 +180,7 @@ export function useLists() {
                 dueOn: optimistic.dueOn,
                 dueAt: optimistic.dueAt,
                 personId,
+                points: optimistic.points,
               }
             : {}),
         },
@@ -198,9 +201,11 @@ export function useLists() {
     }
   }, []);
 
-  const toggleItem = useCallback(async (item) => {
+  // `doneBy`: quién la ha hecho, para las tareas libres (se lleva los puntos).
+  const toggleItem = useCallback(async (item, doneBy = null) => {
     const nextDone = !item.done;
-    const optimistic = { ...item, done: nextDone, updatedAt: new Date().toISOString() };
+    const by = nextDone && doneBy ? String(doneBy) : null;
+    const optimistic = { ...item, done: nextDone, doneBy: by, updatedAt: new Date().toISOString() };
     setError(null);
     setItems((current) =>
       current.map((entry) => (entry.id === item.id ? optimistic : entry))
@@ -211,7 +216,7 @@ export function useLists() {
     try {
       const payload = await apiRequest(
         `/api/lists/${encodeURIComponent(item.id)}`,
-        { method: "PATCH", body: { done: nextDone } }
+        { method: "PATCH", body: by ? { done: nextDone, doneBy: by } : { done: nextDone } }
       );
       // Si lo que vuelve es lo mismo que ya se ve, no se repinta otra vez.
       if (payload && payload.item && !sameVisible(payload.item, optimistic)) {
@@ -224,7 +229,7 @@ export function useLists() {
     } catch (caught) {
       setItems((current) =>
         current.map((entry) =>
-          entry.id === item.id ? { ...entry, done: item.done } : entry
+          entry.id === item.id ? { ...entry, done: item.done, doneBy: item.doneBy || null } : entry
         )
       );
       const message =

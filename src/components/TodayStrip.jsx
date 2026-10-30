@@ -19,6 +19,7 @@ export const TodayStrip = memo(function TodayStrip({
   cleaning,
   lists,
   electricity,
+  pointEvents,
   onOpenCleaning,
   onOpenSummary,
   onOpenEnergy,
@@ -26,7 +27,7 @@ export const TodayStrip = memo(function TodayStrip({
   const today = cleaningDayIndex(now);
   const todayTasks = cleaning.tasks.filter((task) => task.day === today);
   const todayDone = todayTasks.filter((task) => task.done).length;
-  const { scores, mvp } = weeklyScores({ cleaning, lists, now });
+  const { scores, mvp } = weeklyScores({ cleaning, lists, now, pointEvents });
 
   const data = electricity.data;
   const state = data ? currentPriceState(data, now) : null;

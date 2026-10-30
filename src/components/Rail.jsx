@@ -8,7 +8,7 @@ import {
   Images,
   ListChecks,
   Moon,
-  SprayCan,
+  ShoppingBasket,
   Wifi,
   WifiOff,
   Zap,
@@ -21,8 +21,8 @@ import { SeasonBadge } from "./SeasonDecor";
 const TABS = [
   { id: "home", label: "Hoy", Icon: House },
   { id: "agenda", label: "Agenda", Icon: CalendarDays },
-  { id: "lists", label: "Listas", Icon: ListChecks },
-  { id: "cleaning", label: "Limpieza", Icon: SprayCan },
+  { id: "lists", label: "Compra", Icon: ShoppingBasket },
+  { id: "cleaning", label: "Tareas", Icon: ListChecks },
   { id: "weather", label: "Tiempo", Icon: CloudSun },
   { id: "energy", label: "Energía", Icon: Zap },
   ...(CLIMATE_ENABLED

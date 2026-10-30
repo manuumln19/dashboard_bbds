@@ -27,6 +27,7 @@ export const HomeView = memo(function HomeView({
   cleaning,
   electricity,
   notes,
+  pointEvents,
   season,
   menu,
   mascot,
@@ -102,7 +103,7 @@ export const HomeView = memo(function HomeView({
             lists={lists}
             cleaning={cleaning}
             onOpenAgenda={onOpenAgenda}
-            onOpenLists={onOpenLists}
+            onOpenLists={onOpenCleaning}
           />
           <div className="today-side">
             <TodayShopping lists={lists} onOpenLists={onOpenLists} onWriteNote={openWriting} />
@@ -112,6 +113,7 @@ export const HomeView = memo(function HomeView({
             cleaning={cleaning}
             lists={lists}
             electricity={electricity}
+            pointEvents={pointEvents}
             onOpenCleaning={onOpenCleaning}
             onOpenSummary={openSummary}
             onOpenEnergy={onOpenEnergy}
@@ -138,6 +140,7 @@ export const HomeView = memo(function HomeView({
             cleaning={cleaning}
             lists={lists}
             events={calendar.events}
+            pointEvents={pointEvents}
             seasonId={season ? season.id : null}
             onClose={closeSummary}
           />

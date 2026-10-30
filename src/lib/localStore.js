@@ -131,6 +131,27 @@ export function saveDemoNotes(notes) {
   }
 }
 
+const POINTS_KEY = "bbds.demo.points.v1";
+
+// Puntos a mano de la demo: uno de ejemplo para cada uno.
+export function loadDemoPoints() {
+  const saved = readArray(POINTS_KEY);
+  if (saved) return saved;
+  const hour = 60 * 60 * 1000;
+  return [
+    { id: "pt-demo-1", personId: "manu", points: 10, reason: "Hizo la cena", createdAt: new Date(Date.now() - 20 * hour).toISOString() },
+    { id: "pt-demo-2", personId: "paco", points: 5, reason: "Bajó la basura", createdAt: new Date(Date.now() - 3 * hour).toISOString() },
+  ];
+}
+
+export function saveDemoPoints(events) {
+  try {
+    window.localStorage.setItem(POINTS_KEY, JSON.stringify(events));
+  } catch {
+    // Los puntos se ven igual; solo se pierden al recargar.
+  }
+}
+
 const MENU_KEY = "bbds.demo.menu.v1";
 
 export function loadDemoMenu() {

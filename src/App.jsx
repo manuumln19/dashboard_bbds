@@ -39,6 +39,7 @@ import { useLists } from "./hooks/useLists";
 import { useMenu } from "./hooks/useMenu";
 import { useNightMode } from "./hooks/useNightMode";
 import { useNotes } from "./hooks/useNotes";
+import { usePoints } from "./hooks/usePoints";
 import { useNow } from "./hooks/useNow";
 import { usePhotos } from "./hooks/usePhotos";
 import { useSensors } from "./hooks/useSensors";
@@ -57,7 +58,7 @@ import { doneState, houseLines } from "./lib/yoshiTalk";
 // cuando el arranque ya ha terminado (ver PRELOAD_DELAY_MS).
 const loadAgenda = () => import("./components/AgendaView");
 const loadLists = () => import("./components/ListsView");
-const loadCleaning = () => import("./components/CleaningView");
+const loadCleaning = () => import("./components/TasksView");
 const loadWeather = () => import("./components/WeatherView");
 const loadClimate = () => import("./components/ClimateView");
 const loadEnergy = () => import("./components/EnergyView");
@@ -71,8 +72,10 @@ const AgendaView = lazy(() =>
 const ListsView = lazy(() =>
   loadLists().then((module) => ({ default: module.ListsView }))
 );
-const CleaningView = lazy(() =>
-  loadCleaning().then((module) => ({ default: module.CleaningView }))
+// La vista «cleaning» es ahora Tareas (limpieza y tareas juntas); el id se
+// queda para no romper enlaces ni el quiosco.
+const TasksView = lazy(() =>
+  loadCleaning().then((module) => ({ default: module.TasksView }))
 );
 const WeatherView = lazy(() =>
   loadWeather().then((module) => ({ default: module.WeatherView }))
@@ -161,6 +164,7 @@ export default function App() {
   // Aquí y no en Hoy: al volver a Hoy no se vuelven a pedir ni a pintar dos veces.
   const electricity = useElectricity();
   const notes = useNotes();
+  const points = usePoints();
   // Memorizados: objetos nuevos en cada render repintaban todo Hoy y la barra.
   // La temporada cambia como mucho una vez al día: con el minuto en las
   // dependencias salía un objeto nuevo en cada tic y repintaba lo que la usa.
@@ -454,6 +458,7 @@ export default function App() {
               cleaning={cleaning}
               electricity={electricity}
               notes={notes}
+              pointEvents={points.events}
               season={season}
               menu={MENU_ENABLED ? menu : null}
               mascot={mascot}
@@ -480,7 +485,7 @@ export default function App() {
           {view === "lists" ? <ListsView lists={lists} menu={menu} now={now} /> : null}
 
           {view === "cleaning" ? (
-            <CleaningView now={now} cleaning={cleaning} />
+            <TasksView now={now} cleaning={cleaning} lists={lists} points={points} />
           ) : null}
 
           {view === "weather" ? (

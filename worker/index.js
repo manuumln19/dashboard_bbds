@@ -108,6 +108,8 @@ function rowToListItem(row) {
     done: Boolean(row.done),
     dueOn: row.due_on || null,
     dueAt: row.due_at || null,
+    points: row.points == null ? null : Number(row.points),
+    doneBy: row.done_by || null,
     person: row.person_id
       ? {
           id: row.person_id,
@@ -144,6 +146,7 @@ function rowToCleaningTask(row) {
     },
     area: row.area,
     title: row.title,
+    points: Number(row.points) || TASK_POINTS_DEFAULT,
     position: Number(row.position || 0),
     active: Boolean(row.active),
     done: Boolean(row.done),
@@ -244,6 +247,17 @@ function normalizeBirthday(raw) {
   if (!match || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) {
     throw new HttpError(400, "El cumpleaños debe tener el formato MM-DD");
   }
+  return value;
+}
+
+// Lo que vale una tarea: poco, normal o mucho. Sin valor, la de siempre.
+const TASK_POINTS = new Set([5, 10, 20]);
+const TASK_POINTS_DEFAULT = 10;
+
+function normalizePoints(raw) {
+  if (raw === null || raw === undefined || raw === "") return null;
+  const value = Number(raw);
+  if (!TASK_POINTS.has(value)) throw new HttpError(400, "Los puntos deben ser 5, 10 o 20");
   return value;
 }
 
@@ -729,6 +743,7 @@ async function handleSensors(request, env, url) {
 
 const LIST_ITEM_SELECT = `SELECT li.id, li.list_id, li.text, li.drawing, li.done,
        li.created_at, li.updated_at, li.due_on, li.due_at, li.person_id,
+       li.points, li.done_by,
        p.name AS person_name, p.tone AS person_tone, p.initials AS person_initials
   FROM list_items li
   LEFT JOIN people p ON p.id = li.person_id`;
@@ -788,13 +803,14 @@ async function handleLists(request, env, url) {
         throw new HttpError(400, "Para poner una hora, indica también el día");
       }
       const person = isTask ? await getPerson(env, body.personId) : null;
+      const points = isTask ? normalizePoints(body.points) : null;
 
       const finalText = text || "Nota manuscrita";
       const now = new Date().toISOString();
       const result = await env.DB.prepare(
         `INSERT INTO list_items
-          (list_id, text, drawing, done, due_on, due_at, person_id, created_at, updated_at)
-         VALUES (?, ?, ?, 0, ?, ?, ?, ?, ?)`
+          (list_id, text, drawing, done, due_on, due_at, person_id, points, created_at, updated_at)
+         VALUES (?, ?, ?, 0, ?, ?, ?, ?, ?, ?)`
       )
         .bind(
           listId,
@@ -803,6 +819,7 @@ async function handleLists(request, env, url) {
           dueOn,
           dueAt,
           person ? person.id : null,
+          points,
           now,
           now
         )
@@ -839,7 +856,9 @@ async function handleLists(request, env, url) {
       const hasDueOn = Object.prototype.hasOwnProperty.call(body, "dueOn");
       const hasDueAt = Object.prototype.hasOwnProperty.call(body, "dueAt");
       const hasPerson = Object.prototype.hasOwnProperty.call(body, "personId");
-      if (!hasDone && !hasText && !hasDueOn && !hasDueAt && !hasPerson) {
+      const hasPoints = Object.prototype.hasOwnProperty.call(body, "points");
+      const hasDoneBy = Object.prototype.hasOwnProperty.call(body, "doneBy");
+      if (!hasDone && !hasText && !hasDueOn && !hasDueAt && !hasPerson && !hasPoints && !hasDoneBy) {
         throw new HttpError(400, "Nada que actualizar");
       }
 
@@ -862,6 +881,8 @@ async function handleLists(request, env, url) {
       let dueOn = existing.due_on || null;
       let dueAt = existing.due_at || null;
       let personId = existing.person_id || null;
+      let points = existing.points == null ? null : Number(existing.points);
+      let doneBy = existing.done_by || null;
 
       if (existing.list_id === "tasks") {
         if (hasDueOn) {
@@ -878,19 +899,31 @@ async function handleLists(request, env, url) {
           const person = await getPerson(env, body.personId);
           personId = person ? person.id : null;
         }
+        if (hasPoints) points = normalizePoints(body.points);
+        if (hasDoneBy) {
+          const person = await getPerson(env, body.doneBy);
+          doneBy = person ? person.id : null;
+        }
       }
+
+      const done = hasDone ? (body.done ? 1 : 0) : existing.done;
+      // Desmarcada, ya no la ha hecho nadie.
+      if (!done) doneBy = null;
 
       await env.DB.prepare(
         `UPDATE list_items
-         SET done = ?, text = ?, due_on = ?, due_at = ?, person_id = ?, updated_at = ?
+         SET done = ?, text = ?, due_on = ?, due_at = ?, person_id = ?,
+             points = ?, done_by = ?, updated_at = ?
          WHERE id = ?`
       )
         .bind(
-          hasDone ? (body.done ? 1 : 0) : existing.done,
+          done,
           text,
           dueOn,
           dueAt,
           personId,
+          points,
+          doneBy,
           new Date().toISOString(),
           id
         )
@@ -1005,12 +1038,20 @@ async function cleaningTaskPayload(env, body, existing = null) {
     position = Math.max(0, Math.min(999, Math.trunc(candidate)));
   }
 
+  const points =
+    body.points === undefined
+      ? existing
+        ? Number(existing.points) || TASK_POINTS_DEFAULT
+        : TASK_POINTS_DEFAULT
+      : normalizePoints(body.points) || TASK_POINTS_DEFAULT;
+
   return {
     day,
     personId: person.id,
     area: normalizeLabel(area, "La zona", 40),
     title: normalizeLabel(title, "La tarea", 80),
     position,
+    points,
   };
 }
 
@@ -1298,6 +1339,60 @@ async function handleNotes(request, env, url) {
   throw new HttpError(405, "Método no permitido");
 }
 
+// Puntos a mano: lo que no estaba apuntado («hizo la cena»). Se guardan los
+// últimos POINT_EVENTS_KEEP; la app cuenta los de esta semana.
+const POINT_EVENTS_KEEP = 200;
+
+async function fetchPointEvents(env) {
+  const { results } = await env.DB.prepare(
+    `SELECT id, person_id, points, reason, created_at FROM point_events
+      ORDER BY created_at DESC LIMIT 60`
+  ).all();
+  return (results || []).map((row) => ({
+    id: row.id,
+    personId: row.person_id,
+    points: Number(row.points),
+    reason: row.reason || null,
+    createdAt: row.created_at,
+  }));
+}
+
+async function handlePoints(request, env, url) {
+  requireDashboard(request, env);
+
+  if (url.pathname === "/api/points" && request.method === "GET") {
+    return json({ events: await fetchPointEvents(env) });
+  }
+
+  if (url.pathname === "/api/points" && request.method === "POST") {
+    const body = await readJson(request);
+    const person = await getPerson(env, body.personId);
+    if (!person) throw new HttpError(400, "¿Para quién son los puntos?");
+    const points = Number(body.points);
+    if (!Number.isInteger(points) || points === 0 || points < -20 || points > 50) {
+      throw new HttpError(400, "Los puntos deben ir de −20 a 50");
+    }
+    const reason = normalizeText(body.reason).slice(0, 60) || null;
+    await env.DB.batch([
+      env.DB.prepare(
+        "INSERT INTO point_events (id, person_id, points, reason, created_at) VALUES (?, ?, ?, ?, ?)"
+      ).bind(`pt-${crypto.randomUUID().slice(0, 8)}`, person.id, points, reason, new Date().toISOString()),
+      env.DB.prepare(
+        "DELETE FROM point_events WHERE id NOT IN (SELECT id FROM point_events ORDER BY created_at DESC LIMIT ?)"
+      ).bind(POINT_EVENTS_KEEP),
+    ]);
+    return json({ events: await fetchPointEvents(env) }, 201);
+  }
+
+  const match = url.pathname.match(/^\/api\/points\/([a-z0-9_-]+)$/);
+  if (match && request.method === "DELETE") {
+    await env.DB.prepare("DELETE FROM point_events WHERE id = ?").bind(match[1]).run();
+    return json({ events: await fetchPointEvents(env) });
+  }
+
+  throw new HttpError(405, "Método no permitido");
+}
+
 async function handleCleaning(request, env, url) {
   requireDashboard(request, env);
 
@@ -1424,8 +1519,8 @@ async function handleCleaning(request, env, url) {
     const now = new Date().toISOString();
     await env.DB.prepare(
       `INSERT INTO cleaning_tasks
-        (id, day_of_week, person_id, area, title, position, active, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)`
+        (id, day_of_week, person_id, area, title, position, points, active, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?)`
     )
       .bind(
         id,
@@ -1434,6 +1529,7 @@ async function handleCleaning(request, env, url) {
         payload.area,
         payload.title,
         payload.position,
+        payload.points,
         now,
         now
       )
@@ -1457,7 +1553,7 @@ async function handleCleaning(request, env, url) {
       await env.DB.prepare(
         `UPDATE cleaning_tasks
             SET day_of_week = ?, person_id = ?, area = ?, title = ?,
-                position = ?, updated_at = ?
+                position = ?, points = ?, updated_at = ?
           WHERE id = ?`
       )
         .bind(
@@ -1466,6 +1562,7 @@ async function handleCleaning(request, env, url) {
           payload.area,
           payload.title,
           payload.position,
+          payload.points,
           new Date().toISOString(),
           id
         )
@@ -2448,6 +2545,10 @@ async function route(request, env, url, ctx) {
 
   if (url.pathname === "/api/notes" || /^\/api\/notes\/[a-z0-9_-]+$/.test(url.pathname)) {
     return handleNotes(request, env, url);
+  }
+
+  if (url.pathname === "/api/points" || /^\/api\/points\/[a-z0-9_-]+$/.test(url.pathname)) {
+    return handlePoints(request, env, url);
   }
 
   if (

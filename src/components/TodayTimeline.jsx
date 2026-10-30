@@ -129,7 +129,7 @@ export const TodayTimeline = memo(function TodayTimeline({ now, events, lists, c
       {undated ? (
         <button type="button" className="today-timeline__more" onClick={onOpenLists}>
           <ListChecks size={15} strokeWidth={1.9} aria-hidden="true" />
-          {undated} {undated === 1 ? "tarea sin fecha" : "tareas sin fecha"} en Listas
+          {undated} {undated === 1 ? "tarea sin fecha" : "tareas sin fecha"} en Tareas
         </button>
       ) : null}
     </article>

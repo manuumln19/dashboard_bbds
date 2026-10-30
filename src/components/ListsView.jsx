@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Cloud, ListChecks, ShoppingBasket, UtensilsCrossed } from "lucide-react";
+import { Cloud, ShoppingBasket, UtensilsCrossed } from "lucide-react";
 import { DEMO_MODE, MENU_ENABLED } from "../config";
 import { formatFreshnessTime } from "../lib/freshness";
 import { HandwritingSheet } from "./HandwritingSheet";
@@ -8,13 +8,13 @@ import { MenuSheet } from "./MenuSheet";
 
 const INK_LISTS = {
   shopping: "La compra",
-  tasks: "Tareas",
 };
 
 export function ListsView({ lists, menu, now = new Date() }) {
   const [inkListId, setInkListId] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const openCount = lists.items.filter((item) => !item.done).length;
+  // Solo la compra: las tareas viven en Tareas.
+  const openCount = lists.byList("shopping").filter((item) => !item.done).length;
 
   function saveRecognizedText(text) {
     if (!inkListId) return;
@@ -27,8 +27,8 @@ export function ListsView({ lists, menu, now = new Date() }) {
       <header className="lists-head">
         <div>
           <span className="eyebrow">Compartido · BBDS</span>
-          <h1 id="lists-title">Listas</h1>
-          <p>La compra y lo que ronda por casa.</p>
+          <h1 id="lists-title">Compra</h1>
+          <p>Lo que falta en casa.</p>
         </div>
 
         <div className="lists-head__aside">
@@ -40,7 +40,7 @@ export function ListsView({ lists, menu, now = new Date() }) {
           ) : null}
           <div className="lists-head__count">
             <strong>{openCount}</strong>
-            <span>{openCount === 1 ? "pendiente" : "pendientes"} en total</span>
+            <span>por comprar</span>
           </div>
           <span className="lists-head__sync">
             <Cloud size={15} strokeWidth={1.8} aria-hidden="true" />
@@ -70,22 +70,6 @@ export function ListsView({ lists, menu, now = new Date() }) {
           Icon={ShoppingBasket}
           sticker="lemon"
           items={lists.byList("shopping")}
-          people={lists.people}
-          now={now}
-          onAdd={lists.addItem}
-          onToggle={lists.toggleItem}
-          onUpdate={lists.updateItem}
-          onRemove={lists.removeItem}
-          onClear={lists.clearDone}
-          onDraw={setInkListId}
-        />
-        <ListCard
-          listId="tasks"
-          title="Tareas"
-          subtitle="Cosas pequeñas de la casa"
-          Icon={ListChecks}
-          sticker="star"
-          items={lists.byList("tasks")}
           people={lists.people}
           now={now}
           onAdd={lists.addItem}

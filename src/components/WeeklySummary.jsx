@@ -70,8 +70,8 @@ function progressOf(level, points) {
   return Math.min(1, (points - level.min) / (level.next - level.min));
 }
 
-export function WeeklySummary({ now, cleaning, lists, events, seasonId, onClose }) {
-  const { scores, mvp } = weeklyScores({ cleaning, lists, now });
+export function WeeklySummary({ now, cleaning, lists, events, pointEvents, seasonId, onClose }) {
+  const { scores, mvp } = weeklyScores({ cleaning, lists, now, pointEvents });
   const ranked = [...scores].sort((a, b) => b.points - a.points);
   const coming = nextWeekEvents(events, now);
   const birthday = upcomingBirthday(now, cleaning.people, 8);

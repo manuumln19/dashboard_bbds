@@ -51,7 +51,7 @@ export const TodayShopping = memo(function TodayShopping({ lists, onOpenLists, o
           </button>
         ) : null}
         <button type="button" className="today-link" onClick={onOpenLists}>
-          Listas
+          Compra
           <ArrowUpRight size={15} strokeWidth={2} aria-hidden="true" />
         </button>
       </header>
