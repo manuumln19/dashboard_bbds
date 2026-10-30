@@ -8861,3 +8861,351 @@ button:not(:disabled):active {
   font-size: 13px;
   letter-spacing: 0.06em;
 }
+
+/* Cuentas: alquiler y facturas, a medias -------------------------------- */
+.view.bills-view {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+}
+
+.bills-layout {
+  display: grid;
+  min-height: 0;
+  flex: 1 1 auto;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+  gap: 16px;
+  margin-top: 14px;
+}
+
+.bills-list {
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px 22px;
+}
+
+.bills-list h2,
+.bills-side h2 {
+  margin: 4px 0 8px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.bills-paid h2 {
+  margin-top: 22px;
+}
+
+.bills-list ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bills-empty {
+  margin: 18px 0;
+  color: var(--muted);
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-style: italic;
+}
+
+.bill {
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+}
+
+.bill:first-child {
+  border-top: 0;
+}
+
+.bill__main {
+  display: flex;
+  align-items: center;
+}
+
+.bill__icon {
+  display: flex;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  border-radius: 12px;
+  background: #f6e3d4;
+  color: #8a3f10;
+}
+
+.bill__icon.kind-luz { background: #f4e9c6; color: #7a5a0c; }
+.bill__icon.kind-agua { background: #dfe9f1; color: #2f5f86; }
+.bill__icon.kind-basura,
+.bill__icon.kind-comunidad { background: #dfece5; color: #2f6b4f; }
+.bill__icon.kind-internet,
+.bill__icon.kind-gas { background: #e6e0ee; color: #5a4a7a; }
+
+.bill__copy {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
+.bill__copy strong {
+  font-family: var(--font-serif);
+  font-size: 21px;
+  font-weight: 400;
+  line-height: 1.15;
+}
+
+.bill__copy small {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.bill__copy small.is-alert {
+  color: #b0571c;
+  font-weight: 600;
+}
+
+.bill__amount {
+  margin-left: 12px;
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.bill__delete {
+  display: flex;
+  min-width: 36px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  margin-left: 6px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 14px;
+}
+
+.bill__delete.is-confirm {
+  padding: 0 12px;
+  background: #b0571c;
+  color: #fff;
+  font-weight: 600;
+}
+
+.bill__people {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 8px 0 0 52px;
+}
+
+.bill__share {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  margin: 3px 8px 3px 0;
+  padding: 0 14px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 15px;
+}
+
+.bill__share .who-dot {
+  margin-right: 8px;
+}
+
+.bill__share em {
+  margin-left: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  font-style: normal;
+}
+
+.bill__share.is-paid {
+  border-style: solid;
+  border-color: #3b6d11;
+  background: #e5efd9;
+}
+
+.bill__share.is-paid em {
+  color: #3b6d11;
+  font-weight: 600;
+}
+
+.bill.is-compact {
+  padding: 8px 0;
+}
+
+.bill.is-compact .bill__icon {
+  width: 32px;
+  height: 32px;
+}
+
+.bill.is-compact .bill__copy strong,
+.bill.is-compact .bill__amount {
+  font-size: 18px;
+}
+
+.bill.is-compact .bill__people {
+  margin-left: 44px;
+}
+
+.bill.is-compact .bill__share {
+  min-height: 34px;
+  font-size: 13px;
+}
+
+.bills-chart__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bills-chart__head button {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  background: none;
+  color: var(--text);
+}
+
+.bills-chart__head button:disabled {
+  opacity: 0.3;
+}
+
+.bills-chart__bars {
+  display: flex;
+  height: 120px;
+  align-items: stretch;
+  margin: 4px -2px 0;
+}
+
+.bills-chart__bar {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: flex-end;
+  margin: 0 2px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 12px;
+}
+
+.bills-chart__bar i {
+  display: block;
+  min-height: 2px;
+  margin-bottom: 4px;
+  border-radius: 6px 6px 2px 2px;
+  background: #e8d9c6;
+}
+
+.bills-chart__bar.is-now i {
+  background: #d9a77f;
+}
+
+.bills-chart__bar.is-on i {
+  background: #b0571c;
+}
+
+.bills-chart__bar.is-on {
+  color: #b0571c;
+  font-weight: 600;
+}
+
+.bills-chart__summary {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 10px 0 0;
+  font-size: 15px;
+}
+
+.bills-chart__summary strong {
+  font-family: var(--font-serif);
+  font-weight: 400;
+}
+
+.bills-chart__summary small {
+  width: 100%;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.bills-new__row {
+  display: flex;
+  margin: 6px 0 2px;
+}
+
+.bills-new__row input {
+  min-width: 0;
+  flex: 1;
+  min-height: 46px;
+  padding: 0 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+  background: var(--paper);
+  color: var(--text);
+  font: inherit;
+  font-size: 17px;
+}
+
+.bills-new__add {
+  margin-left: 8px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 14px;
+  background: #b0571c;
+  color: #fff;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.bills-new__msg {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.bills-new__msg.is-alert {
+  color: #b0571c;
+  font-weight: 600;
+}
+
+.bills-rent p {
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.bills-rent p strong {
+  color: var(--text);
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 400;
+}
+
+/* Con Cuentas (y Casa, si hay sensores) caben 8 pestañas en 800 px de alto. */
+.rail__nav {
+  margin-top: 22px;
+  gap: 4px;
+}
+
+.rail__item {
+  min-height: 54px;
+  padding: 7px 5px 6px;
+}

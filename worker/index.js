@@ -1,5 +1,6 @@
 import ICAL from "ical.js";
-import { handleTelegram } from "./telegram.js";
+import { handleBills } from "./bills.js";
+import { handleTelegram, sendDailyNotices } from "./telegram.js";
 
 const JSON_HEADERS = {
   "Content-Type": "application/json; charset=utf-8",
@@ -28,7 +29,7 @@ const PVPC_NOTE =
   "PVPC 2.0 TD (Península). Incluye peajes y cargos; no incluye IEE ni IVA.";
 let electricityCache = null;
 
-class HttpError extends Error {
+export class HttpError extends Error {
   constructor(status, message, code = null) {
     super(message);
     this.name = "HttpError";
@@ -37,7 +38,7 @@ class HttpError extends Error {
   }
 }
 
-function json(data, status = 200, extraHeaders = {}) {
+export function json(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
     status,
     headers: { ...JSON_HEADERS, ...extraHeaders },
@@ -60,7 +61,7 @@ function safeEqual(a, b) {
   return result === 0;
 }
 
-function requireDashboard(request, env) {
+export function requireDashboard(request, env) {
   if (!env.DASHBOARD_TOKEN) return;
   const supplied = bearerToken(request);
   if (!safeEqual(supplied, env.DASHBOARD_TOKEN)) {
@@ -77,7 +78,7 @@ function requireSensor(request, env) {
   }
 }
 
-async function readJson(request) {
+export async function readJson(request) {
   const text = await request.text();
   if (!text) return {};
   try {
@@ -93,7 +94,7 @@ function parseInteger(value, fallback, min, max) {
   return Math.min(max, Math.max(min, parsed));
 }
 
-function normalizeText(value) {
+export function normalizeText(value) {
   return String(value || "")
     .replace(/[\u0000-\u001f\u007f]/g, " ")
     .replace(/\s+/g, " ")
@@ -178,7 +179,7 @@ function rowToCalendar(row) {
   };
 }
 
-function normalizeDateValue(raw, label = "La fecha") {
+export function normalizeDateValue(raw, label = "La fecha") {
   if (raw === undefined || raw === null || raw === "") return null;
   const value = String(raw).trim();
   if (!DATE_RE.test(value)) {
@@ -751,7 +752,7 @@ const LIST_ITEM_SELECT = `SELECT li.id, li.list_id, li.text, li.drawing, li.done
   FROM list_items li
   LEFT JOIN people p ON p.id = li.person_id`;
 
-async function fetchPeople(env) {
+export async function fetchPeople(env) {
   const { results } = await env.DB.prepare(
     "SELECT id, name, tone, initials, birthday FROM people ORDER BY created_at ASC, id ASC"
   ).all();
@@ -2574,6 +2575,10 @@ async function route(request, env, url, ctx) {
     });
   }
 
+  if (url.pathname === "/api/bills" || url.pathname.startsWith("/api/bills/")) {
+    return handleBills(request, env, url);
+  }
+
   // El bot se autentica con su propia cabecera secreta, no con DASHBOARD_TOKEN.
   if (url.pathname === "/api/telegram") {
     return handleTelegram(request, env);
@@ -2648,6 +2653,11 @@ async function route(request, env, url, ctx) {
 }
 
 export default {
+  // Cada mañana (wrangler.jsonc, triggers): avisos de Cuentas por Telegram.
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(sendDailyNotices(env));
+  },
+
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 

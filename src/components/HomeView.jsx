@@ -31,6 +31,7 @@ export const HomeView = memo(function HomeView({
   pointEvents,
   season,
   menu,
+  bills,
   mascot,
   mascotMood,
   onOpenAgenda,
@@ -38,6 +39,7 @@ export const HomeView = memo(function HomeView({
   onOpenEnergy,
   onOpenWeather,
   onOpenCleaning,
+  onOpenBills,
   hidden = false,
   night = false,
   onWakeNight,
@@ -126,7 +128,9 @@ export const HomeView = memo(function HomeView({
             cleaning={cleaning}
             lists={lists}
             menu={menu}
+            bills={bills}
             onOpenAgenda={onOpenAgenda}
+            onOpenBills={onOpenBills}
           />
           <YoshiWindow now={now} weather={weather.weather} mood={mascotMood} mascot={mascot} season={season} />
           <TodayTimeline

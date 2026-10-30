@@ -9,6 +9,8 @@
 //   leche, pan y sal  texto suelto: se apunta en la compra
 //   /t bajar la basura mañana   una tarea suelta (hoy, mañana o sin fecha)
 import { AISLES, aisleFor } from "../src/lib/aisles.js";
+import { BILL_KINDS, billStatus, compareBill, formatMoney, parseAmount } from "../src/lib/bills.js";
+import { billLine, createBill, dailyNotices, madridDay, pendingBills, setPayment } from "./bills.js";
 
 const API = "https://api.telegram.org/bot";
 const MAX_ITEMS = 20;
@@ -19,6 +21,8 @@ const HELP = [
   "/lista · la compra por pasillos; toca una cosa para tacharla",
   "Escribe «leche, huevos y pan» para apuntarlo en la compra",
   "/t bajar la basura mañana · una tarea (hoy, mañana o sin fecha)",
+  "/facturas · lo pendiente de pagar; toca tu nombre al pagar tu parte",
+  "/factura luz 62,40 · apunta una factura de este mes (luz, agua, basura, gas, internet, comunidad u otro)",
 ].join("\n");
 
 function safeEqual(a, b) {
@@ -181,10 +185,84 @@ async function addTask(env, chatId, text) {
   await telegram(env, "sendMessage", { chat_id: chatId, text: `Tarea apuntada ${label}: ${title}. Está en Tareas, libre para quien la haga.` });
 }
 
+// Cuentas: lo pendiente, con un botón por persona en cada factura para
+// marcar (o desmarcar) su parte.
+async function billsMessage(env) {
+  const { people, bills, pending } = await pendingBills(env);
+  const lines = [`<b>Cuentas · ${pending.length ? `${pending.length} por pagar` : "todo pagado"}</b>`];
+  const keyboard = [];
+  pending.forEach((bill) => {
+    lines.push("", billLine(bill, people, bills));
+    const status = billStatus(bill, people);
+    keyboard.push(
+      people.map((person) => ({
+        text: `${status.paid.has(person.id) ? "✓" : "☐"} ${person.name} · ${bill.kind}`,
+        callback_data: `p:${bill.id}:${person.id}`,
+      }))
+    );
+  });
+  if (!pending.length) lines.push("", "No hay nada pendiente.");
+  keyboard.push([{ text: "Actualizar", callback_data: "f" }]);
+  return { text: lines.join("\n"), parse_mode: "HTML", reply_markup: { inline_keyboard: keyboard } };
+}
+
+// «/factura luz 62,40» → factura de este mes, a medias.
+async function addBill(env, chatId, text) {
+  const match = String(text).trim().match(/^(\S+)\s+([\d.,]+)\s*€?$/);
+  const kind = match ? match[1].toLowerCase().replace("otra", "otro") : "";
+  const amount = match ? parseAmount(match[2]) : null;
+  if (!BILL_KINDS.some((item) => item.id === kind) || !amount) {
+    await telegram(env, "sendMessage", {
+      chat_id: chatId,
+      text: `Escribe el tipo y el importe, por ejemplo: /factura luz 62,40\nTipos: ${BILL_KINDS.map((item) => item.id).join(", ")}.`,
+    });
+    return;
+  }
+  await createBill(env, { kind, period: madridDay().slice(0, 7), amount });
+  const { people, bills } = await pendingBills(env);
+  const bill = bills.find((item) => item.kind === kind && item.period === madridDay().slice(0, 7) && Number(item.amount) === amount);
+  const compare = bill ? compareBill(bill, bills) : null;
+  await telegram(env, "sendMessage", {
+    chat_id: chatId,
+    text: [
+      `Apuntada: ${kind} de este mes, ${formatMoney(amount)} (${formatMoney(amount / Math.max(1, people.length))} cada uno).`,
+      compare ? `${compare.alert ? "⚠️ Ojo: " : ""}${compare.label}.` : "",
+    ]
+      .filter(Boolean)
+      .join("\n"),
+    reply_markup: { inline_keyboard: [[{ text: "Ver cuentas", callback_data: "f" }]] },
+  });
+}
+
 async function onCallback(env, query) {
   const data = String(query.data || "");
   const message = query.message;
   let notice = "";
+
+  // Cuentas: pagar (o deshacer) la parte de alguien, o ver lo pendiente.
+  if (data === "f" || data.startsWith("p:")) {
+    if (data.startsWith("p:")) {
+      const [, billId, personId] = data.split(":");
+      const { bills, people } = await pendingBills(env);
+      const bill = bills.find((item) => item.id === billId);
+      if (bill) {
+        const paid = billStatus(bill, people).paid.has(personId);
+        await setPayment(env, billId, personId, !paid);
+        const person = people.find((item) => item.id === personId);
+        notice = `${person ? person.name : "Hecho"}: ${paid ? "vuelve a pendiente" : "pagado"}`;
+      } else {
+        notice = "Ya no está";
+      }
+    }
+    await telegram(env, "answerCallbackQuery", { callback_query_id: query.id, text: notice || undefined });
+    if (!message) return;
+    if (data === "f" && message.text && !message.text.startsWith("Cuentas")) {
+      await telegram(env, "sendMessage", { chat_id: message.chat.id, ...(await billsMessage(env)) });
+      return;
+    }
+    await telegram(env, "editMessageText", { chat_id: message.chat.id, message_id: message.message_id, ...(await billsMessage(env)) });
+    return;
+  }
 
   if (data.startsWith("t:")) {
     const id = Number(data.slice(2));
@@ -231,12 +309,37 @@ async function onMessage(env, message) {
       else await sendList(env, chatId);
     } else if (name === "t" || name === "tarea") {
       await addTask(env, chatId, rest);
+    } else if (name === "facturas" || name === "cuentas") {
+      await telegram(env, "sendMessage", { chat_id: chatId, ...(await billsMessage(env)) });
+    } else if (name === "factura") {
+      await addBill(env, chatId, rest);
+    } else if (name === "id") {
+      // Para TELEGRAM_CHAT_ID: adónde manda el bot los avisos de cada mañana.
+      await telegram(env, "sendMessage", { chat_id: chatId, text: `Este chat es ${chatId}. Guárdalo en TELEGRAM_CHAT_ID para recibir aquí los avisos de Cuentas.` });
     } else {
       await telegram(env, "sendMessage", { chat_id: chatId, text: HELP });
     }
     return;
   }
   await addShopping(env, chatId, text);
+}
+
+// Cada mañana (cron): resumen del mes el día 1, alquiler pendiente y
+// facturas que vencen. Va al chat de TELEGRAM_CHAT_ID (el grupo de casa).
+export async function sendDailyNotices(env) {
+  if (!env.TELEGRAM_BOT_TOKEN || !env.TELEGRAM_CHAT_ID) return;
+  try {
+    const text = await dailyNotices(env);
+    if (!text) return;
+    await telegram(env, "sendMessage", {
+      chat_id: env.TELEGRAM_CHAT_ID,
+      text,
+      parse_mode: "HTML",
+      reply_markup: { inline_keyboard: [[{ text: "Ver cuentas", callback_data: "f" }]] },
+    });
+  } catch (error) {
+    console.error("BBDS avisos", error);
+  }
 }
 
 export async function handleTelegram(request, env) {

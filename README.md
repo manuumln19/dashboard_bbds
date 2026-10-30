@@ -19,6 +19,7 @@ Pensado para **1280 × 800** en horizontal. En pantallas más estrechas el rail 
 - **Compra** (vista `lists`): solo la compra, en etiquetas agrupadas por pasillos en el orden del súper (`src/lib/aisles.js`, por palabras clave; lo que no reconoce va a «Otros») y con «Lo de siempre» (lo apuntado dos veces o más en ese navegador; mientras no hay historial, lo básico). La libreta manuscrita con OCR local queda como acción secundaria.
 - **Tareas** (vista `cleaning`, `TasksView.jsx`): limpieza y tareas sueltas en una sola lista, con puntos. La rutina de limpieza (el cuadrante semanal de `cleaning_tasks`, editable en «Rutina semanal») y las tareas sueltas (`list_items` de `tasks`) se agrupan en Hoy, Libres (sin dueño: al marcarlas se pregunta quién la hizo, que se lleva los puntos, `done_by`), Se quedó atrás, Esta semana y Cuando sea. Cada tarea vale 2,5, 5, 10 o 20 puntos (`points`: 2,5 bajar la basura, 20 el horno; la rutina, 10 por defecto). A la derecha, el marcador de la semana, los **puntos a mano** (persona, motivo y +2,5/+5/+10/+20/−5, en `point_events`, con su cruz para quitarlos) y el alta rápida (qué, quién o libre, cuándo y cuánto vale; «Cada semana» con sus días la apunta en la rutina, uno por día, y necesita dueño). Para el marco: **Deshacer** durante 6 s tras marcar y un segundo toque seguido sobre la misma fila se ignora.
 - **Tiempo**: temperatura exterior, sensación térmica, icono del cielo, humedad, viento, lluvia, UV, salida y puesta de sol, previsión de siete días y panel **Próximas horas** (temperatura y probabilidad de lluvia de las 12 horas siguientes, con aviso de cuándo empieza a llover).
+- **Cuentas** (vista `cuentas`, `BillsView.jsx`): alquiler y facturas de casa (luz, agua, basura, gas, internet, comunidad u otra), todo a medias. A la izquierda, lo que falta por pagar y lo pagado de los últimos tres meses: cada factura con su importe, lo que le toca a cada uno y un botón por persona para marcar su parte como pagada (la factura queda pagada cuando la marcan los dos); borrar pide un segundo toque. Cada factura se compara con la del mismo mes del año anterior (o, si no la hay, con la anterior del mismo tipo) y una subida de más del 30 % sale en terracota. A la derecha, las facturas de cada mes del año en barras (sin el alquiler, que es fijo; al tocar un mes sale su resumen con todo), la factura nueva (tipo, mes, importe y «Ya pagada» para meter las antiguas y tener con qué comparar) y el **alquiler**: importe y plazo (del 1 al 5, por defecto), que crea solo la factura de cada mes; se puede pausar. En Hoy, «Lo siguiente» avisa **sin importes** (la pantalla la ve quien venga a casa): el alquiler desde el primer día del plazo hasta que lo paguen los dos («Falta Paco · alquiler de octubre», en rosa si se pasó el plazo) y las facturas que vencen en tres días o ya vencieron. La lógica compartida con el bot está en `src/lib/bills.js`; el Worker, en `worker/bills.js`.
 - **Energía**: PVPC 2.0 TD hora a hora, precio vigente, mínimo, máximo y media del día, bandas barata/media/cara, gráfico de 24 h con horas pasadas atenuadas y pestañas **Hoy**/**Mañana**. La tarjeta de recomendaciones calcula la mejor franja completa para la lavadora o el termo eléctrico, con duración, consumo y margen configurables; compara con empezar lo antes posible y muestra el ahorro estimado en euros y porcentaje. Incluye fuente, vigencia, impuestos estimados y método de cálculo en una hoja de detalle.
 - **Casa**: temperatura y humedad por habitación, histórico de 24 h y 7 días, tendencia, riesgo de moho, batería/presión del sensor y consejos de ventilación. Solo aparece con `VITE_CLIMATE_ENABLED=true`.
 - **Fotos**: salvapantallas con las fotos de un álbum compartido de iCloud, tras unos minutos sin actividad o desde el botón del rail. De noche solo muestra la hora, tenue. Se vuelve tocando la pantalla, con `Esc` o con las flechas.
@@ -252,6 +253,10 @@ Un bot para los dos (mejor en un grupo con él) que escribe en las mismas tablas
 - **/lista**: la compra por pasillos, con un botón por cosa. Al tocarlo se tacha (✓) y el mensaje se actualiza en el sitio; al tocarlo otra vez vuelve. Abajo, **Actualizar** y **Quitar tachados**. En la pared desaparece en el siguiente sondeo.
 - **Texto suelto** («leche, huevos y pan»): se apunta en la compra, una cosa por coma; la «y» solo separa si hay comas («Tomates y albahaca» es una). Lo que ya estaba pendiente no se repite.
 - **/t bajar la basura mañana**: una tarea libre en Tareas, para hoy, mañana o sin fecha.
+- **/facturas**: lo pendiente de Cuentas, con la parte de cada uno y la comparación; un botón por persona y factura para marcar (o desmarcar) su parte.
+- **/factura luz 62,40**: apunta una factura de este mes (luz, agua, basura, gas, internet, comunidad u otro) y avisa si sube más de un 30 %.
+- **/id**: el id del chat, para `TELEGRAM_CHAT_ID`.
+- **Avisos de cada mañana** (cron de `wrangler.jsonc`, 07:00 UTC) en el chat de `TELEGRAM_CHAT_ID`: el día 1, el resumen del mes anterior (total, lo de cada uno y por tipo); el alquiler, el primer día del plazo y el penúltimo si falta alguien; y las facturas que vencen hoy o mañana. Sin `TELEGRAM_CHAT_ID` no se manda nada. En local se prueba con `POST /cdn-cgi/local/explorer/api/local/scheduled?worker=bbds-dashboard` y `{ "cron": "0 7 * * *" }`.
 
 Solo atiende las llamadas con la cabecera secreta de Telegram (`TELEGRAM_WEBHOOK_SECRET`) y a los ids de `TELEGRAM_USERS`; a un desconocido, en privado, le dice su id y nada más. Sin `TELEGRAM_BOT_TOKEN` la ruta no existe. Siempre responde 200 para que Telegram no reintente.
 
@@ -273,6 +278,7 @@ Puesta en marcha (unos 5 minutos):
 
 4. Cada uno escribe al bot en privado: contesta con su id. Guarda los dos, separados por comas, con `npx wrangler secret put TELEGRAM_USERS`.
 5. Crea un grupo con los dos y el bot, y escribe `/lista`.
+6. Para los avisos de Cuentas, escribe `/id` en el grupo y guarda ese número con `npx wrangler secret put TELEGRAM_CHAT_ID`.
 
 Para probar en local sin Telegram: `wrangler dev` acepta `--var TELEGRAM_API:http://127.0.0.1:PUERTO/bot` para apuntar las respuestas a un servidor de prueba.
 
@@ -374,6 +380,12 @@ X-Sensor-Token: dev-sensor-token
 | `DELETE` | `/api/points/:id` | Quita unos puntos a mano. |
 | `POST` | `/api/points/redeem` | `{ personId, reward, cost }`; canjea una recompensa (coste de 0,5 a 200). |
 | `DELETE` | `/api/points/redeem/:id` | Deshace un canje. |
+| `GET` | `/api/bills` | Facturas (`bills`, unas 200, cada una con `payments: [{ personId, paidAt }]`) y reglas (`rules`). Antes crea la factura del mes de cada regla activa. |
+| `POST` | `/api/bills` | `{ kind, period: "YYYY-MM", amount, title?, dueOn?, paid? }`; `paid: true` la apunta pagada por todos. |
+| `PATCH` | `/api/bills/:id` | Cambia `kind`, `title`, `period`, `amount` o `dueOn`. |
+| `DELETE` | `/api/bills/:id` | Borra la factura y sus pagos. |
+| `PUT` | `/api/bills/:id/payments/:personId` | `{ paid }`: marca o desmarca la parte de esa persona. |
+| `PUT` | `/api/bills/rules/:id` | `{ kind, amount, dayFrom, dayTo, active }` (días del 1 al 28); el alquiler es `alquiler`. Si nadie ha pagado el mes en curso, se actualiza también. |
 | `POST` | `/api/telegram` | Webhook del bot. Solo con la cabecera `X-Telegram-Bot-Api-Secret-Token` y usuarios de `TELEGRAM_USERS`; no usa `DASHBOARD_TOKEN`. |
 
 `GET /api/electricity` devuelve `source` (`id`, `label`, `priceType`, `note`, `url`), `days` con `{ date, hours: [{ start, price }] }` en €/kWh, `updatedAt` (publicación de la fuente), `fetchedAt` (consulta), `stale`, `timezone` y, si procede, `warning`. Las horas se agrupan por día de Madrid; `start` es un instante ISO con offset para que los cambios de hora no dependan de la posición en la lista.

@@ -8,6 +8,7 @@ import {
   Images,
   ListChecks,
   Moon,
+  Receipt,
   ShoppingBasket,
   Wifi,
   WifiOff,
@@ -25,6 +26,7 @@ const TABS = [
   { id: "cleaning", label: "Tareas", Icon: ListChecks },
   { id: "weather", label: "Tiempo", Icon: CloudSun },
   { id: "energy", label: "Energía", Icon: Zap },
+  { id: "cuentas", label: "Cuentas", Icon: Receipt },
   ...(CLIMATE_ENABLED
     ? [{ id: "climate", label: "Casa", Icon: Droplets }]
     : []),

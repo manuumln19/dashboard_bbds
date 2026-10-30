@@ -3,6 +3,10 @@
   "name": "bbds-dashboard",
   "main": "worker/index.js",
   "compatibility_date": "2025-09-01",
+  // Avisos de Cuentas por Telegram cada mañana (07:00 UTC: 8:00 o 9:00 en Madrid).
+  "triggers": {
+    "crons": ["0 7 * * *"]
+  },
   "observability": {
     "enabled": true
   },

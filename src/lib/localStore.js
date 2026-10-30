@@ -166,6 +166,52 @@ export function saveDemoRedemptions(redemptions) {
   }
 }
 
+const BILLS_KEY = "bbds.demo.bills.v1";
+
+// Cuentas de la demo: un año de facturas pagadas para comparar y el gráfico,
+// y este mes con la luz y el alquiler a medio pagar.
+function createDemoBills() {
+  const now = new Date();
+  const period = (offset) => {
+    const date = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+  };
+  const both = [
+    { personId: "manu", paidAt: now.toISOString() },
+    { personId: "paco", paidAt: now.toISOString() },
+  ];
+  const light = [48, 44, 41, 39, 46, 58, 66, 61, 52, 47, 55, 63, 71];
+  const bills = [];
+  for (let offset = 12; offset >= 1; offset -= 1) {
+    const month = period(offset);
+    bills.push({ id: `bl-demo-r${offset}`, kind: "alquiler", title: null, period: month, amount: 750, dueOn: `${month}-05`, ruleId: "alquiler", payments: both });
+    bills.push({ id: `bl-demo-l${offset}`, kind: "luz", title: null, period: month, amount: light[12 - offset], dueOn: null, ruleId: null, payments: both });
+    bills.push({ id: `bl-demo-i${offset}`, kind: "internet", title: null, period: month, amount: 35, dueOn: null, ruleId: null, payments: both });
+    if (offset % 2 === 0) bills.push({ id: `bl-demo-a${offset}`, kind: "agua", title: null, period: month, amount: 28 + (offset % 3) * 3, dueOn: null, ruleId: null, payments: both });
+    if (offset % 3 === 0) bills.push({ id: `bl-demo-b${offset}`, kind: "basura", title: null, period: month, amount: 24, dueOn: null, ruleId: null, payments: both });
+  }
+  const current = period(0);
+  bills.push({ id: "bl-demo-r0", kind: "alquiler", title: null, period: current, amount: 750, dueOn: `${current}-05`, ruleId: "alquiler", payments: [both[0]] });
+  bills.push({ id: "bl-demo-l0", kind: "luz", title: null, period: current, amount: light[12], dueOn: null, ruleId: null, payments: [] });
+  return {
+    bills: bills.reverse(),
+    rules: [{ id: "alquiler", kind: "alquiler", title: null, amount: 750, dayFrom: 1, dayTo: 5, active: true }],
+  };
+}
+
+export function loadDemoBills() {
+  const saved = readJson(BILLS_KEY);
+  return saved && Array.isArray(saved.bills) ? saved : createDemoBills();
+}
+
+export function saveDemoBills(data) {
+  try {
+    window.localStorage.setItem(BILLS_KEY, JSON.stringify(data));
+  } catch {
+    // Sin persistencia, las cuentas duran hasta recargar.
+  }
+}
+
 const MENU_KEY = "bbds.demo.menu.v1";
 
 export function loadDemoMenu() {

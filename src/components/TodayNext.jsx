@@ -1,5 +1,5 @@
 import { memo, useState } from "react";
-import { BellRing, Cake, CalendarDays, Plus, Sparkles, SprayCan, Trophy, Umbrella, UtensilsCrossed, Zap } from "lucide-react";
+import { BellRing, Cake, CalendarDays, Plus, Receipt, Sparkles, SprayCan, Trophy, Umbrella, UtensilsCrossed, Zap } from "lucide-react";
 import { getWeatherAdvice } from "../lib/weather";
 import { nextItems } from "../lib/today";
 
@@ -12,9 +12,10 @@ const ICONS = {
   birthday: Cake,
   trophy: Trophy,
   menu: UtensilsCrossed,
+  bill: Receipt,
 };
 
-const KIND_TONES = { rain: "lilac", cleaning: "mint", power: "amber", reminder: "amber", birthday: "pink", trophy: "amber", menu: "mint" };
+const KIND_TONES = { bill: "amber", rain: "lilac", cleaning: "mint", power: "amber", reminder: "amber", birthday: "pink", trophy: "amber", menu: "mint" };
 
 // «Añadir a la compra» para avisos como el de las uvas.
 function AddToShopping({ text, lists }) {
@@ -45,8 +46,8 @@ function AddToShopping({ text, lists }) {
 const SHOWN_ELSEWHERE = new Set(["cleaning", "power"]);
 
 // Una sola tarjeta de color: lo más importante ahora, y debajo lo demás.
-export const TodayNext = memo(function TodayNext({ now, events, weather, electricity, cleaning, lists, menu, onOpenAgenda }) {
-  const items = nextItems({ now, events, weather, electricity, cleaning, menu }).filter(
+export const TodayNext = memo(function TodayNext({ now, events, weather, electricity, cleaning, lists, menu, bills, onOpenAgenda, onOpenBills }) {
+  const items = nextItems({ now, events, weather, electricity, cleaning, menu, bills }).filter(
     (item) => !SHOWN_ELSEWHERE.has(item.kind)
   );
   const [lead, ...rest] = items;
@@ -71,7 +72,7 @@ export const TodayNext = memo(function TodayNext({ now, events, weather, electri
       className={`card today-next tone-${lead.tone || KIND_TONES[lead.kind] || "ink"}`}
       aria-label="Lo siguiente"
     >
-      <button type="button" className="today-next__lead" onClick={onOpenAgenda}>
+      <button type="button" className="today-next__lead" onClick={lead.kind === "bill" && onOpenBills ? onOpenBills : onOpenAgenda}>
         <span className="today-next__kicker">
           <LeadIcon size={14} strokeWidth={2} aria-hidden="true" />
           {lead.kicker}
@@ -92,6 +93,7 @@ export const TodayNext = memo(function TodayNext({ now, events, weather, electri
                   <strong>{item.title}</strong>
                   {item.kind === "event" ? ` · ${item.kicker.replace(/^Próximo · /, "")}` : ""}
                   {item.kind === "birthday" ? ` · ${item.detail}` : ""}
+                  {item.kind === "bill" ? ` · ${item.kicker.toLowerCase()}` : ""}
                 </span>
                 {item.addToShopping ? <AddToShopping text={item.addToShopping} lists={lists} /> : null}
               </li>

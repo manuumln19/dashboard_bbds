@@ -11,3 +11,5 @@ TELEGRAM_BOT_TOKEN=
 TELEGRAM_WEBHOOK_SECRET=
 # Ids de Telegram que pueden usarlo, separados por comas.
 TELEGRAM_USERS=
+# Chat (el grupo de casa) donde el bot manda los avisos de Cuentas; el bot lo dice con /id.
+TELEGRAM_CHAT_ID=

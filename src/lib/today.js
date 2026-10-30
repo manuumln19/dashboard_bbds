@@ -6,6 +6,7 @@ import {
   currentPriceState,
   formatHour,
 } from "./energy";
+import { billStatus, billTitle, kindLabel, periodLabel, periodOf } from "./bills";
 import { houseReminders } from "./reminders";
 import { hourLabel, isRainyHour, nextHours } from "./weather";
 import { compareText } from "./compare";
@@ -52,7 +53,47 @@ export function cheapPower(electricity, now) {
 }
 
 // Una lista corta y ordenada por importancia. El primero se pinta grande.
-export function nextItems({ now, events, weather, electricity, cleaning, menu }) {
+// Cuentas en Hoy, sin importes (la pantalla la ve quien venga a casa): el
+// alquiler desde el primer día del plazo hasta que lo paguen los dos, y las
+// facturas que vencen en los próximos 3 días o ya han vencido.
+function billReminders({ now, bills, people }) {
+  if (!bills || !Array.isArray(bills.bills) || !people || !people.length) return [];
+  const period = periodOf(now);
+  const today = localDateKey(now);
+  const soon = localDateKey(addDays(now, 3));
+  const items = [];
+  (bills.rules || []).forEach((rule) => {
+    if (!rule.active || now.getDate() < rule.dayFrom) return;
+    const bill = bills.bills.find((item) => item.ruleId === rule.id && item.period === period);
+    if (!bill) return;
+    const { missing, done } = billStatus(bill, people);
+    if (done) return;
+    const late = now.getDate() > rule.dayTo;
+    items.push({
+      id: `bill-${bill.id}`,
+      kind: "bill",
+      tone: late ? "pink" : "amber",
+      kicker: `${kindLabel(rule.kind)} de ${periodLabel(period)}`,
+      title: `Falta ${missing.map((person) => person.name).join(" y ")}`,
+      detail: late ? `Se pasó el día ${rule.dayTo}` : `Antes del día ${rule.dayTo}`,
+    });
+  });
+  bills.bills
+    .filter((bill) => !bill.ruleId && bill.dueOn && bill.dueOn <= soon && !billStatus(bill, people).done)
+    .forEach((bill) => {
+      items.push({
+        id: `bill-${bill.id}`,
+        kind: "bill",
+        tone: bill.dueOn < today ? "pink" : "amber",
+        kicker: "Factura",
+        title: `${billTitle(bill)} ${bill.dueOn < today ? "vencida" : bill.dueOn === today ? "vence hoy" : "vence pronto"}`,
+        detail: `Falta ${billStatus(bill, people).missing.map((person) => person.name).join(" y ")}`,
+      });
+    });
+  return items;
+}
+
+export function nextItems({ now, events, weather, electricity, cleaning, menu, bills }) {
   const items = [];
   const upcoming = (Array.isArray(events) ? events : [])
     .filter((event) => getEventEnd(event) > now)
@@ -111,6 +152,7 @@ export function nextItems({ now, events, weather, electricity, cleaning, menu })
     });
   }
 
+  items.push(...billReminders({ now, bills, people: cleaning && cleaning.people }));
   items.push(...houseReminders({ now, cleaning }));
 
 

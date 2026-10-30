@@ -40,6 +40,7 @@ import { useMenu } from "./hooks/useMenu";
 import { useNightMode } from "./hooks/useNightMode";
 import { useNotes } from "./hooks/useNotes";
 import { usePoints } from "./hooks/usePoints";
+import { useBills } from "./hooks/useBills";
 import { useNow } from "./hooks/useNow";
 import { usePhotos } from "./hooks/usePhotos";
 import { useSensors } from "./hooks/useSensors";
@@ -62,6 +63,7 @@ const loadCleaning = () => import("./components/TasksView");
 const loadWeather = () => import("./components/WeatherView");
 const loadClimate = () => import("./components/ClimateView");
 const loadEnergy = () => import("./components/EnergyView");
+const loadBills = () => import("./components/BillsView");
 const loadScreensaver = () => import("./components/Screensaver");
 // Paneles de demo y diagnóstico: casi nunca se abren; fuera del arranque.
 const loadDemoPanel = () => import("./components/DemoPanel");
@@ -86,6 +88,9 @@ const ClimateView = lazy(() =>
 const EnergyView = lazy(() =>
   loadEnergy().then((module) => ({ default: module.EnergyView }))
 );
+const BillsView = lazy(() =>
+  loadBills().then((module) => ({ default: module.BillsView }))
+);
 const Screensaver = lazy(() =>
   loadScreensaver().then((module) => ({ default: module.Screensaver }))
 );
@@ -104,6 +109,7 @@ const PRELOADERS = [
   loadCleaning,
   loadWeather,
   loadEnergy,
+  loadBills,
   loadScreensaver,
   ...(CLIMATE_ENABLED ? [loadClimate] : []),
 ];
@@ -115,6 +121,7 @@ const VALID_VIEWS = new Set([
   "cleaning",
   "weather",
   "energy",
+  "cuentas",
   ...(CLIMATE_ENABLED ? ["climate"] : []),
 ]);
 
@@ -165,6 +172,7 @@ export default function App() {
   const electricity = useElectricity();
   const notes = useNotes();
   const points = usePoints();
+  const bills = useBills();
   // Memorizados: objetos nuevos en cada render repintaban todo Hoy y la barra.
   // La temporada cambia como mucho una vez al día: con el minuto en las
   // dependencias salía un objeto nuevo en cada tic y repintaba lo que la usa.
@@ -216,6 +224,7 @@ export default function App() {
   const openEnergy = useCallback(() => setView("energy"), [setView]);
   const openWeather = useCallback(() => setView("weather"), [setView]);
   const openCleaning = useCallback(() => setView("cleaning"), [setView]);
+  const openBills = useCallback(() => setView("cuentas"), [setView]);
 
   useWakeLock();
   useNightlyReload(NIGHTLY_RELOAD_HOUR);
@@ -478,6 +487,8 @@ export default function App() {
               onOpenEnergy={openEnergy}
               onOpenWeather={openWeather}
               onOpenCleaning={openCleaning}
+              onOpenBills={openBills}
+              bills={bills}
             />
           ) : null}
 
@@ -508,6 +519,8 @@ export default function App() {
           ) : null}
 
           {view === "energy" ? <EnergyView now={now} /> : null}
+
+          {view === "cuentas" ? <BillsView now={now} bills={bills} people={cleaning.people} /> : null}
 
           {CLIMATE_ENABLED && view === "climate" ? (
             <ClimateView
