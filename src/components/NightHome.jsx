@@ -12,7 +12,7 @@ function round(value) {
 // Hoy de noche: la hora grande y lo de mañana a primera hora (tiempo,
 // primeros eventos y la limpieza que toca), con Yoshi dormido. Menos luz y
 // menos ruido que el panel de día; el botón de la luna de la barra lo cambia.
-export const NightHome = memo(function NightHome({ now, weather, events, cleaning, mascot }) {
+export const NightHome = memo(function NightHome({ now, weather, events, cleaning, mascot, onWake }) {
   const tomorrow = addDays(startOfDay(now), 1);
   const after = addDays(tomorrow, 1);
   const forecast = weather && Array.isArray(weather.days) ? weather.days[1] : null;
@@ -29,7 +29,9 @@ export const NightHome = memo(function NightHome({ now, weather, events, cleanin
   const hello = hour >= 20 || hour < 6 ? "Buenas noches" : "Modo noche";
 
   return (
-    <div className="night-home">
+    // Sin barra ni botones: un toque en cualquier sitio la despierta.
+    <div className="night-home" onClick={onWake}>
+      <span className="night-home__wake">Toca para despertar</span>
       <div className="night-home__time">
         <span className="night-home__hello">
           <Moon size={16} strokeWidth={1.9} aria-hidden="true" />

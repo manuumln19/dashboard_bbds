@@ -13,17 +13,17 @@ Pensado para **1280 × 800** en horizontal. En pantallas más estrechas el rail 
 - **Agenda**: abre en **Tablero** (siete columnas con lo de cada día, sin rejilla horaria); Hoy, 3 días y Semana siguen disponibles.
 - **Listas**: la compra ocupa dos tercios y sus cosas son etiquetas (se marcan tocándolas, la cruz las borra), con **Lo de siempre** debajo: lo apuntado dos veces o más que ahora no está, para volver a añadirlo de un toque (se cuenta en este navegador, `bbds.shopping.usual`, `lib/usualShopping.js`). Las tareas van en una columna estrecha agrupadas en Hoy (con lo atrasado), Mañana, Más adelante y Sin fecha. Lo hecho queda debajo, atenuado y tachado.
 - **Salvapantallas**: las fotos se presentan como recuerdo («Tal día como hoy, hace 2 años» / «Hace 2 años · octubre de 2024»).
-- **Hoy (diseño)**: arriba la hora, «Lo siguiente» y la ventana de Yoshi, en medio la línea del día —con una marca de **«Ahora»** que separa lo pasado (atenuado) de lo que viene— y la Compra, y abajo **Casa** (`TodayStrip.jsx`) en tres baldosas con número grande: limpieza de hoy y de la semana, puntos y rachas del equipo (abre el resumen) y la luz. Cada dato sale en un solo sitio (la compra lleva su cuenta en su tarjeta; la ciudad, en el rail). Diseño tipo bento: la hora es la baldosa protagonista: crema con el reloj en terracota (de día; de noche Hoy pasa a NightHome); «Lo siguiente» lleva el color macizo del tono de lo que anuncia, y el resto de baldosas, uno según su papel (compra en salvia, limpieza en agua, equipo en lila, luz en mantequilla). Todo color liso, también en el modo ligero, y lo que se lee de lejos no baja de 14–16 px. Como mucho 4 pósits sueltos; el resto queda en un montón «+N notas» que abre la lista. Con el modo noche, Hoy pasa a `NightHome.jsx`: la hora en grande, mañana a primera hora (tiempo, primeros eventos y limpieza) y Yoshi dormido, sin pósits.
-- **Hoy**: responde en orden a qué hora y qué tiempo hace (reloj, tiempo actual y próximas horas), qué es **lo siguiente** (una sola tarjeta de color que elige lo más relevante: evento en las próximas 3 h, lluvia, menú, avisos o el próximo evento; la limpieza y la luz van en sus baldosas) y qué pasa hoy en casa: **Hoy y mañana** junta en una lista por horas los eventos, las tareas con fecha (las atrasadas suben a hoy) y la limpieza del día, que se marcan desde ahí. A la derecha, la compra con un campo para añadir y, abajo, las baldosas del equipo (huevo-avatar de cada persona con sus puntos de la semana, nivel y racha; el trofeo abre el resumen semanal) y de la luz; la mejor franja de cada aparato sigue en Energía. La lógica vive en `src/lib/today.js`. Inicio no muestra clima interior.
+- **Hoy (diseño)**: arriba la hora, «Lo siguiente» y la ventana de Yoshi, en medio la línea del día —con una marca de **«Ahora»** que separa lo pasado (atenuado) de lo que viene— y la Compra, y abajo **Casa** (`TodayStrip.jsx`) en tres baldosas con número grande: limpieza de hoy y de la semana, puntos y rachas del equipo (abre el resumen) y la luz. Cada dato sale en un solo sitio (la compra lleva su cuenta en su tarjeta; la ciudad, en el rail). Diseño tipo bento: la hora es la baldosa protagonista: crema con el reloj en terracota (de día; de noche Hoy pasa a NightHome); «Lo siguiente» lleva el color macizo del tono de lo que anuncia, y el resto de baldosas, uno según su papel (compra en salvia, limpieza en agua, equipo en lila, luz en mantequilla). Todo color liso, también en el modo ligero, y lo que se lee de lejos no baja de 14–16 px. Como mucho 4 pósits sueltos; el resto queda en un montón «+N notas» que abre la lista. Hoy cambia con la hora en tres momentos. **Mañana** (de `VITE_NIGHT_END` a `VITE_MORNING_END`, 07:30–10:00 por defecto; `MorningHome.jsx`): la hora grande en terracota, el tiempo de las próximas horas y tres tarjetas para salir de casa (qué llevarse según `getWeatherAdvice`, lo primero de la agenda y lo que toca hoy en casa); sin pósits y sin la hoja de «Buenos días», que ya sobra. **Ver todo el día** la quita hasta el día siguiente (`localStorage` `bbds.morning.dismissed`). **Día**: el panel de siempre, con sus colores. **Noche**: Hoy pasa a `NightHome.jsx`: la hora en grande en terracota tenue, mañana a primera hora (tiempo, primeros eventos y limpieza) y Yoshi dormido, sin pósits ni barra lateral; un toque en cualquier sitio la despierta 2 minutos.
+- **Hoy**: responde en orden a qué hora y qué tiempo hace (reloj, tiempo actual y próximas horas), qué es **lo siguiente** (una sola tarjeta de color que elige lo más relevante: evento en las próximas 3 h, lluvia, menú, avisos o el próximo evento; la limpieza y la luz van en sus baldosas) y qué pasa hoy en casa: **Hoy y mañana** junta en una lista por horas los eventos, las tareas con fecha (las atrasadas suben a hoy) y la limpieza del día, que se marcan desde ahí (lo que no tiene hora deja la columna vacía; la limpieza lleva su icono). A la derecha, la compra en etiquetas por pasillo, como en Compra, con un campo para añadir y, abajo, tres baldosas con una frase cada una: la limpieza («Faltan 2 de limpieza hoy · Manu»), el equipo (huevo-avatar con puntos y racha, «Manu gana por 7,5»; el trofeo abre el resumen semanal) y la luz; la mejor franja de cada aparato sigue en Energía. La lógica vive en `src/lib/today.js`. Inicio no muestra clima interior.
 - **Agenda**: varios calendarios ICS de solo lectura con vistas **Hoy**, **3 días** y **Semana**. Cada feed tiene nombre, persona y color; se añaden, pausan o borran desde **Calendarios**, sin tocar código. Los eventos fuera de la rejilla 06:00–23:00 aparecen como fichas con hora en la fila de todo el día. La ficha de un evento incluye un QR con su ubicación.
-- **Compra** (vista `lists`): solo la compra, en etiquetas y con «Lo de siempre». La libreta manuscrita con OCR local queda como acción secundaria.
-- **Tareas** (vista `cleaning`, `TasksView.jsx`): limpieza y tareas sueltas en una sola lista, con puntos. La rutina de limpieza (el cuadrante semanal de `cleaning_tasks`, editable en «Rutina semanal») y las tareas sueltas (`list_items` de `tasks`) se agrupan en Hoy, Libres (sin dueño: al marcarlas se pregunta quién la hizo, que se lleva los puntos, `done_by`), Se quedó atrás, Esta semana y Cuando sea. Cada tarea vale 1, 2, 3 o 5 puntos (`points`: 1 bajar la basura, 2 fregar, 3 sábanas, 5 el horno; la rutina, 2 por defecto). A la derecha, el marcador de la semana, los **puntos a mano** (persona, motivo y +1/+2/+3/+5/−1, en `point_events`, con su cruz para quitarlos) y el alta rápida (qué, quién o libre, cuándo y cuánto vale; «Cada semana» con sus días la apunta en la rutina, uno por día, y necesita dueño). Para el marco: **Deshacer** durante 6 s tras marcar y un segundo toque seguido sobre la misma fila se ignora.
+- **Compra** (vista `lists`): solo la compra, en etiquetas agrupadas por pasillos en el orden del súper (`src/lib/aisles.js`, por palabras clave; lo que no reconoce va a «Otros») y con «Lo de siempre» (lo apuntado dos veces o más en ese navegador; mientras no hay historial, lo básico). La libreta manuscrita con OCR local queda como acción secundaria.
+- **Tareas** (vista `cleaning`, `TasksView.jsx`): limpieza y tareas sueltas en una sola lista, con puntos. La rutina de limpieza (el cuadrante semanal de `cleaning_tasks`, editable en «Rutina semanal») y las tareas sueltas (`list_items` de `tasks`) se agrupan en Hoy, Libres (sin dueño: al marcarlas se pregunta quién la hizo, que se lleva los puntos, `done_by`), Se quedó atrás, Esta semana y Cuando sea. Cada tarea vale 2,5, 5, 10 o 20 puntos (`points`: 2,5 bajar la basura, 20 el horno; la rutina, 10 por defecto). A la derecha, el marcador de la semana, los **puntos a mano** (persona, motivo y +2,5/+5/+10/+20/−5, en `point_events`, con su cruz para quitarlos) y el alta rápida (qué, quién o libre, cuándo y cuánto vale; «Cada semana» con sus días la apunta en la rutina, uno por día, y necesita dueño). Para el marco: **Deshacer** durante 6 s tras marcar y un segundo toque seguido sobre la misma fila se ignora.
 - **Tiempo**: temperatura exterior, sensación térmica, icono del cielo, humedad, viento, lluvia, UV, salida y puesta de sol, previsión de siete días y panel **Próximas horas** (temperatura y probabilidad de lluvia de las 12 horas siguientes, con aviso de cuándo empieza a llover).
 - **Energía**: PVPC 2.0 TD hora a hora, precio vigente, mínimo, máximo y media del día, bandas barata/media/cara, gráfico de 24 h con horas pasadas atenuadas y pestañas **Hoy**/**Mañana**. La tarjeta de recomendaciones calcula la mejor franja completa para la lavadora o el termo eléctrico, con duración, consumo y margen configurables; compara con empezar lo antes posible y muestra el ahorro estimado en euros y porcentaje. Incluye fuente, vigencia, impuestos estimados y método de cálculo en una hoja de detalle.
 - **Casa**: temperatura y humedad por habitación, histórico de 24 h y 7 días, tendencia, riesgo de moho, batería/presión del sensor y consejos de ventilación. Solo aparece con `VITE_CLIMATE_ENABLED=true`.
 - **Fotos**: salvapantallas con las fotos de un álbum compartido de iCloud, tras unos minutos sin actividad o desde el botón del rail. De noche solo muestra la hora, tenue. Se vuelve tocando la pantalla, con `Esc` o con las flechas.
 - **Modo noche**: variante de tinta oscura del mismo diseño, automática por horario y con atenuación manual temporal.
-- **Sin conexión y frescura**: un service worker guarda el shell y la última respuesta buena de tiempo, listas, limpieza, agenda y energía. Si una fuente falla, el dashboard sigue mostrando la copia anterior y un aviso indica cuándo se actualizó por última vez. La vista **Energía** conserva además su propia copia en `localStorage` y marca como «sin confirmar» cualquier dato que no cubra la hora actual. La recarga nocturna y la vuelta a **Hoy** tras inactividad mantienen el kiosco fresco.
+- **Sin conexión y frescura**: un service worker guarda el shell y la última respuesta buena de tiempo, listas, limpieza, agenda y energía. Si una fuente falla, el dashboard sigue mostrando la copia anterior y el estado de la barra lateral se pone en ámbar con un punto («2 avisos»); al tocarlo se abre, junto a la barra, el detalle de cuándo se actualizó cada fuente. Nada flota sobre la pantalla sin pedirlo. La vista **Energía** conserva además su propia copia en `localStorage` y marca como «sin confirmar» cualquier dato que no cubra la hora actual. La recarga nocturna y la vuelta a **Hoy** tras inactividad mantienen el kiosco fresco.
 - **Panel de pruebas y diagnóstico**: en modo demo, `D`, pulsación larga en el reloj del rail o `?demo` abren hora simulada, idle, red, datos antiguos y accesos rápidos. En producción esos gestos abren el diagnóstico. `Shift+I` o `?diag` muestran estado de red, service worker, cachés, almacenamiento y compatibilidad del WebView.
 - **Deep links**: `#home`, `#agenda`, `#lists`, `#cleaning`, `#weather`, `#energy` y, con clima activado, `#climate`.
 - **Demo navegable** sin backend (`npm run dev:demo`), con listas, limpieza, calendarios y precios PVPC simulados que se identifican como demo.
@@ -126,7 +126,7 @@ Rutas principales: `GET /api/cleaning?week=YYYY-MM-DD`, `PATCH /api/cleaning/che
 
 ### Puntos, rachas y resumen semanal
 
-Los puntos se calculan en el cliente (`src/lib/points.js`) y se reinician el lunes: lo que valga cada tarea de limpieza hecha (2 si no se dice otra cosa), lo que valga cada tarea suelta hecha esta semana (1 por defecto) para quien la hizo (`done_by`) o, si no, para su dueño, los puntos a mano de la semana (`/api/points`), +4 a quien termina todo lo suyo y +2 a cada uno si la casa completa la semana. Una tarea suelta cuenta en la semana en que se hizo (`done_at`), aunque luego se edite. Los niveles van de «Huevo» a «Leyenda de casa». La racha personal sale de `personStreaks` del Worker más la semana en curso si ya está completa. El **resumen semanal** (`WeeklySummary.jsx`) se abre solo el domingo desde las 20:00, una vez por semana (`localStorage` `bbds.summary.seen`), y siempre desde el trofeo de Hoy. Es una hoja `ink-sheet` como Energía o Calendarios: Yoshi (con el trofeo si hay ganador) en la cabecera, una columna por persona con puntos, nivel, limpieza, tareas y racha, un título para cada uno («Todo hecho», «En racha», «Modo sofá»…), la casa y la semana que viene.
+Los puntos se calculan en el cliente (`src/lib/points.js`) y se reinician el lunes: lo que valga cada tarea de limpieza hecha (10 si no se dice otra cosa), lo que valga cada tarea suelta hecha esta semana (5 por defecto) para quien la hizo (`done_by`) o, si no, para su dueño, los puntos a mano de la semana (`/api/points`), +20 a quien termina todo lo suyo y +10 a cada uno si la casa completa la semana. Una tarea suelta cuenta en la semana en que se hizo (`done_at`), aunque luego se edite. Desde **Canjear** (en el marcador de Tareas) cada uno gasta sus puntos de la semana en **recompensas** («Elijo la peli», «Hoy no friego», «Desayuno en la cama»…): se elige quién, la recompensa y se confirma; lo canjeado esta semana sale abajo con su cruz para deshacerlo. El saldo es lo ganado esta semana menos lo canjeado esta semana y no pasa a la siguiente; canjear no baja el marcador, el nivel ni la corona. El catálogo está en `src/lib/rewards.js`; cada canje guarda su nombre y su coste en `redemptions` (`GET /api/points` devuelve `events` y `redemptions`, `POST /api/points/redeem`, `DELETE /api/points/redeem/:id`). Los niveles van de «Huevo» a «Leyenda de casa». La racha personal sale de `personStreaks` del Worker más la semana en curso si ya está completa. El **resumen semanal** (`WeeklySummary.jsx`) se abre solo el domingo desde las 20:00, una vez por semana (`localStorage` `bbds.summary.seen`), y siempre desde el trofeo de Hoy. Es una hoja `ink-sheet` como Energía o Calendarios: Yoshi (con el trofeo si hay ganador) en la cabecera, una columna por persona con puntos, nivel, limpieza, tareas y racha, un título para cada uno («Todo hecho», «En racha», «Modo sofá»…), la casa y la semana que viene.
 
 ## Notas en Hoy
 
@@ -180,7 +180,7 @@ Configuración disponible por electrodoméstico: duración, consumo total (o por
 
 En producción, `public/sw.js` guarda el shell de la app y la última respuesta buena de las rutas same-origin (`/api/...`) y de Open-Meteo. Las peticiones usan red primero y, si fallan, caen a la copia guardada. Lo que lleva hash en el nombre (`/assets/`) y las fuentes (`/fonts/`) no cambian nunca: salen de la copia tal cual, sin volver a descargarlos ni copiarlos en cada arranque (en el marco era lo más caro de abrir), y de `/assets/` se guardan como mucho 160 archivos. Si cambia la estrategia de caché, sube `VERSION` en `sw.js` para que el aparato instale el nuevo. Para probarlo en local: `npx vite build --mode demo` y `npm run preview`. El service worker solo se registra en el build de producción, no en `npm run dev`; para probarlo hay que servir `dist` con `npm run preview` desde `localhost` o HTTPS.
 
-La franja de estado global resume la frescura de cuatro fuentes: tiempo, listas, limpieza y agenda. **Energía** mantiene su propio aviso de vigencia y copia local tanto en Inicio como en su vista, porque el precio se consulta al arrancar y se refresca cada 30 minutos. Si una fuente falla, se sigue viendo el último dato y el aviso explica cuándo se actualizó. **Estado** abre el detalle por fuente; cada tarjeta de la agenda también puede mostrar su propio error de feed sin tumbar los demás.
+El aviso de estado (punto en la barra lateral, detalle al tocarlo) resume la frescura de cuatro fuentes: tiempo, listas, limpieza y agenda. **Energía** mantiene su propio aviso de vigencia y copia local tanto en Inicio como en su vista, porque el precio se consulta al arrancar y se refresca cada 30 minutos. Si una fuente falla, se sigue viendo el último dato y el aviso explica cuándo se actualizó. **Estado** abre el detalle por fuente; cada tarjeta de la agenda también puede mostrar su propio error de feed sin tumbar los demás.
 
 En modo demo, el panel de pruebas (`D`, pulsación larga en el reloj del rail o `?demo`) permite simular **sin conexión**, forzar **datos de hace 2 h**, cambiar la hora y el idle o abrir el diagnóstico. El diagnóstico (`Shift+I` o `?diag`) muestra red, visibilidad, service worker, cachés, almacenamiento y una comprobación de APIs/CSS del WebView; el botón **Copiar diagnóstico** genera un JSON para pegar en un informe.
 
@@ -200,6 +200,7 @@ VITE_LONGITUDE=-3.7849
 VITE_TIMEZONE=Europe/Madrid
 VITE_NIGHT_START=22:30
 VITE_NIGHT_END=07:30
+VITE_MORNING_END=10:00
 VITE_CALENDAR_DAYS=21
 VITE_CLIMATE_ENABLED=false
 VITE_SCREENSAVER_IDLE_MINUTES=3
@@ -243,6 +244,49 @@ La URL debe ser la dirección secreta del calendario en formato iCal (`.ics` o `
 `ICLOUD_ICS_URL` sigue siendo opcional para instalaciones antiguas: si existe y la tabla de calendarios está vacía, el Worker la siembra una vez como calendario **Casa**. Después se gestiona como cualquier otro feed y no reaparece si se borra.
 
 La agenda es de solo lectura. El dashboard abre la ficha de una cita para consultar fecha, hora, lugar y QR de ubicación; cualquier cambio se hace desde el dispositivo donde está el calendario original.
+
+### Bot de Telegram: la compra en el móvil
+
+Un bot para los dos (mejor en un grupo con él) que escribe en las mismas tablas que la pantalla (`worker/telegram.js`, ruta `POST /api/telegram`):
+
+- **/lista**: la compra por pasillos, con un botón por cosa. Al tocarlo se tacha (✓) y el mensaje se actualiza en el sitio; al tocarlo otra vez vuelve. Abajo, **Actualizar** y **Quitar tachados**. En la pared desaparece en el siguiente sondeo.
+- **Texto suelto** («leche, huevos y pan»): se apunta en la compra, una cosa por coma; la «y» solo separa si hay comas («Tomates y albahaca» es una). Lo que ya estaba pendiente no se repite.
+- **/t bajar la basura mañana**: una tarea libre en Tareas, para hoy, mañana o sin fecha.
+
+Solo atiende las llamadas con la cabecera secreta de Telegram (`TELEGRAM_WEBHOOK_SECRET`) y a los ids de `TELEGRAM_USERS`; a un desconocido, en privado, le dice su id y nada más. Sin `TELEGRAM_BOT_TOKEN` la ruta no existe. Siempre responde 200 para que Telegram no reintente.
+
+Puesta en marcha (unos 5 minutos):
+
+1. En Telegram, habla con **@BotFather**: `/newbot`, elige nombre y te da el token. Después `/setprivacy` → tu bot → **Disable**, para que en el grupo lea el texto suelto y no solo los comandos.
+2. Guarda los secretos en el Worker (el token no se pega en ningún chat ni archivo del repositorio). El secreto del webhook lo inventas tú: letras, números, `_` o `-`, cuanto más largo mejor.
+
+   ```bash
+   npx wrangler secret put TELEGRAM_BOT_TOKEN
+   npx wrangler secret put TELEGRAM_WEBHOOK_SECRET
+   ```
+
+3. Despliega (push a `main`) y conecta el bot con el Worker. En PowerShell:
+
+   ```powershell
+   $env:TELEGRAM_BOT_TOKEN="..."; $env:TELEGRAM_WEBHOOK_SECRET="..."; $env:BBDS_URL="https://tu-worker.workers.dev"; npm run telegram:setup
+   ```
+
+4. Cada uno escribe al bot en privado: contesta con su id. Guarda los dos, separados por comas, con `npx wrangler secret put TELEGRAM_USERS`.
+5. Crea un grupo con los dos y el bot, y escribe `/lista`.
+
+Para probar en local sin Telegram: `wrangler dev` acepta `--var TELEGRAM_API:http://127.0.0.1:PUERTO/bot` para apuntar las respuestas a un servidor de prueba.
+
+### Sensores de verdad: Xiaomi + un ESP32 de puente
+
+Lo más barato y sencillo (unos 20 € para tres habitaciones):
+
+1. **Compra** termómetros Xiaomi **LYWSD03MMC** (unos 4 € cada uno, con pantalla y pila de botón para un año) y un **ESP32** normal (ESP32-WROOM / «ESP32 DevKit», unos 5 €) con un cargador USB cualquiera.
+2. **Firmware pvvx en cada termómetro**: desde Chrome en el móvil o el PC con Bluetooth, abre el flasheador de pvvx (`https://pvvx.github.io/ATC_MiThermometer/TelinkMiFlasher.html`), conecta, flashea el firmware personalizado y deja el formato de anuncio en «PVVX (Custom)». Apunta la MAC de cada uno (empieza por `A4:C1:38`).
+3. **Token**: `npx wrangler secret put SENSOR_TOKEN` con una clave larga cualquiera.
+4. **Puente**: copia `sensors/secrets.example.yaml` como `sensors/secrets.yaml` (no se sube), rellénalo, pon las MAC en `sensors/bbds-puente.yaml` y, con el ESP32 por USB: `pip install esphome` y `esphome run sensors/bbds-puente.yaml`. Después se actualiza por Wi-Fi.
+5. **Activa Casa**: `VITE_CLIMATE_ENABLED=true` en las variables de build de Cloudflare. Los `room` del YAML deben coincidir con `ROOMS` de `src/config.js`; para la funda del oboe, descomenta `estudio` en los dos sitios.
+
+El Frameo no hace nada aquí: los sensores mandan al Worker y la pantalla solo lee.
 
 ### Simulador de sensores
 
@@ -325,6 +369,12 @@ X-Sensor-Token: dev-sensor-token
 | `PUT` | `/api/photos/album` | `{ url }` con el enlace público del álbum; se comprueba antes de guardarlo. |
 | `DELETE` | `/api/photos/album` | Quita el álbum guardado en la app. |
 | `GET` | `/api/photos/:id` | La foto, servida con caché. No pide token: un `<img>` no puede enviarlo. |
+| `GET` | `/api/points` | Puntos a mano (`events`) y recompensas canjeadas (`redemptions`), los más recientes. |
+| `POST` | `/api/points` | `{ personId, points, reason? }`; de −20 a 50, de medio en medio punto. |
+| `DELETE` | `/api/points/:id` | Quita unos puntos a mano. |
+| `POST` | `/api/points/redeem` | `{ personId, reward, cost }`; canjea una recompensa (coste de 0,5 a 200). |
+| `DELETE` | `/api/points/redeem/:id` | Deshace un canje. |
+| `POST` | `/api/telegram` | Webhook del bot. Solo con la cabecera `X-Telegram-Bot-Api-Secret-Token` y usuarios de `TELEGRAM_USERS`; no usa `DASHBOARD_TOKEN`. |
 
 `GET /api/electricity` devuelve `source` (`id`, `label`, `priceType`, `note`, `url`), `days` con `{ date, hours: [{ start, price }] }` en €/kWh, `updatedAt` (publicación de la fuente), `fetchedAt` (consulta), `stale`, `timezone` y, si procede, `warning`. Las horas se agrupan por día de Madrid; `start` es un instante ISO con offset para que los cambios de hora no dependan de la posición en la lista.
 

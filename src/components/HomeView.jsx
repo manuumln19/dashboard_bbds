@@ -1,6 +1,7 @@
 import { lazy, memo, Suspense, useCallback, useEffect, useState } from "react";
 import { HomeNotes, NoteComposer } from "./HomeNotes";
 import { markMorningBrief, MorningBrief, morningBriefDue } from "./MorningBrief";
+import { dismissMorning, isMorningTime, MorningHome, morningDismissed } from "./MorningHome";
 import { NightHome } from "./NightHome";
 import { TodayNext } from "./TodayNext";
 import { TodayNow } from "./TodayNow";
@@ -39,6 +40,7 @@ export const HomeView = memo(function HomeView({
   onOpenCleaning,
   hidden = false,
   night = false,
+  onWakeNight,
   wake = 0,
 }) {
   const [summaryOpen, setSummaryOpen] = useState(false);
@@ -48,6 +50,18 @@ export const HomeView = memo(function HomeView({
   const closeSummary = useCallback(() => setSummaryOpen(false), []);
   const openWriting = useCallback(() => setWriting(true), []);
   const closeWriting = useCallback(() => setWriting(false), []);
+  // Tres momentos: la mañana (salir de casa), el día (el panel de siempre) y
+  // la noche (NightHome). «Ver todo el día» quita la mañana hasta mañana.
+  const [morningOff, setMorningOff] = useState(() => morningDismissed(new Date()));
+  const morningTime = isMorningTime(now);
+  const morning = !night && morningTime && !morningOff;
+  const showDay = useCallback(() => {
+    dismissMorning(new Date());
+    setMorningOff(true);
+  }, []);
+  useEffect(() => {
+    if (!morningTime && morningOff) setMorningOff(false);
+  }, [morningTime, morningOff]);
   // Solo con Hoy a la vista: oculta, no debe abrirse encima de otra vista.
   const due = !hidden && !cleaning.loading && summaryDue(now, cleaning.weekKey);
 
@@ -63,8 +77,9 @@ export const HomeView = memo(function HomeView({
     const at = new Date();
     if (hidden || night || !morningBriefDue(at)) return;
     markMorningBrief(at);
-    setBriefOpen(true);
-  }, [wake, hidden, night]);
+    // La pantalla de mañana ya cuenta el día: sin hoja encima.
+    if (!morning) setBriefOpen(true);
+  }, [wake, hidden, night, morning]);
 
   return (
     <section
@@ -74,7 +89,24 @@ export const HomeView = memo(function HomeView({
       style={hidden ? HIDDEN : undefined}
     >
       {night ? (
-        <NightHome now={now} weather={weather.weather} events={calendar.events} cleaning={cleaning} mascot={mascot} />
+        <NightHome
+          now={now}
+          weather={weather.weather}
+          events={calendar.events}
+          cleaning={cleaning}
+          mascot={mascot}
+          onWake={onWakeNight}
+        />
+      ) : morning ? (
+        <MorningHome
+          now={now}
+          weather={weather.weather}
+          events={calendar.events}
+          lists={lists}
+          cleaning={cleaning}
+          season={season}
+          onShowDay={showDay}
+        />
       ) : (
         <div className="today-board">
           <TodayNow
@@ -120,8 +152,8 @@ export const HomeView = memo(function HomeView({
           />
         </div>
       )}
-      {/* De noche, sin pósits: la pantalla tranquila. */}
-      {night ? null : <HomeNotes notes={notes} people={cleaning.people} now={now} />}
+      {/* De noche y de mañana, sin pósits: la pantalla tranquila. */}
+      {night || morning ? null : <HomeNotes notes={notes} people={cleaning.people} now={now} />}
       {writing ? <NoteComposer notes={notes} people={cleaning.people} onClose={closeWriting} /> : null}
       {briefOpen ? (
         <MorningBrief

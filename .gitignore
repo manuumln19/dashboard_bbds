@@ -11,3 +11,7 @@ dist
 Thumbs.db
 
 kiosk/build/
+
+# ESPHome: claves del puente de sensores
+sensors/secrets.yaml
+sensors/.esphome/

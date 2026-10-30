@@ -8,19 +8,21 @@ import {
 } from "lucide-react";
 import { formatFreshnessTime } from "../lib/freshness";
 
-export const StatusBanner = memo(function StatusBanner({ online, health, onOpenDiagnostics }) {
-  const [expanded, setExpanded] = useState(false);
-  const [dismissedKey, setDismissedKey] = useState(null);
+// Se abre desde el punto del rail, ya desplegado, y se cierra solo cuando
+// los avisos desaparecen.
+export const StatusBanner = memo(function StatusBanner({ open, online, health, onClose, onOpenDiagnostics }) {
+  const [expanded, setExpanded] = useState(true);
   const issues = health.issues;
-  const key = `${online ? "on" : "off"}:${issues
-    .map((issue) => issue.id)
-    .join("|")}`;
 
   useEffect(() => {
-    setExpanded(false);
-  }, [key]);
+    if (open) setExpanded(true);
+  }, [open]);
 
-  if (!issues.length || dismissedKey === key) return null;
+  useEffect(() => {
+    if (open && !issues.length) onClose();
+  }, [open, issues.length, onClose]);
+
+  if (!open || !issues.length) return null;
 
   const offline = !online;
   const first = issues[0];
@@ -68,8 +70,8 @@ export const StatusBanner = memo(function StatusBanner({ online, health, onOpenD
         <button
           type="button"
           className="status-banner__close"
-          onClick={() => setDismissedKey(key)}
-          aria-label="Ocultar el aviso hasta que cambie"
+          onClick={onClose}
+          aria-label="Cerrar el aviso"
         >
           <X size={15} strokeWidth={2} aria-hidden="true" />
         </button>

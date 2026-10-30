@@ -95,7 +95,10 @@ export const TodayTimeline = memo(function TodayTimeline({ now, events, lists, c
                             : `${entry.title}. Abrir agenda`
                         }
                       >
-                        <span className="today-entry__time">{entry.time}</span>
+                        {/* Sin hora, la columna queda vacía; la limpieza lleva su icono. */}
+                        <span className="today-entry__time">
+                          {entry.time || (entry.kind === "cleaning" ? <SprayCan size={16} strokeWidth={1.8} aria-label="Limpieza" /> : null)}
+                        </span>
                         <span className="today-entry__mark" aria-hidden="true">
                           {checkable ? (
                             <CheckMark checked={Boolean(entry.done)} small />

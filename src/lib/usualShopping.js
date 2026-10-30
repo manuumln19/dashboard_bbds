@@ -35,12 +35,22 @@ export function rememberShopping(text) {
   }
 }
 
-// Lo que se ha apuntado al menos dos veces y ahora no está en la lista.
+// Mientras no hay historial, lo básico de cualquier casa.
+const STAPLES = ["Leche", "Pan", "Huevos", "Plátanos", "Tomates", "Yogures", "Café", "Papel higiénico", "Aceite", "Agua"];
+
+// Lo que se ha apuntado al menos dos veces y ahora no está en la lista; si
+// faltan, se completa con lo básico.
 export function usualShopping(openTexts, limit = 8) {
   const open = new Set((openTexts || []).map(normalize));
-  return Object.entries(read())
+  const learned = Object.entries(read())
     .filter(([key, entry]) => entry.n >= 2 && !open.has(key))
     .sort((a, b) => b[1].n - a[1].n || b[1].at - a[1].at)
     .slice(0, limit)
     .map(([, entry]) => entry.text);
+  const seen = new Set(learned.map(normalize));
+  STAPLES.forEach((text) => {
+    const key = normalize(text);
+    if (learned.length < limit && !open.has(key) && !seen.has(key)) learned.push(text);
+  });
+  return learned;
 }

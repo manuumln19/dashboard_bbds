@@ -6,7 +6,7 @@ import {
   currentPriceState,
   formatPrice,
 } from "../lib/energy";
-import { weeklyScores } from "../lib/points";
+import { formatPoints, weeklyScores } from "../lib/points";
 import { cheapPower, cleaningDayIndex } from "../lib/today";
 import { EggAvatar } from "./EggAvatar";
 
@@ -27,7 +27,14 @@ export const TodayStrip = memo(function TodayStrip({
   const today = cleaningDayIndex(now);
   const todayTasks = cleaning.tasks.filter((task) => task.day === today);
   const todayDone = todayTasks.filter((task) => task.done).length;
+  const left = todayTasks.length - todayDone;
   const { scores, mvp } = weeklyScores({ cleaning, lists, now, pointEvents });
+  const ranked = [...scores].sort((a, b) => b.points - a.points);
+  const lead = mvp && ranked[1] ? mvp.points - ranked[1].points : 0;
+  const pendingNames = todayTasks
+    .filter((task) => !task.done && task.person)
+    .map((task) => task.person.name)
+    .filter((name, index, all) => all.indexOf(name) === index);
 
   const data = electricity.data;
   const state = data ? currentPriceState(data, now) : null;
@@ -40,11 +47,11 @@ export const TodayStrip = memo(function TodayStrip({
       <button type="button" className="today-strip__item today-strip__item--cleaning" onClick={onOpenCleaning}>
         <SprayCan size={18} strokeWidth={1.8} aria-hidden="true" />
         <span className="today-strip__text">
-          <strong>
-            {todayTasks.length ? (todayDone === todayTasks.length ? "Hecha" : `${todayDone}/${todayTasks.length}`) : "Libre"}
-          </strong>
+          <strong>{!todayTasks.length ? "Hoy libre" : left ? `Faltan ${left}` : "Todo limpio"}</strong>
           <small>
-            Limpieza hoy · {cleaning.doneCount}/{cleaning.totalCount} semana
+            {left && pendingNames.length
+              ? `de limpieza hoy · ${pendingNames.join(" y ")}`
+              : `Llevamos ${cleaning.doneCount} de ${cleaning.totalCount} esta semana`}
           </small>
         </span>
       </button>
@@ -58,7 +65,7 @@ export const TodayStrip = memo(function TodayStrip({
                 className={`today-strip__person${mvp && mvp.person.id === entry.person.id ? " is-mvp" : ""}`}
               >
                 <EggAvatar person={entry.person} size={24} cracked={entry.ownWeek} level={entry.level.index} />
-                <strong>{entry.points}</strong>
+                <strong>{formatPoints(entry.points)}</strong>
                 {entry.streak ? (
                   <small className="today-strip__flame">
                     <Flame size={12} strokeWidth={2.2} aria-hidden="true" />
@@ -68,7 +75,13 @@ export const TodayStrip = memo(function TodayStrip({
               </span>
             ))}
           </span>
-          <small>{mvp ? `Va ganando ${mvp.person.name}` : "Puntos de la semana"}</small>
+          <small>
+            {mvp
+              ? `${mvp.person.name} gana por ${formatPoints(lead)}`
+              : scores.some((entry) => entry.points)
+                ? "Vais empatados"
+                : "Puntos de la semana"}
+          </small>
         </span>
         <Trophy className="today-strip__trophy" size={16} strokeWidth={1.9} aria-label="Resumen de la semana" />
       </button>
@@ -81,7 +94,7 @@ export const TodayStrip = memo(function TodayStrip({
             <em> €/kWh</em>
             {band ? <span className={`energy-band energy-band--${band.id}`}>{band.label}</span> : null}
           </strong>
-          <small>{cheap ? cheap.label : "Luz ahora"}</small>
+          <small>{cheap ? cheap.label : "Precio de la luz ahora"}</small>
         </span>
       </button>
     </nav>

@@ -16,6 +16,7 @@
     "db:migrate:local": "wrangler d1 migrations apply bbds-db --local",
     "db:migrate": "wrangler d1 migrations apply bbds-db --remote",
     "sensors:simulate": "node scripts/simulate-sensors.mjs",
+    "telegram:setup": "node scripts/telegram-setup.mjs",
     "check:webview": "node scripts/check-webview.mjs",
     "check:energy": "node scripts/check-energy.mjs",
     "deploy": "npm run build && wrangler deploy"

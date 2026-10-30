@@ -139,8 +139,8 @@ export function loadDemoPoints() {
   if (saved) return saved;
   const hour = 60 * 60 * 1000;
   return [
-    { id: "pt-demo-1", personId: "manu", points: 3, reason: "Hizo la cena", createdAt: new Date(Date.now() - 20 * hour).toISOString() },
-    { id: "pt-demo-2", personId: "paco", points: 1, reason: "Bajó la basura", createdAt: new Date(Date.now() - 3 * hour).toISOString() },
+    { id: "pt-demo-1", personId: "manu", points: 10, reason: "Hizo la cena", createdAt: new Date(Date.now() - 20 * hour).toISOString() },
+    { id: "pt-demo-2", personId: "paco", points: 2.5, reason: "Bajó la basura", createdAt: new Date(Date.now() - 3 * hour).toISOString() },
   ];
 }
 
@@ -149,6 +149,20 @@ export function saveDemoPoints(events) {
     window.localStorage.setItem(POINTS_KEY, JSON.stringify(events));
   } catch {
     // Los puntos se ven igual; solo se pierden al recargar.
+  }
+}
+
+const REDEMPTIONS_KEY = "bbds.demo.redemptions.v1";
+
+export function loadDemoRedemptions() {
+  return readArray(REDEMPTIONS_KEY) || [];
+}
+
+export function saveDemoRedemptions(redemptions) {
+  try {
+    window.localStorage.setItem(REDEMPTIONS_KEY, JSON.stringify(redemptions));
+  } catch {
+    // Se ven igual; solo se pierden al recargar.
   }
 }
 

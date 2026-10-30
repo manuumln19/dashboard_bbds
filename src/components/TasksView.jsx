@@ -1,16 +1,17 @@
 import { useEffect, useRef, useState } from "react";
-import { Flame, Pencil, Plus, RotateCcw, Undo2, X } from "lucide-react";
+import { Flame, Gift, Pencil, Plus, RotateCcw, Undo2, X } from "lucide-react";
 import { weekDays, weekRangeLabel, weekdayLong } from "../lib/cleaning";
-import { levelFor, weeklyScores } from "../lib/points";
+import { formatPoints, levelFor, weeklyScores } from "../lib/points";
 import { cleaningDayIndex } from "../lib/today";
 import { CheckMark } from "./CheckMark";
 import { CleaningEditor } from "./CleaningEditor";
+import { RewardsSheet } from "./RewardsSheet";
 
 const UNDO_MS = 6000;
 // En el marco un toque lento llega a veces dos veces: el segundo se ignora.
 const DOUBLE_TAP_MS = 800;
-const TASK_POINTS = [1, 2, 3, 5];
-const MANUAL_POINTS = [1, 2, 3, 5, -1];
+const TASK_POINTS = [2.5, 5, 10, 20];
+const MANUAL_POINTS = [2.5, 5, 10, 20, -5];
 const REASONS = ["Hizo la cena", "Fregó", "Bajó la basura", "Hizo la compra", "Puso lavadoras"];
 
 function dayKey(date) {
@@ -35,7 +36,7 @@ function buildEntries({ cleaning, lists, now }) {
     title: task.title,
     meta: `${task.area} · cada ${weekdayLong(weekDays(now)[task.day]).toLowerCase()}`,
     person: task.person,
-    points: task.points || 2,
+    points: task.points || 10,
     done: task.done,
     when: task.day === today ? "today" : task.day < today ? (task.done ? "past" : "late") : "week",
   }));
@@ -60,7 +61,7 @@ function buildEntries({ cleaning, lists, now }) {
             : item.dueOn.slice(8, 10) + "/" + item.dueOn.slice(5, 7)
         : "cuando sea",
       person: item.person,
-      points: item.points || 1,
+      points: item.points || 5,
       done: item.done,
       doneBy: item.doneBy,
       when,
@@ -74,12 +75,19 @@ function buildEntries({ cleaning, lists, now }) {
 // los puntos a mano y apuntar una tarea nueva.
 export function TasksView({ now, cleaning, lists, points }) {
   const [editorOpen, setEditorOpen] = useState(false);
+  const [rewardsOpen, setRewardsOpen] = useState(false);
   const [asking, setAsking] = useState(null);
   const [undo, setUndo] = useState(null);
   const lastTap = useRef({ key: "", at: 0 });
   const people = cleaning.people;
   const entries = buildEntries({ cleaning, lists, now });
-  const { scores, mvp } = weeklyScores({ cleaning, lists, now, pointEvents: points.events });
+  const { scores, mvp } = weeklyScores({
+    cleaning,
+    lists,
+    now,
+    pointEvents: points.events,
+    redemptions: points.redemptions,
+  });
 
   useEffect(() => {
     if (!undo) return undefined;
@@ -152,7 +160,7 @@ export function TasksView({ now, cleaning, lists, points }) {
               {who ? ` · ${who.name}` : ""}
             </span>
           </span>
-          <span className="chore__points">{entry.points}</span>
+          <span className="chore__points">{formatPoints(entry.points)}</span>
         </button>
         {entry.kind === "task" ? (
           <button type="button" className="chore__remove" onClick={() => lists.removeItem(entry.item)} aria-label={`Borrar: ${entry.title}`}>
@@ -223,7 +231,7 @@ export function TasksView({ now, cleaning, lists, points }) {
         </section>
 
         <aside className="tasks-side">
-          <Scoreboard scores={scores} mvp={mvp} />
+          <Scoreboard scores={scores} mvp={mvp} onRewards={() => setRewardsOpen(true)} />
           <ManualPoints people={people} points={points} />
           <NewTask people={people} lists={lists} cleaning={cleaning} now={now} />
         </aside>
@@ -242,15 +250,22 @@ export function TasksView({ now, cleaning, lists, points }) {
       ) : null}
 
       <CleaningEditor open={editorOpen} onClose={() => setEditorOpen(false)} cleaning={cleaning} />
+      {rewardsOpen ? <RewardsSheet scores={scores} points={points} now={now} onClose={() => setRewardsOpen(false)} /> : null}
     </section>
   );
 }
 
-function Scoreboard({ scores, mvp }) {
+function Scoreboard({ scores, mvp, onRewards }) {
   const top = Math.max(1, ...scores.map((entry) => entry.points));
   return (
     <section className="card tasks-score" aria-label="Marcador de la semana">
-      <h2>Marcador</h2>
+      <div className="tasks-score__head">
+        <h2>Marcador</h2>
+        <button type="button" className="tasks-score__rewards" onClick={onRewards}>
+          <Gift size={15} strokeWidth={1.9} aria-hidden="true" />
+          Canjear
+        </button>
+      </div>
       {scores.map((entry) => (
         <div key={entry.person.id} className={`tasks-score__row tone-${entry.person.tone}`}>
           <span className="who-dot" aria-hidden="true" />
@@ -258,7 +273,7 @@ function Scoreboard({ scores, mvp }) {
           <span className="tasks-score__bar" aria-hidden="true">
             <i style={{ width: `${Math.max(0, Math.round((entry.points / top) * 100))}%` }} />
           </span>
-          <strong>{entry.points}</strong>
+          <strong>{formatPoints(entry.points)}</strong>
         </div>
       ))}
       <p className="tasks-score__note">
@@ -324,7 +339,7 @@ function ManualPoints({ people, points }) {
               setReason("");
             }}
           >
-            {value > 0 ? `+${value}` : `−${Math.abs(value)}`}
+            {value > 0 ? `+${formatPoints(value)}` : `−${formatPoints(Math.abs(value))}`}
           </button>
         ))}
       </div>
@@ -333,7 +348,7 @@ function ManualPoints({ people, points }) {
           {recent.map((event) => (
             <li key={event.id}>
               <span>
-                {event.points > 0 ? `+${event.points}` : `−${Math.abs(event.points)}`} {nameOf(event.personId)}
+                {event.points > 0 ? `+${formatPoints(event.points)}` : `−${formatPoints(Math.abs(event.points))}`} {nameOf(event.personId)}
                 {event.reason ? ` · ${event.reason}` : ""}
               </span>
               <button type="button" onClick={() => points.removePoints(event.id)} aria-label="Quitar estos puntos">
@@ -355,7 +370,7 @@ function NewTask({ people, lists, cleaning, now }) {
   const [personId, setPersonId] = useState("");
   const [when, setWhen] = useState("today");
   const [days, setDays] = useState(() => [cleaningDayIndex(now)]);
-  const [value, setValue] = useState(1);
+  const [value, setValue] = useState(5);
   const weekly = when === "weekly";
   const needsOwner = weekly && !personId;
 
@@ -424,7 +439,7 @@ function NewTask({ people, lists, cleaning, now }) {
           : null}
         {TASK_POINTS.map((amount) => (
           <button key={amount} type="button" className={`tasks-chip is-small${value === amount ? " is-on" : ""}`} aria-pressed={value === amount} onClick={() => setValue(amount)}>
-            {amount} {amount === 1 ? "pt" : "pts"}
+            {formatPoints(amount)} pts
           </button>
         ))}
       </div>

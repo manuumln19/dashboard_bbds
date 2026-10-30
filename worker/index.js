@@ -1,4 +1,5 @@
 import ICAL from "ical.js";
+import { handleTelegram } from "./telegram.js";
 
 const JSON_HEADERS = {
   "Content-Type": "application/json; charset=utf-8",
@@ -251,15 +252,15 @@ function normalizeBirthday(raw) {
   return value;
 }
 
-// Lo que vale una tarea: 1 (bajar la basura), 2 (fregar), 3 (sábanas) o 5
-// (el horno). La rutina, sin valor, vale 2.
-const TASK_POINTS = new Set([1, 2, 3, 5]);
-const TASK_POINTS_DEFAULT = 2;
+// Lo que vale una tarea: 2,5 (bajar la basura), 5, 10 o 20 (el horno). La
+// rutina, sin valor, vale 10.
+const TASK_POINTS = new Set([2.5, 5, 10, 20]);
+const TASK_POINTS_DEFAULT = 10;
 
 function normalizePoints(raw) {
   if (raw === null || raw === undefined || raw === "") return null;
   const value = Number(raw);
-  if (!TASK_POINTS.has(value)) throw new HttpError(400, "Los puntos deben ser 1, 2, 3 o 5");
+  if (!TASK_POINTS.has(value)) throw new HttpError(400, "Los puntos deben ser 2,5, 5, 10 o 20");
   return value;
 }
 
@@ -1366,11 +1367,61 @@ async function fetchPointEvents(env) {
   }));
 }
 
+// Recompensas canjeadas («elijo la peli»): nombre y coste en el momento de
+// canjear. La app resta las de la semana del saldo de cada uno.
+const REDEMPTIONS_KEEP = 100;
+
+async function fetchRedemptions(env) {
+  const { results } = await env.DB.prepare(
+    `SELECT id, person_id, reward, cost, created_at FROM redemptions
+      ORDER BY created_at DESC LIMIT 40`
+  ).all();
+  return (results || []).map((row) => ({
+    id: row.id,
+    personId: row.person_id,
+    reward: row.reward,
+    cost: Number(row.cost),
+    createdAt: row.created_at,
+  }));
+}
+
+async function pointsPayload(env) {
+  const [events, redemptions] = await Promise.all([fetchPointEvents(env), fetchRedemptions(env)]);
+  return { events, redemptions };
+}
+
 async function handlePoints(request, env, url) {
   requireDashboard(request, env);
 
   if (url.pathname === "/api/points" && request.method === "GET") {
-    return json({ events: await fetchPointEvents(env) });
+    return json(await pointsPayload(env));
+  }
+
+  if (url.pathname === "/api/points/redeem" && request.method === "POST") {
+    const body = await readJson(request);
+    const person = await getPerson(env, body.personId);
+    if (!person) throw new HttpError(400, "¿Quién canjea?");
+    const reward = normalizeText(body.reward).slice(0, 60);
+    if (!reward) throw new HttpError(400, "Falta la recompensa");
+    const cost = Number(body.cost);
+    if (!Number.isInteger(cost * 2) || cost <= 0 || cost > 200) {
+      throw new HttpError(400, "El coste debe ir de 0,5 a 200 puntos");
+    }
+    await env.DB.batch([
+      env.DB.prepare(
+        "INSERT INTO redemptions (id, person_id, reward, cost, created_at) VALUES (?, ?, ?, ?, ?)"
+      ).bind(`rw-${crypto.randomUUID().slice(0, 8)}`, person.id, reward, cost, new Date().toISOString()),
+      env.DB.prepare(
+        "DELETE FROM redemptions WHERE id NOT IN (SELECT id FROM redemptions ORDER BY created_at DESC LIMIT ?)"
+      ).bind(REDEMPTIONS_KEEP),
+    ]);
+    return json(await pointsPayload(env), 201);
+  }
+
+  const redeemed = url.pathname.match(/^\/api\/points\/redeem\/([a-z0-9_-]+)$/);
+  if (redeemed && request.method === "DELETE") {
+    await env.DB.prepare("DELETE FROM redemptions WHERE id = ?").bind(redeemed[1]).run();
+    return json(await pointsPayload(env));
   }
 
   if (url.pathname === "/api/points" && request.method === "POST") {
@@ -1378,8 +1429,9 @@ async function handlePoints(request, env, url) {
     const person = await getPerson(env, body.personId);
     if (!person) throw new HttpError(400, "¿Para quién son los puntos?");
     const points = Number(body.points);
-    if (!Number.isInteger(points) || points === 0 || points < -5 || points > 10) {
-      throw new HttpError(400, "Los puntos deben ir de −5 a 10");
+    // De medio en medio punto (2,5), de −20 a 50.
+    if (!Number.isInteger(points * 2) || points === 0 || points < -20 || points > 50) {
+      throw new HttpError(400, "Los puntos deben ir de −20 a 50");
     }
     const reason = normalizeText(body.reason).slice(0, 60) || null;
     await env.DB.batch([
@@ -1390,13 +1442,13 @@ async function handlePoints(request, env, url) {
         "DELETE FROM point_events WHERE id NOT IN (SELECT id FROM point_events ORDER BY created_at DESC LIMIT ?)"
       ).bind(POINT_EVENTS_KEEP),
     ]);
-    return json({ events: await fetchPointEvents(env) }, 201);
+    return json(await pointsPayload(env), 201);
   }
 
   const match = url.pathname.match(/^\/api\/points\/([a-z0-9_-]+)$/);
-  if (match && request.method === "DELETE") {
+  if (match && match[1] !== "redeem" && request.method === "DELETE") {
     await env.DB.prepare("DELETE FROM point_events WHERE id = ?").bind(match[1]).run();
-    return json({ events: await fetchPointEvents(env) });
+    return json(await pointsPayload(env));
   }
 
   throw new HttpError(405, "Método no permitido");
@@ -2522,6 +2574,11 @@ async function route(request, env, url, ctx) {
     });
   }
 
+  // El bot se autentica con su propia cabecera secreta, no con DASHBOARD_TOKEN.
+  if (url.pathname === "/api/telegram") {
+    return handleTelegram(request, env);
+  }
+
   if (url.pathname === "/api/electricity" && request.method === "GET") {
     return handleElectricity(request, env);
   }
@@ -2556,7 +2613,7 @@ async function route(request, env, url, ctx) {
     return handleNotes(request, env, url);
   }
 
-  if (url.pathname === "/api/points" || /^\/api\/points\/[a-z0-9_-]+$/.test(url.pathname)) {
+  if (url.pathname === "/api/points" || /^\/api\/points\/(redeem\/)?[a-z0-9_-]+$/.test(url.pathname)) {
     return handlePoints(request, env, url);
   }
 

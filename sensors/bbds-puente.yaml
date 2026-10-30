@@ -1,0 +1,117 @@
+# BBDS · Puente de sensores
+# Un ESP32 enchufado a un USB escucha por Bluetooth los termómetros Xiaomi
+# LYWSD03MMC (con el firmware pvvx) y cada minuto manda la lectura de cada uno
+# al Worker (POST /api/sensors). Uno basta para toda la casa si llega el
+# Bluetooth (unos 10 m con paredes).
+#
+# Uso: rellena secrets.yaml (copia secrets.example.yaml), pon la MAC de cada
+# termómetro (la enseña el flasheador de pvvx, empieza por A4:C1:38) y:
+#   pip install esphome
+#   esphome run bbds-puente.yaml
+# La primera vez, con el ESP32 conectado por USB; después se actualiza por Wi-Fi.
+#
+# Los `room` deben coincidir con los ids de ROOMS en src/config.js.
+
+esphome:
+  name: bbds-puente
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+logger:
+
+ota:
+  - platform: esphome
+
+http_request:
+  # shortcut: sin comprobar el certificado del Worker; si se quiere, usar
+  # verify_ssl: true con el paquete de certificados de esp-idf.
+  verify_ssl: false
+  timeout: 10s
+
+esp32_ble_tracker:
+  scan_parameters:
+    active: false
+
+sensor:
+  - platform: pvvx_mithermometer
+    mac_address: "A4:C1:38:00:00:01" # Salón
+    temperature:
+      id: salon_t
+    humidity:
+      id: salon_h
+    battery_level:
+      id: salon_b
+
+  - platform: pvvx_mithermometer
+    mac_address: "A4:C1:38:00:00:02" # Dormitorio
+    temperature:
+      id: dormitorio_t
+    humidity:
+      id: dormitorio_h
+    battery_level:
+      id: dormitorio_b
+
+  # Funda del oboe / estudio: descomenta aquí y en src/config.js.
+  # - platform: pvvx_mithermometer
+  #   mac_address: "A4:C1:38:00:00:03"
+  #   temperature:
+  #     id: estudio_t
+  #   humidity:
+  #     id: estudio_h
+  #   battery_level:
+  #     id: estudio_b
+
+script:
+  # Manda una lectura; si el termómetro aún no ha hablado (NaN), no manda nada.
+  - id: send
+    mode: queued
+    parameters:
+      room: string
+      temperature: float
+      humidity: float
+      battery: float
+    then:
+      - if:
+          condition:
+            lambda: "return !isnan(temperature) && !isnan(humidity);"
+          then:
+            - http_request.post:
+                url: !secret bbds_sensors_url
+                request_headers:
+                  Content-Type: application/json
+                  X-Sensor-Token: !secret sensor_token
+                json:
+                  room: !lambda "return room;"
+                  temperature: !lambda "return temperature;"
+                  humidity: !lambda "return humidity;"
+                  # pvvx manda la batería en el mismo paquete que la temperatura.
+                  battery: !lambda "return battery;"
+
+interval:
+  - interval: 60s
+    then:
+      - script.execute:
+          id: send
+          room: "salon"
+          temperature: !lambda "return id(salon_t).state;"
+          humidity: !lambda "return id(salon_h).state;"
+          battery: !lambda "return id(salon_b).state;"
+      - script.execute:
+          id: send
+          room: "dormitorio"
+          temperature: !lambda "return id(dormitorio_t).state;"
+          humidity: !lambda "return id(dormitorio_h).state;"
+          battery: !lambda "return id(dormitorio_b).state;"
+      # - script.execute:
+      #     id: send
+      #     room: "estudio"
+      #     temperature: !lambda "return id(estudio_t).state;"
+      #     humidity: !lambda "return id(estudio_h).state;"
+      #     battery: !lambda "return id(estudio_b).state;"

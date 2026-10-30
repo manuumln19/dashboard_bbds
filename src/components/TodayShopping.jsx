@@ -1,11 +1,11 @@
 import { memo, useRef, useState } from "react";
 import { ArrowUpRight, Check, Plus, ShoppingBasket, StickyNote } from "lucide-react";
+import { groupByAisle } from "../lib/aisles";
 import { isLegacyDrawing } from "../lib/listItems";
 import { useRecentlyDone } from "../hooks/useRecentlyDone";
-import { CheckMark } from "./CheckMark";
 import { SeasonMark } from "./SeasonDecor";
 
-const VISIBLE = 6;
+const VISIBLE = 12;
 
 // `onWriteNote` abre la hoja de nota nueva; las notas viven sueltas en Hoy.
 export const TodayShopping = memo(function TodayShopping({ lists, onOpenLists, onWriteNote }) {
@@ -18,6 +18,8 @@ export const TodayShopping = memo(function TodayShopping({ lists, onOpenLists, o
   const open = shopping.filter((item) => !item.done);
   const shown = shopping.filter((item) => !item.done || recent.ids.has(item.id));
   const hidden = shown.length - VISIBLE;
+  // Igual que en Compra: etiquetas por pasillo, en el orden del súper.
+  const aisles = groupByAisle(shown.slice(0, VISIBLE));
 
   function toggle(item) {
     if (item.done) recent.forget(item.id);
@@ -57,32 +59,36 @@ export const TodayShopping = memo(function TodayShopping({ lists, onOpenLists, o
       </header>
 
       {shown.length ? (
-        <ul className="today-shopping__list">
-          {shown.slice(0, VISIBLE).map((item) => (
-            <li key={item.id}>
-              <button
-                type="button"
-                className={item.done ? "is-done" : ""}
-                onClick={() => toggle(item)}
-                aria-label={`${item.done ? "Desmarcar" : "Marcar como comprado"}: ${item.text}`}
-              >
-                <CheckMark checked={item.done} small />
-                {isLegacyDrawing(item) ? (
-                  <img className="today-shopping__drawing" src={item.drawing} alt={item.text} />
-                ) : (
-                  <span>{item.text}</span>
-                )}
-              </button>
-            </li>
+        <div className="today-shopping__aisles">
+          {aisles.map((aisle) => (
+            <section key={aisle.id} className="today-shopping__aisle" aria-label={aisle.label}>
+              <h3>{aisle.label}</h3>
+              <div className="today-shopping__chips">
+                {aisle.items.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className={`today-shopping__chip${item.done ? " is-done" : ""}`}
+                    onClick={() => toggle(item)}
+                    aria-pressed={item.done}
+                    aria-label={`${item.done ? "Desmarcar" : "Marcar como comprado"}: ${item.text}`}
+                  >
+                    {isLegacyDrawing(item) ? (
+                      <img className="today-shopping__drawing" src={item.drawing} alt={item.text} />
+                    ) : (
+                      item.text
+                    )}
+                  </button>
+                ))}
+              </div>
+            </section>
           ))}
           {hidden > 0 ? (
-            <li className="today-shopping__more">
-              <button type="button" onClick={onOpenLists}>
-                y {hidden} más
-              </button>
-            </li>
+            <button type="button" className="today-shopping__more-link" onClick={onOpenLists}>
+              y {hidden} más en Compra
+            </button>
           ) : null}
-        </ul>
+        </div>
       ) : (
         <p className="today-shopping__empty">
           <Check size={22} strokeWidth={1.8} aria-hidden="true" />

@@ -8,6 +8,7 @@ import {
   X,
 } from "lucide-react";
 import { isLegacyDrawing } from "../lib/listItems";
+import { groupByAisle } from "../lib/aisles";
 import { usualShopping } from "../lib/usualShopping";
 import { CheckMark } from "./CheckMark";
 import { Sticker } from "./SeasonDecor";
@@ -96,6 +97,7 @@ export function ListCard({
   const doneCount = doneItems.length;
   const groups = isTasks ? groupByWhen(openItems, now) : [];
   const usual = isTasks ? [] : usualShopping(openItems.map((item) => item.text), 8);
+  const aisles = isTasks ? [] : groupByAisle(openItems);
   const progress = items.length ? Math.round((doneCount / items.length) * 100) : 0;
 
   function handleSubmit(event) {
@@ -375,7 +377,19 @@ export function ListCard({
             emptyState
           )
         ) : openItems.length ? (
-          <div className="shop-chips">{openItems.map(renderChip)}</div>
+          // Por pasillos, en el orden del súper; con uno solo, sin título.
+          aisles.length > 1 ? (
+            <div className="shop-aisles">
+              {aisles.map((aisle) => (
+                <section key={aisle.id} className="shop-aisle" aria-label={aisle.label}>
+                  <h3>{aisle.label}</h3>
+                  <div className="shop-chips">{aisle.items.map(renderChip)}</div>
+                </section>
+              ))}
+            </div>
+          ) : (
+            <div className="shop-chips">{openItems.map(renderChip)}</div>
+          )
         ) : (
           emptyState
         )}

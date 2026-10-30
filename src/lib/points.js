@@ -1,27 +1,37 @@
 import { startOfWeek } from "./date";
+import { numberFormat } from "./intl";
 
-// Puntos de la semana (se reinician el lunes, como la limpieza), en escala
-// pequeña: 1 bajar la basura, 2 fregar, 3 sábanas, 5 el horno.
-//   lo que valga cada tarea de limpieza hecha (2 si no se dice otra cosa),
-//   lo que valga cada tarea de la lista hecha esta semana (1 por defecto),
+// Puntos de la semana (se reinician el lunes, como la limpieza). Cada tarea
+// vale 2,5 (bajar la basura), 5, 10 o 20 (el horno):
+//   lo que valga cada tarea de limpieza hecha (10 si no se dice otra cosa),
+//   lo que valga cada tarea de la lista hecha esta semana (5 por defecto),
 //     para quien la hizo o, si nadie lo dijo, para su dueño,
 //   los puntos a mano de esta semana («hizo la cena»),
-//   +4 si alguien termina todo lo suyo de limpieza,
-//   +2 a cada uno si la casa completa la semana.
+//   +20 si alguien termina todo lo suyo de limpieza,
+//   +10 a cada uno si la casa completa la semana.
+// Lo canjeado esta semana (recompensas) se resta del saldo, no del marcador:
+// gastar no te baja de nivel ni te quita la corona.
 export const POINTS = {
-  cleaning: 2,
-  task: 1,
-  ownWeek: 4,
-  houseWeek: 2,
+  cleaning: 10,
+  task: 5,
+  ownWeek: 20,
+  houseWeek: 10,
 };
 
 const LEVELS = [
   { min: 0, label: "Huevo" },
-  { min: 8, label: "Cría" },
-  { min: 18, label: "Saltarín" },
-  { min: 30, label: "Lengua rápida" },
-  { min: 44, label: "Leyenda de casa" },
+  { min: 40, label: "Cría" },
+  { min: 90, label: "Saltarín" },
+  { min: 150, label: "Lengua rápida" },
+  { min: 220, label: "Leyenda de casa" },
 ];
+
+const POINTS_FORMAT = { maximumFractionDigits: 1 };
+
+// 2,5 y no 2.5: los puntos pueden llevar medio punto.
+export function formatPoints(value) {
+  return numberFormat(POINTS_FORMAT).format(Number(value) || 0);
+}
 
 export function levelFor(points) {
   let level = LEVELS[0];
@@ -31,7 +41,7 @@ export function levelFor(points) {
   return { ...level, index, next: next ? next.min : null };
 }
 
-export function weeklyScores({ cleaning, lists, now, pointEvents = [] }) {
+export function weeklyScores({ cleaning, lists, now, pointEvents = [], redemptions = [] }) {
   const people = (cleaning && cleaning.people) || [];
   const tasks = (cleaning && cleaning.tasks) || [];
   const weekStart = startOfWeek(now).getTime();
@@ -43,6 +53,7 @@ export function weeklyScores({ cleaning, lists, now, pointEvents = [] }) {
   });
   const manual = (pointEvents || []).filter((event) => new Date(event.createdAt).getTime() >= weekStart);
   const streaks = (cleaning && cleaning.personStreaks) || {};
+  const spentThisWeek = (redemptions || []).filter((entry) => new Date(entry.createdAt).getTime() >= weekStart);
 
   const scores = people.map((person) => {
     const mine = tasks.filter((task) => task.personId === person.id);
@@ -58,6 +69,9 @@ export function weeklyScores({ cleaning, lists, now, pointEvents = [] }) {
       extra +
       (ownWeek ? POINTS.ownWeek : 0) +
       (cleaning && cleaning.weekComplete ? POINTS.houseWeek : 0);
+    const spent = spentThisWeek
+      .filter((entry) => entry.personId === person.id)
+      .reduce((sum, entry) => sum + entry.cost, 0);
     return {
       person,
       points,
@@ -66,6 +80,8 @@ export function weeklyScores({ cleaning, lists, now, pointEvents = [] }) {
       listDone,
       extra,
       ownWeek,
+      spent,
+      balance: Math.max(0, points - spent),
       // Como la de la casa: semanas anteriores seguidas, más esta si ya está.
       streak: (Number(streaks[person.id]) || 0) + (ownWeek ? 1 : 0),
       level: levelFor(points),

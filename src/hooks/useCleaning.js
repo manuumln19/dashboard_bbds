@@ -344,7 +344,7 @@ export function useCleaning(now) {
         person,
         area: payload.area,
         title: payload.title,
-        points: Number(payload.points) || 2,
+        points: Number(payload.points) || 10,
         position: 999,
         done: false,
       };

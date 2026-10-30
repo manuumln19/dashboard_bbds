@@ -38,6 +38,8 @@ export const Rail = memo(function Rail({
   onToggleNight,
   onOpenGallery,
   status,
+  issueCount = 0,
+  onStatus,
   seasonId,
 }) {
   const StatusIcon =
@@ -73,13 +75,19 @@ export const Rail = memo(function Rail({
           {formatClock(now)}
         </time>
 
-        <span
-          className={`rail__status rail__status--${status.tone}`}
+        {/* Con avisos de datos, un punto ámbar; al tocarlo se abre el detalle. */}
+        <button
+          type="button"
+          className={`rail__status rail__status--${issueCount && status.tone === "good" ? "warn" : status.tone}`}
           title={status.title || status.label}
+          onClick={onStatus}
+          disabled={!issueCount && status.tone !== "bad"}
+          aria-label={issueCount ? `${issueCount} ${issueCount === 1 ? "aviso" : "avisos"} de datos. Ver detalle` : status.label}
         >
+          {issueCount ? <i className="rail__status-dot" aria-hidden="true" /> : null}
           <StatusIcon size={12} strokeWidth={2} aria-hidden="true" />
-          <span>{status.label}</span>
-        </span>
+          <span>{issueCount && status.tone === "good" ? (issueCount === 1 ? "1 aviso" : `${issueCount} avisos`) : status.label}</span>
+        </button>
 
         <div className="rail__actions">
           <button

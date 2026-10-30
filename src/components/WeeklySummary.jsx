@@ -4,7 +4,7 @@ import { weekRangeLabel } from "../lib/cleaning";
 import { addDays, eventStartDate, eventTimeLabel, relativeDayLabel, startOfWeek } from "../lib/date";
 import { LITE_MODE } from "../lib/perf";
 import { sheetPortal } from "../lib/sheetPortal";
-import { weeklyScores } from "../lib/points";
+import { formatPoints, weeklyScores } from "../lib/points";
 import { markSummarySeen } from "../lib/summary";
 import { upcomingBirthday } from "../lib/season";
 import { EggAvatar } from "./EggAvatar";
@@ -56,13 +56,13 @@ function CountUp({ value, delay = 0 }) {
     el.textContent = "0";
     function tick(at) {
       const t = Math.min(1, Math.max(0, (at - startAt) / duration));
-      el.textContent = String(Math.round(value * (1 - Math.pow(1 - t, 3))));
+      el.textContent = t < 1 ? String(Math.round(value * (1 - Math.pow(1 - t, 3)))) : formatPoints(value);
       if (t < 1) frame = window.requestAnimationFrame(tick);
     }
     frame = window.requestAnimationFrame(tick);
     return () => window.cancelAnimationFrame(frame);
   }, [value, delay]);
-  return <span ref={ref}>{value}</span>;
+  return <span ref={ref}>{formatPoints(value)}</span>;
 }
 
 function progressOf(level, points) {

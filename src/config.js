@@ -36,6 +36,9 @@ export const NIGHT = {
   end: env.VITE_NIGHT_END || "07:30",
 };
 
+// Hoy de mañana (lo de salir de casa): desde que acaba la noche hasta esta hora.
+export const MORNING_END = env.VITE_MORNING_END || "10:00";
+
 export const CALENDAR_DAYS = asNumber(env.VITE_CALENDAR_DAYS, 21);
 
 // Salvapantallas de fotos. `0` desactiva el arranque automático, pero el

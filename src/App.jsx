@@ -175,7 +175,7 @@ export default function App() {
   );
   const { idle, reset: resetIdle } = useIdle(idleMs);
   const [galleryOpen, setGalleryOpen] = useState(false);
-  const { isNight, toggleNight } = useNightMode(now);
+  const { isNight, toggleNight, wake: wakeNight } = useNightMode(now);
   const dataHealth = useDataHealth(effectiveOnline, now, {
     climateEnabled: CLIMATE_ENABLED,
   });
@@ -206,6 +206,11 @@ export default function App() {
   }, []);
 
   const goHome = useCallback(() => setView("home"), [setView]);
+  // Los avisos de datos ya no flotan sobre la pantalla: el rail enseña un
+  // punto y, al tocarlo, se abre el detalle.
+  const [statusOpen, setStatusOpen] = useState(false);
+  const toggleStatus = useCallback(() => setStatusOpen((open) => !open), []);
+  const closeStatus = useCallback(() => setStatusOpen(false), []);
   const openAgenda = useCallback(() => setView("agenda"), [setView]);
   const openLists = useCallback(() => setView("lists"), [setView]);
   const openEnergy = useCallback(() => setView("energy"), [setView]);
@@ -426,13 +431,17 @@ export default function App() {
         onToggleNight={toggleNight}
         onOpenGallery={openGallery}
         status={status}
+        issueCount={DEMO_MODE ? 0 : health.issues.length}
+        onStatus={toggleStatus}
         seasonId={season.id}
       />
       {strolling ? <YoshiStroll onDone={endStroll} /> : null}
 
       <StatusBanner
+        open={statusOpen}
         online={effectiveOnline}
         health={health}
+        onClose={closeStatus}
         onOpenDiagnostics={openDiagnostics}
       />
 
@@ -450,6 +459,7 @@ export default function App() {
             <HomeView
               hidden={view !== "home"}
               night={isNight}
+              onWakeNight={wakeNight}
               wake={yoshiGreet}
               now={now}
               weather={weather}

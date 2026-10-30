@@ -6,3 +6,8 @@ ESIOS_TOKEN=
 ICLOUD_ICS_URL=
 # Opcional: álbum compartido de iCloud si no se elige desde la app.
 ICLOUD_ALBUM_URL=
+# Opcional: bot de Telegram para la compra (ver README, «Bot de Telegram»).
+TELEGRAM_BOT_TOKEN=
+TELEGRAM_WEBHOOK_SECRET=
+# Ids de Telegram que pueden usarlo, separados por comas.
+TELEGRAM_USERS=

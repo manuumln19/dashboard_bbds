@@ -4741,47 +4741,8 @@ html.is-lite .app {
   padding: 16px 20px 14px;
 }
 
-.today-shopping__list {
-  display: flex;
-  min-height: 0;
-  flex: 1;
-  flex-direction: column;
-  margin: 0;
-  padding: 0;
-  overflow-y: auto;
-  list-style: none;
-}
-
-.today-shopping__list button {
-  display: flex;
-  width: 100%;
-  min-height: 40px;
-  align-items: center;
-  gap: 10px;
-  padding: 4px 2px;
-  border: 0;
-  background: none;
-  color: var(--text);
-  font-size: 16px;
-  text-align: left;
-}
-
-.today-shopping__list li + li button {
-  border-top: 1px solid var(--line);
-}
-
-.today-shopping__list button.is-done span {
-  color: var(--faint);
-  text-decoration: line-through;
-}
-
 .today-shopping__drawing {
   max-height: 30px;
-}
-
-.today-shopping__more button {
-  color: var(--muted);
-  font-size: 13px;
 }
 
 .today-shopping__add {
@@ -7953,6 +7914,7 @@ button:not(:disabled):active {
   text-decoration: line-through;
 }
 
+.lists-view .shop-aisle h3,
 .lists-view .list-panel__usual h3,
 .lists-view .list-panel__done h3,
 .lists-view .list-panel__group h3 {
@@ -8399,4 +8361,503 @@ button:not(:disabled):active {
   margin: 6px 0 0;
   color: #b0571c;
   font-size: 14px;
+}
+
+/* Compra por pasillos: dos columnas, cada pasillo entero en la suya. */
+.shop-aisles {
+  column-count: 2;
+  column-gap: 32px;
+}
+
+.shop-aisle {
+  break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+  padding: 2px 0 14px;
+}
+
+.lists-view .shop-aisle h3 {
+  margin: 0 0 2px;
+}
+
+/* Recompensas: el botón del marcador y la hoja para canjear. */
+.tasks-score__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tasks-score__rewards {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  padding: 0 12px;
+  border: 1px solid #b0571c;
+  border-radius: 999px;
+  background: #f6e3d4;
+  color: #8a3f10;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.tasks-score__rewards svg {
+  margin-right: 6px;
+}
+
+.rewards-sheet {
+  width: 900px;
+}
+
+.rewards-who {
+  display: flex;
+  margin: 14px -6px 6px;
+}
+
+.rewards-who__person {
+  display: flex;
+  flex: 1 1 0;
+  align-items: center;
+  margin: 0 6px;
+  padding: 10px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 18px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+}
+
+.rewards-who__person.is-on {
+  border-color: #b0571c;
+  box-shadow: inset 0 0 0 1px #b0571c;
+}
+
+.rewards-who__person > span {
+  display: flex;
+  flex-direction: column;
+  margin-left: 12px;
+}
+
+.rewards-who__person strong {
+  font-size: 18px;
+}
+
+.rewards-who__person small {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.rewards-grid {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 6px -6px;
+}
+
+.rewards-card {
+  display: flex;
+  width: calc(33.333% - 12px);
+  min-height: 104px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin: 6px;
+  padding: 14px 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: 18px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+}
+
+.rewards-card strong {
+  margin: 8px 0 4px;
+  font-family: var(--font-serif);
+  font-size: 19px;
+  font-weight: 400;
+  line-height: 1.15;
+}
+
+.rewards-card span {
+  color: #b0571c;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.rewards-card.is-on {
+  border-color: #b0571c;
+  box-shadow: inset 0 0 0 2px #b0571c;
+}
+
+.rewards-card.is-locked {
+  opacity: 0.45;
+}
+
+.rewards-card.is-locked span {
+  color: var(--muted);
+}
+
+.rewards-foot {
+  margin-top: 8px;
+}
+
+.rewards-foot__confirm {
+  width: 100%;
+  min-height: 54px;
+  border: 0;
+  border-radius: 16px;
+  background: #b0571c;
+  color: #fff;
+  font: inherit;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.rewards-foot__done,
+.rewards-foot__hint {
+  display: flex;
+  min-height: 54px;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  color: var(--muted);
+  font-size: 16px;
+}
+
+.rewards-foot__done {
+  color: #b0571c;
+  font-weight: 600;
+}
+
+.rewards-foot__done svg {
+  margin-right: 8px;
+}
+
+.rewards-foot__list {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rewards-foot__list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.rewards-foot__list button {
+  display: flex;
+  width: 36px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: none;
+  color: var(--muted);
+}
+
+/* Avisos de datos: punto en el rail y detalle junto a él, sin tapar nada. */
+.rail__status {
+  position: relative;
+  padding: 4px 6px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  font-family: inherit;
+}
+
+.rail__status:disabled {
+  opacity: 1;
+  cursor: default;
+}
+
+.rail__status--warn {
+  background: #f6e3d4;
+  color: #8a3f10;
+}
+
+.rail__status-dot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 9px;
+  height: 9px;
+  border: 2px solid var(--paper);
+  border-radius: 50%;
+  background: #d9822b;
+}
+
+.status-banner,
+.app:not(.app--home) .status-banner {
+  top: auto;
+  right: auto;
+  bottom: 18px;
+  left: 118px;
+  width: 460px;
+}
+
+/* Compra en Hoy: etiquetas por pasillo, como en la pantalla Compra. */
+.today-shopping__aisles {
+  min-height: 0;
+  flex: 1;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.today-shopping__aisle + .today-shopping__aisle {
+  margin-top: 8px;
+}
+
+.today-shopping__aisle h3 {
+  margin: 0 0 2px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.today-shopping__chips {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -4px;
+}
+
+.today-shopping__chip {
+  margin: 3px 4px;
+  padding: 7px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--text);
+  font-family: var(--font-serif);
+  font-size: 18px;
+  line-height: 1.1;
+}
+
+.today-shopping__chip.is-done {
+  border-style: dashed;
+  background: transparent;
+  color: var(--faint);
+  text-decoration: line-through;
+}
+
+.today-shopping__more-link {
+  margin-top: 6px;
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* Hoy y mañana, para leer desde lejos: filas más altas y letra mayor. */
+.today-entry,
+.today-board .today-entry {
+  min-height: 54px;
+  grid-template-columns: 70px 26px minmax(0, 1fr) auto;
+}
+
+.today-entry__title,
+.today-board .today-entry__title {
+  font-size: 19px;
+}
+
+.today-entry__time,
+.today-board .today-entry__time {
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+}
+
+/* Hoy de mañana: la hora grande en terracota y, a la derecha, lo justo para
+   salir de casa. Mismo papel crema que el día. */
+.morning-home {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  align-items: stretch;
+  padding: 26px 34px 26px 30px;
+}
+
+.morning-home__time {
+  display: flex;
+  flex: 1.15;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  padding-right: 36px;
+}
+
+.morning-home__hello {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.morning-home__hello strong {
+  color: #b0571c;
+  font-weight: 600;
+}
+
+.morning-home__clock {
+  margin: 10px 0 14px -6px;
+  color: #b0571c;
+  font-family: var(--font-serif);
+  font-size: 190px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 300;
+  letter-spacing: -0.04em;
+  line-height: 0.85;
+}
+
+.morning-home__weather {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  color: var(--text);
+  font-size: 20px;
+}
+
+.morning-home__weather svg {
+  flex: none;
+  margin-right: 12px;
+  color: #b0571c;
+}
+
+.morning-home__hours {
+  display: flex;
+  justify-content: space-between;
+  margin: 34px 0 0;
+  padding: 16px 0 0;
+  border-top: 1px solid var(--line);
+  list-style: none;
+}
+
+.morning-home__hours li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.morning-home__hours li svg {
+  margin: 6px 0;
+}
+
+.morning-home__hours strong {
+  color: var(--text);
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 400;
+}
+
+.morning-home__hours li.is-rain,
+.morning-home__hours li.is-rain strong {
+  color: #2f6f9f;
+}
+
+.morning-home__cards {
+  display: flex;
+  width: 440px;
+  flex: none;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.morning-card {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 12px;
+  padding: 16px 20px;
+  border-radius: 20px;
+  background: var(--paper-strong, #fff8ec);
+}
+
+.morning-card.is-advice {
+  background: #f6e3d4;
+}
+
+.morning-card.is-advice.tone-rain {
+  background: #dfe9f1;
+}
+
+.morning-card.is-advice.tone-cold {
+  background: #e3e6f2;
+}
+
+.morning-card.is-advice.tone-mild {
+  background: #dfece5;
+}
+
+.morning-card__label {
+  display: inline-flex;
+  align-items: center;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.morning-card__label svg {
+  margin-right: 6px;
+}
+
+.morning-card strong {
+  margin: 6px 0 2px;
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-weight: 400;
+  line-height: 1.15;
+}
+
+.morning-card small {
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.morning-home__day {
+  display: inline-flex;
+  align-self: flex-end;
+  align-items: center;
+  min-height: 48px;
+  margin-top: 4px;
+  padding: 0 14px 0 20px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 16px;
+}
+
+/* Noche: sin barra lateral (un toque la despierta 2 minutos) y la hora en el
+   color de la casa, tenue. */
+.app.is-night.app--home .rail {
+  display: none;
+}
+
+.night-home {
+  cursor: pointer;
+}
+
+.night-home__time time {
+  color: #c9773a;
+  opacity: 0.85;
+}
+
+.night-home__wake {
+  position: absolute;
+  top: 18px;
+  right: 40px;
+  color: var(--faint);
+  font-size: 13px;
+  letter-spacing: 0.06em;
 }
