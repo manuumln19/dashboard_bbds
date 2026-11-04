@@ -93,9 +93,9 @@ export function parseDoneState(text) {
 // Avisos sueltos para Yoshi (una nota nueva…), sin pasar props por media app.
 const EVENT = "bbds:yoshi";
 
-export function tellYoshi(type) {
+export function tellYoshi(type, text = "") {
   try {
-    window.dispatchEvent(new CustomEvent(EVENT, { detail: { type } }));
+    window.dispatchEvent(new CustomEvent(EVENT, { detail: { type, text } }));
   } catch {
     // Sin CustomEvent (no pasa en el marco), Yoshi simplemente no se entera.
   }
@@ -103,7 +103,7 @@ export function tellYoshi(type) {
 
 export function listenYoshi(handler) {
   function onEvent(event) {
-    handler(event.detail ? event.detail.type : null);
+    handler(event.detail ? event.detail.type : null, event.detail ? event.detail.text : "");
   }
   window.addEventListener(EVENT, onEvent);
   return () => window.removeEventListener(EVENT, onEvent);

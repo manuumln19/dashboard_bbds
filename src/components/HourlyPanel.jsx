@@ -31,7 +31,7 @@ export function HourlyPanel({ weather, now }) {
   return (
     <aside className="card hourly" aria-labelledby="hourly-title">
       <header className="hourly-head">
-        <p className="hourly-kicker">Próximas horas · Open-Meteo</p>
+        <p className="hourly-kicker">Próximas horas</p>
         <h2 id="hourly-title">{LOCATION.name}, hora a hora</h2>
       </header>
 

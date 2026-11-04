@@ -96,7 +96,6 @@ export function ClimateView({
     <section className="view climate-view" aria-labelledby="climate-title">
       <header className="view-heading">
         <div>
-          <span className="eyebrow">Sensores</span>
           <h1 id="climate-title">Clima en casa</h1>
           <p>Temperatura y humedad reales, con el histórico de cada rincón.</p>
         </div>
@@ -224,7 +223,6 @@ export function ClimateView({
         <article className="card chart-card">
           <header className="chart-card__head">
             <div>
-              <span className="eyebrow">Histórico</span>
               <h2>
                 {selectedRoom.name} · humedad
                 <span className={`mini-dot mini-dot--${selectedStatus.tone}`} />

@@ -61,7 +61,6 @@ export function MorningBrief({ now, weather, events, cleaning, electricity, onCl
         <header className="ink-head">
           <img className="morning-brief__yoshi" src={YOSHI_SPRITES.happy} alt="" width={92} height={92} />
           <div>
-            <span className="eyebrow">Yoshi te cuenta el día</span>
             <h2 id="morning-title">¡Buenos días!</h2>
           </div>
           <button type="button" className="ink-close" onClick={onClose} aria-label="Cerrar">

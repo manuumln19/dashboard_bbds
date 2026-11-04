@@ -31,10 +31,6 @@ export const TodayStrip = memo(function TodayStrip({
   const { scores, mvp } = weeklyScores({ cleaning, lists, now, pointEvents });
   const ranked = [...scores].sort((a, b) => b.points - a.points);
   const lead = mvp && ranked[1] ? mvp.points - ranked[1].points : 0;
-  const pendingNames = todayTasks
-    .filter((task) => !task.done && task.person)
-    .map((task) => task.person.name)
-    .filter((name, index, all) => all.indexOf(name) === index);
 
   const data = electricity.data;
   const state = data ? currentPriceState(data, now) : null;
@@ -47,12 +43,11 @@ export const TodayStrip = memo(function TodayStrip({
       <button type="button" className="today-strip__item today-strip__item--cleaning" onClick={onOpenCleaning}>
         <SprayCan size={18} strokeWidth={1.8} aria-hidden="true" />
         <span className="today-strip__text">
-          <strong>{!todayTasks.length ? "Hoy libre" : left ? `Faltan ${left}` : "Todo limpio"}</strong>
-          <small>
-            {left && pendingNames.length
-              ? `de limpieza hoy · ${pendingNames.join(" y ")}`
-              : `Llevamos ${cleaning.doneCount} de ${cleaning.totalCount} esta semana`}
-          </small>
+          {/* Lo de hoy ya está en «Hoy y mañana»: aquí, cómo va la semana. */}
+          <strong>
+            {cleaning.doneCount}/{cleaning.totalCount}
+          </strong>
+          <small>{!todayTasks.length ? "Limpieza de la semana · hoy libre" : left ? "Limpieza de la semana" : "Limpieza de la semana · hoy, todo"}</small>
         </span>
       </button>
 

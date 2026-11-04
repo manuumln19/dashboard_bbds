@@ -54,7 +54,7 @@ export function useNotes() {
     if (DEMO_MODE) saveDemoNotes(notes);
   }, [notes]);
 
-  async function addNote({ text, personId, color, shape, x, y, rot }) {
+  async function addNote({ text, personId, color, shape, x, y, rot, remindAt, forPersonId, expiresAt }) {
     const clean = String(text || "").replace(/\s+/g, " ").trim().slice(0, 160);
     if (!clean) return;
     const draft = {
@@ -68,6 +68,9 @@ export function useNotes() {
       w: null,
       h: null,
       rot: Number.isFinite(rot) ? rot : 0,
+      remindAt: remindAt || null,
+      forPersonId: forPersonId || null,
+      expiresAt: expiresAt || null,
       createdAt: new Date().toISOString(),
     };
     setNotes((current) => [draft, ...current]);

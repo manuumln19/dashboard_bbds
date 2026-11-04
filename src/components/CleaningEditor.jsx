@@ -405,7 +405,6 @@ export function CleaningEditor({ open, onClose, cleaning }) {
             <SprayCan size={23} strokeWidth={1.7} />
           </span>
           <div>
-            <span className="eyebrow">Cuadrante de casa</span>
             <h2 id="cleaning-editor-title">Editar limpieza</h2>
             <p>
               Los cambios se guardan en la nube y los ven Manu y Paco. Las

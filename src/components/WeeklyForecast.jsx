@@ -51,7 +51,7 @@ export function WeeklyForecast({ days = [], now }) {
             ? `${firstDay.getDate()}—${lastDay.getDate()} ${monthName(lastDay)}`
             : "—"}
           <br />
-          Temperatura °C · escala {Math.round(coldest)}—{Math.round(warmest)}
+          De {Math.round(coldest)}° a {Math.round(warmest)}° esta semana
         </p>
       </header>
 

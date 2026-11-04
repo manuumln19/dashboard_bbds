@@ -237,7 +237,6 @@ export function AgendaView({
     <section className="view agenda-view" aria-labelledby="agenda-title">
       <header className="agenda-view__head">
         <div>
-          <span className="eyebrow">Calendarios · solo lectura</span>
           <h1 id="agenda-title">Agenda</h1>
           <p>{range}</p>
         </div>

@@ -50,7 +50,9 @@ export const TodayNext = memo(function TodayNext({ now, events, weather, electri
   const items = nextItems({ now, events, weather, electricity, cleaning, menu, bills }).filter(
     (item) => !SHOWN_ELSEWHERE.has(item.kind)
   );
-  const [lead, ...rest] = items;
+  // El resto no repite eventos: ya están en «Hoy y mañana».
+  const lead = items[0];
+  const rest = items.slice(1).filter((item) => item.kind !== "event");
 
   if (!lead) {
     const advice = getWeatherAdvice(weather, now);

@@ -94,9 +94,10 @@ export function WeeklySummary({ now, cleaning, lists, events, pointEvents, seaso
             <Yoshi mood="idle" seasonId={seasonId} holding={mvp || cleaning.weekComplete ? "trophy" : null} size={92} />
           </span>
           <div>
-            <span className="eyebrow">Resumen · {weekRangeLabel(now)}</span>
             <h2 id="summary-title">Así ha ido la semana</h2>
-            <p>{headline({ cleaning, mvp, scores })}</p>
+            <p>
+              {weekRangeLabel(now)} · {headline({ cleaning, mvp, scores })}
+            </p>
           </div>
           <button type="button" className="ink-close" onClick={onClose} aria-label="Cerrar">
             <X size={18} strokeWidth={1.9} aria-hidden="true" />

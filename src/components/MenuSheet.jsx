@@ -43,7 +43,6 @@ export function MenuSheet({ menu, onClose }) {
             <UtensilsCrossed size={23} strokeWidth={1.7} />
           </span>
           <div>
-            <span className="eyebrow">La cocina</span>
             <h2 id="menu-title">Menú de la semana</h2>
             <p>Lo que se come cada día. Los ingredientes pasan a la compra desde Hoy.</p>
           </div>

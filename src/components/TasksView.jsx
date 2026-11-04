@@ -133,7 +133,7 @@ export function TasksView({ now, cleaning, lists, points }) {
     { id: "today", label: "Hoy", items: entries.filter((e) => e.person && e.when === "today") },
     { id: "free", label: "Libres · el primero que la haga se lleva los puntos", items: entries.filter((e) => !e.person && !e.done) },
     // Lo que se quedó sin hacer de días anteriores, aparte: no tapa lo de hoy.
-    { id: "late", label: "Se quedó atrás", items: entries.filter((e) => e.person && e.when === "late") },
+    { id: "late", label: "De otros días", items: entries.filter((e) => e.person && e.when === "late") },
     { id: "week", label: "Esta semana", items: entries.filter((e) => e.person && e.when === "week" && !e.done) },
     { id: "someday", label: "Cuando sea", items: entries.filter((e) => e.person && (e.when === "someday" || e.when === "later") && !e.done) },
   ].filter((group) => group.items.length);
@@ -155,7 +155,6 @@ export function TasksView({ now, cleaning, lists, points }) {
           <span className="chore__copy">
             <strong>{entry.title}</strong>
             <span>
-              {entry.when === "late" && !entry.done ? "Atrasada · " : ""}
               {entry.meta}
               {who ? ` · ${who.name}` : ""}
             </span>
@@ -186,7 +185,6 @@ export function TasksView({ now, cleaning, lists, points }) {
     <section className="view tasks-view" aria-labelledby="tasks-title">
       <header className="cleaning-head">
         <div>
-          <span className="eyebrow">Casa · semana</span>
           <h1 id="tasks-title">Tareas</h1>
           <p>{weekRangeLabel(now)} · limpieza y tareas, con puntos</p>
         </div>

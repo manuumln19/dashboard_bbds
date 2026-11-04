@@ -15,7 +15,6 @@ export function ClimateSummary({ latest, now, onOpen }) {
     <article className="card climate-summary">
       <header className="card-head card-head--tight">
         <div>
-          <span className="eyebrow">Clima en casa</span>
           <h2>El aire</h2>
         </div>
         <button type="button" className="text-button" onClick={onOpen}>

@@ -21,6 +21,7 @@ const HELP = [
   "/lista · la compra por pasillos; toca una cosa para tacharla",
   "Escribe «leche, huevos y pan» para apuntarlo en la compra",
   "/t bajar la basura mañana · una tarea (hoy, mañana o sin fecha)",
+  "/nota hay tortilla para Paco a las 20 · un pósit en Hoy (para alguien y con aviso, si quieres)",
   "/facturas · lo pendiente de pagar; toca tu nombre al pagar tu parte",
   "/factura luz 62,40 · apunta una factura de este mes (luz, agua, basura, gas, internet, comunidad u otro)",
 ].join("\n");
@@ -234,6 +235,52 @@ async function addBill(env, chatId, text) {
   });
 }
 
+// «/nota hay tortilla para Paco a las 20» → un pósit en Hoy. «para X» lo
+// dirige a alguien; «a las HH(:MM)» pone el aviso (hoy, o mañana si ya pasó).
+async function addNote(env, chatId, text) {
+  let rest = String(text || "").replace(/\s+/g, " ").trim();
+  let forPerson = null;
+  let remindAt = null;
+  const hour = rest.match(/\s+a las (\d{1,2})(?::(\d{2}))?$/i);
+  if (hour) {
+    const today = madridDay();
+    const hh = String(Math.min(23, Number(hour[1]))).padStart(2, "0");
+    const mm = hour[2] || "00";
+    // Hora de Madrid a ISO: se prueba con el desfase de invierno y de verano.
+    const candidates = ["+01:00", "+02:00"].map((zone) => new Date(`${today}T${hh}:${mm}:00${zone}`));
+    const offset = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Madrid", hour: "2-digit", hour12: false });
+    let at = candidates.find((date) => offset.format(date) === hh) || candidates[0];
+    if (at <= new Date()) at = new Date(at.getTime() + 86400000);
+    remindAt = at.toISOString();
+    rest = rest.slice(0, hour.index).trim();
+  }
+  const forMatch = rest.match(/\s+para (\w+)$/i);
+  if (forMatch) {
+    const row = await env.DB.prepare("SELECT id, name FROM people WHERE lower(name) = lower(?) OR id = lower(?)")
+      .bind(forMatch[1], forMatch[1])
+      .first();
+    if (row) {
+      forPerson = row;
+      rest = rest.slice(0, forMatch.index).trim();
+    }
+  }
+  if (!rest) {
+    await telegram(env, "sendMessage", { chat_id: chatId, text: "Escribe la nota después de /nota, por ejemplo: /nota hay tortilla para Paco a las 20" });
+    return;
+  }
+  const body = rest.charAt(0).toUpperCase() + rest.slice(1, 160);
+  await env.DB.prepare(
+    `INSERT INTO notes (id, text, color, created_at, rot, shape, remind_at, for_person)
+     VALUES (?, ?, 'amber', ?, ?, 'square', ?, ?)`
+  )
+    .bind(`note-${crypto.randomUUID().slice(0, 8)}`, body, new Date().toISOString(), Math.round((Math.random() * 6 - 3) * 10) / 10, remindAt, forPerson ? forPerson.id : null)
+    .run();
+  const parts = [`Pósit puesto en Hoy: «${body}»`];
+  if (forPerson) parts.push(`para ${forPerson.name}`);
+  if (remindAt) parts.push(`con aviso a las ${new Intl.DateTimeFormat("es-ES", { timeZone: "Europe/Madrid", hour: "2-digit", minute: "2-digit" }).format(new Date(remindAt))}`);
+  await telegram(env, "sendMessage", { chat_id: chatId, text: `${parts.join(", ")}.` });
+}
+
 async function onCallback(env, query) {
   const data = String(query.data || "");
   const message = query.message;
@@ -313,6 +360,8 @@ async function onMessage(env, message) {
       await telegram(env, "sendMessage", { chat_id: chatId, ...(await billsMessage(env)) });
     } else if (name === "factura") {
       await addBill(env, chatId, rest);
+    } else if (name === "nota") {
+      await addNote(env, chatId, rest);
     } else if (name === "id") {
       // Para TELEGRAM_CHAT_ID: adónde manda el bot los avisos de cada mañana.
       await telegram(env, "sendMessage", { chat_id: chatId, text: `Este chat es ${chatId}. Guárdalo en TELEGRAM_CHAT_ID para recibir aquí los avisos de Cuentas.` });

@@ -54,7 +54,6 @@ export function PhotoAlbumSheet({ photos, onClose }) {
             <Images size={23} strokeWidth={1.7} />
           </span>
           <div>
-            <span className="eyebrow">Salvapantallas</span>
             <h2 id="photo-sheet-title">Álbum de fotos</h2>
             <p>
               Las fotos salen de un álbum compartido de iCloud. Lo que añadáis

@@ -1252,7 +1252,30 @@ function rowToNote(row) {
     h: numberOrNull(row.h),
     rot: Number(row.rot) || 0,
     shape: NOTE_SHAPES.has(row.shape) ? row.shape : "square",
+    remindAt: row.remind_at || null,
+    forPersonId: row.for_person || null,
+    expiresAt: row.expires_at || null,
   };
+}
+
+function isoOrNull(raw, label) {
+  if (raw === null || raw === undefined || raw === "") return null;
+  const date = new Date(String(raw));
+  if (!Number.isFinite(date.getTime())) throw new HttpError(400, `${label} no es una fecha válida`);
+  return date.toISOString();
+}
+
+// Aviso, destinatario y caducidad de un pósit: solo las claves que vengan.
+async function noteExtras(env, body) {
+  const extras = {};
+  const has = (key) => Object.prototype.hasOwnProperty.call(body, key);
+  if (has("remindAt")) extras.remind_at = isoOrNull(body.remindAt, "El aviso");
+  if (has("expiresAt")) extras.expires_at = isoOrNull(body.expiresAt, "La caducidad");
+  if (has("forPersonId")) {
+    const person = body.forPersonId ? await getPerson(env, body.forPersonId) : null;
+    extras.for_person = person ? person.id : null;
+  }
+  return extras;
 }
 
 function clampNumber(value, min, max) {
@@ -1282,6 +1305,10 @@ function notePatch(body) {
 }
 
 async function fetchNotes(env) {
+  // Los que han caducado se quitan solos.
+  await env.DB.prepare("DELETE FROM notes WHERE expires_at IS NOT NULL AND expires_at < ?")
+    .bind(new Date().toISOString())
+    .run();
   const { results } = await env.DB.prepare(
     "SELECT * FROM notes ORDER BY created_at DESC LIMIT ?"
   )
@@ -1303,11 +1330,13 @@ async function handleNotes(request, env, url) {
     const person = body.personId ? await getPerson(env, body.personId) : null;
     const color = NOTE_COLORS.has(body.color) ? body.color : "amber";
     const layout = notePatch(body);
+    const extras = await noteExtras(env, body);
     const id = `note-${crypto.randomUUID().slice(0, 8)}`;
     await env.DB.batch([
       env.DB.prepare(
-        `INSERT INTO notes (id, text, person_id, color, created_at, x, y, w, h, rot, shape)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        `INSERT INTO notes (id, text, person_id, color, created_at, x, y, w, h, rot, shape,
+           remind_at, for_person, expires_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
       ).bind(
         id,
         text,
@@ -1319,7 +1348,10 @@ async function handleNotes(request, env, url) {
         layout.w === undefined ? null : layout.w,
         layout.h === undefined ? null : layout.h,
         layout.rot || 0,
-        layout.shape || "square"
+        layout.shape || "square",
+        extras.remind_at || null,
+        extras.for_person || null,
+        extras.expires_at || null
       ),
       env.DB.prepare(
         "DELETE FROM notes WHERE id NOT IN (SELECT id FROM notes ORDER BY created_at DESC LIMIT ?)"
@@ -1330,7 +1362,8 @@ async function handleNotes(request, env, url) {
 
   const match = url.pathname.match(/^\/api\/notes\/([a-z0-9_-]+)$/);
   if (match && request.method === "PATCH") {
-    const patch = notePatch(await readJson(request));
+    const body = await readJson(request);
+    const patch = { ...notePatch(body), ...(await noteExtras(env, body)) };
     const columns = Object.keys(patch);
     if (!columns.length) throw new HttpError(400, "No hay nada que cambiar en la nota");
     const result = await env.DB.prepare(

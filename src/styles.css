@@ -42,13 +42,6 @@ button {
   touch-action: manipulation;
 }
 
-button:focus-visible,
-input:focus-visible,
-textarea:focus-visible {
-  outline: 2px solid #cf1f5e;
-  outline-offset: 3px;
-}
-
 ::selection {
   background: #cf1f5e;
   color: #fffaf2;
@@ -195,9 +188,14 @@ body {
   color: #fffaf2;
 }
 
+/* Un solo anillo de foco, del acento del tema (también de noche). */
 button:focus-visible,
 input:focus-visible,
-textarea:focus-visible {
+textarea:focus-visible,
+select:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible,
+[tabindex]:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
@@ -529,10 +527,6 @@ textarea:focus-visible {
 
 .text-button:hover {
   color: var(--accent);
-}
-
-.card-note {
-  color: var(--faint);
 }
 
 .empty-state {
@@ -1295,17 +1289,6 @@ textarea:focus-visible {
   background:
     linear-gradient(152deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.01) 48%, rgba(255, 255, 255, 0.03)),
     var(--surface);
-}
-
-.list-panel::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  right: 0;
-  left: 0;
-  height: 4px;
-  background: var(--panel);
-  opacity: 0.9;
 }
 
 .list-panel--shopping {

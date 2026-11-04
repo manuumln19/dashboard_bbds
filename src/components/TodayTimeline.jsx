@@ -66,6 +66,24 @@ export const TodayTimeline = memo(function TodayTimeline({ now, events, lists, c
         {days.map((day) => {
           const isToday = day.label === "Hoy";
           const mark = isToday ? splitAtNow(day.entries, nowKey).index : -1;
+          // Mañana, en una línea: lo de hoy manda; el detalle está en la Agenda.
+          if (!isToday) {
+            const first = day.entries.find((entry) => !entry.done);
+            return (
+              <button key={day.key} type="button" className="today-day__tomorrow" onClick={onOpenAgenda}>
+                <strong>Mañana</strong>
+                {first ? (
+                  <span>
+                    {first.time ? `${first.time} · ` : ""}
+                    {first.title}
+                    {day.entries.length > 1 ? ` y ${day.entries.length - 1} más` : ""}
+                  </span>
+                ) : (
+                  <span>Nada apuntado</span>
+                )}
+              </button>
+            );
+          }
           return (
           <section key={day.key} className="today-day" aria-label={day.label}>
             <h3>{day.label}</h3>
@@ -107,7 +125,9 @@ export const TodayTimeline = memo(function TodayTimeline({ now, events, lists, c
                           )}
                         </span>
                         <span className="today-entry__title">{entry.title}</span>
-                        {entry.meta ? <span className="today-entry__meta">{entry.meta}</span> : null}
+                        {entry.meta ? (
+                          <span className={`today-entry__meta${entry.kind === "event" ? " is-place" : ""}`}>{entry.meta}</span>
+                        ) : null}
                       </button>
                     </li>
                     {isToday && index === day.entries.length - 1 && mark === day.entries.length ? (

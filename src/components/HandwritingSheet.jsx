@@ -376,7 +376,6 @@ export function HandwritingSheet({ open, listTitle, onClose, onSave }) {
             <PenLine size={23} strokeWidth={1.7} />
           </span>
           <div>
-            <span className="eyebrow">Escribir a mano</span>
             <h2 id="ink-title">{listTitle}</h2>
             <p>
               Traza una línea. La convertiremos en texto editable en este

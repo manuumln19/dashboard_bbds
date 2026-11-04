@@ -76,7 +76,6 @@ export function EnergyView({ now }) {
     <section className="view energy-view" aria-labelledby="energy-title">
       <header className="view-heading energy-head">
         <div>
-          <span className="eyebrow">Casa · consumo</span>
           <h1 id="energy-title">Energía</h1>
           <p>
             PVPC hora a hora y las mejores franjas para lo que más consume.

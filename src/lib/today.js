@@ -74,7 +74,7 @@ function billReminders({ now, bills, people }) {
       kind: "bill",
       tone: late ? "pink" : "amber",
       kicker: `${kindLabel(rule.kind)} de ${periodLabel(period)}`,
-      title: `Falta ${missing.map((person) => person.name).join(" y ")}`,
+      title: missing.length > 1 ? "Por pagar" : `Queda la parte de ${missing[0].name}`,
       detail: late ? `Se pasó el día ${rule.dayTo}` : `Antes del día ${rule.dayTo}`,
     });
   });
@@ -87,7 +87,7 @@ function billReminders({ now, bills, people }) {
         tone: bill.dueOn < today ? "pink" : "amber",
         kicker: "Factura",
         title: `${billTitle(bill)} ${bill.dueOn < today ? "vencida" : bill.dueOn === today ? "vence hoy" : "vence pronto"}`,
-        detail: `Falta ${billStatus(bill, people).missing.map((person) => person.name).join(" y ")}`,
+        detail: `Queda la parte de ${billStatus(bill, people).missing.map((person) => person.name).join(" y ")}`,
       });
     });
   return items;

@@ -338,7 +338,6 @@ export function ElectricityCard({
             <i aria-hidden="true" />
             Cara <strong>{counts.high} h</strong>
           </span>
-          <span className="elec-legend__note">Altura relativa al día</span>
         </div>
       </div>
 

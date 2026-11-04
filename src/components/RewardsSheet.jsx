@@ -67,9 +67,8 @@ export function RewardsSheet({ scores, points, now, onClose }) {
       <section className="ink-sheet card rewards-sheet" role="dialog" aria-modal="true" aria-labelledby="rewards-title">
         <header className="ink-head">
           <div>
-            <span className="eyebrow">Recompensas · hasta el domingo</span>
             <h2 id="rewards-title">¿Qué os habéis ganado?</h2>
-            <p>Se gastan los puntos de esta semana. El marcador no baja.</p>
+            <p>Se gastan los puntos de esta semana, hasta el domingo. El marcador no baja.</p>
           </div>
           <button type="button" className="ink-close" onClick={onClose} aria-label="Cerrar">
             <X size={18} strokeWidth={1.9} aria-hidden="true" />

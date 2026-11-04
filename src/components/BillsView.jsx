@@ -72,7 +72,6 @@ export function BillsView({ now, bills, people }) {
     <section className="view bills-view" aria-labelledby="bills-title">
       <header className="cleaning-head">
         <div>
-          <span className="eyebrow">Casa · a medias</span>
           <h1 id="bills-title">Cuentas</h1>
           <p>
             Alquiler y facturas · {year}: {formatMoney(yearTotal)} en casa, {formatMoney(yearTotal / Math.max(1, people.length))} cada

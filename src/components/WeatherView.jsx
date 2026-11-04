@@ -37,26 +37,6 @@ function sunTop(progress) {
   return ((27 - 52 * progress * (1 - progress)) / 30) * 100;
 }
 
-function isoWeek(date) {
-  const day = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-  const weekday = day.getUTCDay() || 7;
-  day.setUTCDate(day.getUTCDate() + 4 - weekday);
-  const yearStart = new Date(Date.UTC(day.getUTCFullYear(), 0, 1));
-  return Math.ceil(((day - yearStart) / 86400000 + 1) / 7);
-}
-
-function dayOfYear(date) {
-  const start = new Date(date.getFullYear(), 0, 0);
-  const today = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  return Math.floor((today - start) / 86400000);
-}
-
-function coordinates() {
-  const lat = `${Math.abs(LOCATION.latitude).toFixed(4)}° ${LOCATION.latitude >= 0 ? "N" : "S"}`;
-  const lon = `${Math.abs(LOCATION.longitude).toFixed(4)}° ${LOCATION.longitude >= 0 ? "E" : "O"}`;
-  return `${lat}, ${lon}`;
-}
-
 export function WeatherView({ now, weather, error, loading }) {
   const current = weather && weather.current ? weather.current : null;
   const today = weather && weather.today ? weather.today : null;
@@ -83,14 +63,10 @@ export function WeatherView({ now, weather, error, loading }) {
     <section className="view weather-view" aria-labelledby="weather-title">
       <header className="weather-head">
         <div>
-          <p className="kicker">
-            <i aria-hidden="true" />
-            Fuera de casa · {weekday}
-          </p>
           <h1 id="weather-title">El tiempo</h1>
           <p className="location">
             <MapPin size={11} strokeWidth={1.8} aria-hidden="true" />
-            {LOCATION.name} · {coordinates()}
+            {LOCATION.name} · {weekday} {now.getDate()} de {month}
           </p>
         </div>
 
@@ -98,17 +74,6 @@ export function WeatherView({ now, weather, error, loading }) {
           <p className="updated">
             <i aria-hidden="true" />
             {updated}
-          </p>
-          <p className="weather-date">
-            <strong>{now.getDate()}</strong>
-            <span>
-              {month}
-              <br />
-              {now.getFullYear()}
-            </span>
-          </p>
-          <p className="weather-folio">
-            Día {dayOfYear(now)} · Semana {isoWeek(now)}
           </p>
           {isDemo ? (
             <span className="weather-demo">
@@ -130,8 +95,8 @@ export function WeatherView({ now, weather, error, loading }) {
           <span className="weather-now__glow" aria-hidden="true" />
 
           <div className="weather-now__top">
-            <span>Ahora / exterior</span>
-            <span>Observación {formatClock(now)}</span>
+            <span>Ahora fuera</span>
+            <span>{formatClock(now)}</span>
           </div>
 
           <div className="weather-now__main">

@@ -39,6 +39,8 @@ await call("setMyCommands", {
   commands: [
     { command: "lista", description: "La compra por pasillos" },
     { command: "t", description: "Apuntar una tarea (hoy, mañana o sin fecha)" },
+    { command: "nota", description: "Poner un pósit en Hoy" },
+    { command: "facturas", description: "Lo pendiente de pagar" },
     { command: "ayuda", description: "Qué sabe hacer el bot" },
   ],
 });

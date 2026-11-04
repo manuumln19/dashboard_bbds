@@ -26,7 +26,6 @@ export function ListsView({ lists, menu, now = new Date() }) {
     <section className="view lists-view" aria-labelledby="lists-title">
       <header className="lists-head">
         <div>
-          <span className="eyebrow">Compartido · BBDS</span>
           <h1 id="lists-title">Compra</h1>
           <p>Lo que falta en casa.</p>
         </div>

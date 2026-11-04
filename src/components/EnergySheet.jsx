@@ -83,7 +83,6 @@ export function EnergySheet({
             <Zap size={23} strokeWidth={1.7} />
           </span>
           <div>
-            <span className="eyebrow">Energía · método y fuente</span>
             <h2 id="energy-sheet-title">Cómo se calcula</h2>
             <p>
               Precio regulado PVPC, coste de cada programa y límites de la

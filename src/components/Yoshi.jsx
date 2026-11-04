@@ -254,7 +254,9 @@ export const Yoshi = memo(function Yoshi({
   // incluido, por si está abierto).
   useEffect(() => {
     if (!lively) return undefined;
-    return listenYoshi((type) => {
+    return listenYoshi((type, text) => {
+      // Un pósit con aviso que llega a su hora: Yoshi lo dice en voz alta.
+      if (type === "reminder") act("cheer", `¡Aviso! ${text}`, 6000);
       if (type === "note") act("cheer", pick(["¡Nota nueva en la nevera! 📌", "¡Uy, una nota! A ver qué pone…", "¡Correo en la nevera!"]), 2800);
     });
   }, [lively]);

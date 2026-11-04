@@ -1,8 +1,9 @@
-import { memo, useEffect, useRef, useState } from "react";
-import { Check, Minus, Plus, RotateCcw, RotateCw, StickyNote, X } from "lucide-react";
+import { memo, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Bell, Check, Minus, Plus, RotateCcw, RotateCw, StickyNote, X } from "lucide-react";
 import { formatAge } from "../lib/date";
 import { sheetPortal } from "../lib/sheetPortal";
 import { compareText } from "../lib/compare";
+import { tellYoshi } from "../lib/yoshiTalk";
 
 export const NOTE_COLORS = ["amber", "pink", "mint", "lilac"];
 export const NOTE_SHAPES = [
@@ -50,6 +51,73 @@ function noteFontSize(text, w, h, shape) {
   return Math.round(clamp(Math.sqrt(area / (chars * 0.74)), 14, 46));
 }
 
+function pad(value) {
+  return String(value).padStart(2, "0");
+}
+
+// «20:00» si es hoy; «mañana 9:00» o «vie 9:00» si no.
+function whenLabel(iso, now) {
+  const at = new Date(iso);
+  const time = `${at.getHours()}:${pad(at.getMinutes())}`;
+  if (at.toDateString() === now.toDateString()) return time;
+  const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  if (at.toDateString() === tomorrow.toDateString()) return `mañana ${time}`;
+  return `${["dom", "lun", "mar", "mié", "jue", "vie", "sáb"][at.getDay()]} ${time}`;
+}
+
+// Opciones de la nota nueva: para quién, cuándo avisa y cuánto dura.
+function remindIso(choice, now) {
+  if (choice === "1h") return new Date(now.getTime() + 60 * 60 * 1000).toISOString();
+  if (choice === "20") {
+    const at = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 20, 0);
+    if (at <= now) at.setDate(at.getDate() + 1);
+    return at.toISOString();
+  }
+  if (choice === "manana9") return new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 9, 0).toISOString();
+  return null;
+}
+
+function expiresIso(choice, now) {
+  const end = (days) => new Date(now.getFullYear(), now.getMonth(), now.getDate() + days, 23, 59).toISOString();
+  if (choice === "today") return end(0);
+  if (choice === "tomorrow") return end(1);
+  if (choice === "week") return end(7);
+  return null;
+}
+
+const REMIND_OPTIONS = [
+  ["none", "Sin aviso"],
+  ["1h", "En 1 hora"],
+  ["20", "A las 20:00"],
+  ["manana9", "Mañana a las 9"],
+];
+
+const LASTS_OPTIONS = [
+  ["seen", "Hasta verla"],
+  ["today", "Solo hoy"],
+  ["tomorrow", "Hasta mañana"],
+  ["week", "Una semana"],
+];
+
+// El texto llena el pósit: el mayor tamaño (entre 14 y 120 px) con el que
+// cabe sin salirse, medido de verdad. Ocho pasos de búsqueda binaria: barato
+// incluso en el marco, y solo al cambiar el texto o el tamaño.
+const FIT_MIN = 14;
+const FIT_MAX = 120;
+
+function fitText(el) {
+  if (!el || !el.clientHeight) return;
+  let low = FIT_MIN;
+  let high = FIT_MAX;
+  while (high - low > 1) {
+    const mid = Math.floor((low + high) / 2);
+    el.style.fontSize = `${mid}px`;
+    if (el.scrollHeight <= el.clientHeight + 1 && el.scrollWidth <= el.clientWidth + 1) low = mid;
+    else high = mid;
+  }
+  el.style.fontSize = `${low}px`;
+}
+
 function authorName(people, id) {
   const person = (people || []).find((item) => item.id === id);
   return person ? person.name : "Alguien de casa";
@@ -64,6 +132,16 @@ function HomeNote({ note, index, people, now, position, selected, layerRef, onSe
   const { w, h } = sizeOf(note);
   const rot = note.rot || 0;
   const shape = note.shape || "square";
+  // Con aviso: antes de la hora enseña cuándo; a su hora se enciende.
+  const due = Boolean(note.remindAt) && new Date(note.remindAt) <= now;
+  const forPerson = note.forPersonId ? (people || []).find((person) => person.id === note.forPersonId) : null;
+
+  // Al cambiar el texto, el tamaño o la forma, y cuando llega la letra a mano.
+  useLayoutEffect(() => {
+    const el = textRef.current;
+    fitText(el);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => fitText(el));
+  }, [note.text, w, h, shape]);
 
   function start(event, mode) {
     const layer = layerRef.current;
@@ -144,7 +222,7 @@ function HomeNote({ note, index, people, now, position, selected, layerRef, onSe
   return (
     <figure
       ref={ref}
-      className={`board-note postit postit--${note.color} board-note--${shape}${selected ? " is-selected" : ""}`}
+      className={`board-note postit postit--${note.color} board-note--${shape}${selected ? " is-selected" : ""}${due ? " is-due" : ""}`}
       style={{
         left: `${position.x * 100}%`,
         top: `${position.y * 100}%`,
@@ -163,6 +241,17 @@ function HomeNote({ note, index, people, now, position, selected, layerRef, onSe
         <span className={`board-note__pin board-note__pin--${note.color}`} aria-hidden="true" />
       ) : null}
       {shape === "square" || shape === "lined" ? <span className="postit__tape" aria-hidden="true" /> : null}
+      {forPerson || note.remindAt ? (
+        <span className="postit__tags">
+          {forPerson ? <span className={`postit__for tone-${forPerson.tone}`}>Para {forPerson.name}</span> : null}
+          {note.remindAt ? (
+            <span className={`postit__when${due ? " is-now" : ""}`}>
+              <Bell size={13} strokeWidth={2.2} aria-hidden="true" />
+              {due ? "Ahora" : whenLabel(note.remindAt, now)}
+            </span>
+          ) : null}
+        </span>
+      ) : null}
       <blockquote ref={textRef} style={{ fontSize: `${noteFontSize(note.text, w, h, shape)}px` }}>
         {note.text}
       </blockquote>
@@ -252,6 +341,9 @@ export function NoteComposer({ notes, people, onClose }) {
   const [text, setText] = useState("");
   const [personId, setPersonId] = useState(people[0] ? people[0].id : "");
   const [color, setColor] = useState("amber");
+  const [forId, setForId] = useState("");
+  const [remind, setRemind] = useState("none");
+  const [lasts, setLasts] = useState("seen");
   const [error, setError] = useState(null);
 
   async function submit(event) {
@@ -266,6 +358,9 @@ export function NoteComposer({ notes, people, onClose }) {
         x: Math.round((0.62 + Math.random() * 0.18) * 1000) / 1000,
         y: Math.round((0.35 + Math.random() * 0.3) * 1000) / 1000,
         rot: Math.round((Math.random() * 8 - 4) * 10) / 10,
+        forPersonId: forId || null,
+        remindAt: remindIso(remind, new Date()),
+        expiresAt: expiresIso(lasts, new Date()),
       });
       onClose();
     } catch (caught) {
@@ -286,7 +381,6 @@ export function NoteComposer({ notes, people, onClose }) {
             <StickyNote size={22} strokeWidth={1.7} />
           </span>
           <div>
-            <span className="eyebrow">La nevera</span>
             <h2 id="note-composer-title">Nota nueva</h2>
             <p>Sale en Hoy; luego la puedes mover, estirar o cambiar de color tocándola.</p>
           </div>
@@ -304,6 +398,41 @@ export function NoteComposer({ notes, people, onClose }) {
             placeholder="Escribe una nota…"
             onChange={(event) => setText(event.target.value)}
           />
+          <div className="board-new__options">
+            <div className="notes-sheet__chips" role="group" aria-label="Para quién">
+              <span>Para</span>
+              <button type="button" className={forId === "" ? "is-on" : ""} aria-pressed={forId === ""} onClick={() => setForId("")}>
+                La casa
+              </button>
+              {people.map((person) => (
+                <button
+                  type="button"
+                  key={person.id}
+                  className={`tone-${person.tone}${forId === person.id ? " is-on" : ""}`}
+                  aria-pressed={forId === person.id}
+                  onClick={() => setForId(person.id)}
+                >
+                  {person.name}
+                </button>
+              ))}
+            </div>
+            <div className="notes-sheet__chips" role="group" aria-label="Cuándo avisa">
+              <span>Avisar</span>
+              {REMIND_OPTIONS.map(([id, label]) => (
+                <button type="button" key={id} className={remind === id ? "is-on" : ""} aria-pressed={remind === id} onClick={() => setRemind(id)}>
+                  {label}
+                </button>
+              ))}
+            </div>
+            <div className="notes-sheet__chips" role="group" aria-label="Cuánto dura">
+              <span>Dura</span>
+              {LASTS_OPTIONS.map(([id, label]) => (
+                <button type="button" key={id} className={lasts === id ? "is-on" : ""} aria-pressed={lasts === id} onClick={() => setLasts(id)}>
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
           <div className="board-new__row">
             <div className="notes-sheet__chips" role="group" aria-label="Quién la deja">
               {people.map((person) => (
@@ -360,7 +489,6 @@ function NotesSheet({ notes, people, now, onClose }) {
             <StickyNote size={22} strokeWidth={1.7} />
           </span>
           <div>
-            <span className="eyebrow">La nevera</span>
             <h2 id="notes-list-title">{ordered.length} notas</h2>
             <p>En Hoy se ven las {MAX_VISIBLE} más recientes; aquí están todas.</p>
           </div>
@@ -400,6 +528,21 @@ export const HomeNotes = memo(function HomeNotes({ notes, people, now }) {
   const hiddenCount = all.length - ordered.length;
   const selected = ordered.find((note) => note.id === selectedId) || null;
 
+  // Cuando un aviso llega a su hora, Yoshi lo dice una vez.
+  const told = useRef(new Set());
+  useEffect(() => {
+    ordered.forEach((note) => {
+      if (!note.remindAt || told.current.has(note.id)) return;
+      if (new Date(note.remindAt) <= now) {
+        told.current.add(note.id);
+        tellYoshi("reminder", note.text);
+      }
+    });
+  }, [now, ordered]);
+
+  // Los que caducan se quitan solos (en la demo no hay Worker que lo haga).
+  const visible = ordered.filter((note) => !note.expiresAt || new Date(note.expiresAt) > now);
+
   // Tocar fuera de la nota (y de su barra) la suelta.
   useEffect(() => {
     if (!selectedId) return undefined;
@@ -414,7 +557,7 @@ export const HomeNotes = memo(function HomeNotes({ notes, people, now }) {
 
   return (
     <div ref={layerRef} className="home-notes" aria-label="Notas de casa">
-      {ordered.map((note, index) => (
+      {visible.map((note, index) => (
         <HomeNote
           key={note.id}
           note={note}

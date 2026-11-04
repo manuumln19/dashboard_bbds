@@ -1206,7 +1206,6 @@
   gap: 7px;
   padding: 8px;
   border: 1px solid var(--line);
-  border-left: 3px solid var(--tone);
   border-radius: 12px;
   background: rgba(255, 250, 242, 0.035);
 }
@@ -1323,9 +1322,8 @@
 .calendar-card {
   padding: 11px;
   border: 1px solid var(--line);
-  border-left: 3px solid var(--tone);
   border-radius: 14px;
-  background: rgba(255, 250, 242, 0.035);
+  background: var(--tone-soft, rgba(255, 250, 242, 0.035));
 }
 
 .calendar-card.has-error {
@@ -2294,17 +2292,17 @@
 
 .energy-band--cheap {
   background: var(--mint-soft);
-  color: var(--mint);
+  color: var(--mint-ink, var(--mint));
 }
 
 .energy-band--mid {
   background: var(--amber-soft);
-  color: var(--amber);
+  color: var(--amber-ink, var(--amber));
 }
 
 .energy-band--high {
   background: var(--pink-soft);
-  color: var(--pink);
+  color: var(--pink-ink, var(--pink));
 }
 
 .elec-now__stamp {
@@ -2528,14 +2526,6 @@
 .elec-legend__item strong {
   color: var(--text);
   font-weight: 500;
-}
-
-.elec-legend__note {
-  margin-left: auto;
-  color: var(--faint);
-  font-family: var(--font-mono);
-  font-size: 12px;
-  white-space: nowrap;
 }
 
 .elec-foot {
@@ -2986,15 +2976,6 @@
 .appliance-tomorrow p {
   margin: 3px 0 0;
   color: var(--faint);
-  font-size: 12px;
-  line-height: 1.4;
-}
-
-.appliance-note {
-  flex: none;
-  margin: 5px 0 0;
-  color: var(--faint);
-  font-family: var(--font-mono);
   font-size: 12px;
   line-height: 1.4;
 }
@@ -3596,80 +3577,9 @@
 
 /* Limpieza --------------------------------------------------------------- */
 
-.cleaning-progress {
-  width: 190px;
-  gap: 6px;
-}
-
-.cleaning-progress__top > span {
-  font-size: 12px;
-}
-
 .cleaning-reset {
   height: 40px;
   padding: 0 12px;
-  font-size: 12px;
-}
-
-.cleaning-row {
-  grid-template-columns: 136px minmax(0, 1fr) 64px;
-}
-
-.cleaning-row__day {
-  gap: 8px;
-  padding: 0 14px;
-}
-
-.cleaning-row__day > div span {
-  font-size: 20px;
-}
-
-.cleaning-row__day > div small {
-  font-size: 12px;
-}
-
-.cleaning-row__day strong {
-  font-size: 35px;
-}
-
-.cleaning-task {
-  gap: 10px;
-  padding: 7px 13px;
-}
-
-.cleaning-task .check-mark {
-  width: 24px;
-  height: 24px;
-}
-
-.cleaning-task__copy strong {
-  font-size: 13.5px;
-}
-
-.cleaning-task__area {
-  font-size: 12px;
-}
-
-.cleaning-task__person {
-  gap: 5px;
-  font-size: 12px;
-}
-
-.cleaning-task__person i {
-  width: 21px;
-  height: 21px;
-  font-size: 12px;
-}
-
-.cleaning-row__foot strong {
-  font-size: 21px;
-}
-
-.cleaning-row__foot span {
-  font-size: 12px;
-}
-
-.cleaning-foot {
   font-size: 12px;
 }
 
@@ -3680,15 +3590,6 @@
 }
 
 .updated {
-  font-size: 12px;
-}
-
-.weather-date strong {
-  font-size: 42px;
-}
-
-.weather-date span,
-.weather-folio {
   font-size: 12px;
 }
 
@@ -3972,10 +3873,6 @@
   font-size: 12px;
 }
 
-.elec-legend__note {
-  font-size: 12px;
-}
-
 .elec-foot > span {
   font-size: 12px;
 }
@@ -4168,14 +4065,6 @@
   .appliance-flex button {
     min-height: 32px;
   }
-
-  .cleaning-row {
-    grid-template-columns: 126px minmax(0, 1fr) 56px;
-  }
-
-  .cleaning-task__person {
-    font-size: 12px;
-  }
 }
 
 @media (max-width: 960px) {
@@ -4195,10 +4084,6 @@
 
   .weather-layout {
     grid-template-rows: minmax(300px, auto) minmax(0, 1fr);
-  }
-
-  .cleaning-row {
-    grid-template-columns: 120px minmax(0, 1fr) 52px;
   }
 }
 
@@ -4557,7 +4442,7 @@ html.is-lite .app {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: var(--tone);
+  color: var(--tone-ink, var(--tone));
   font-family: var(--font-mono);
   font-size: 13.5px;
   letter-spacing: 0.07em;
@@ -4836,48 +4721,6 @@ html.is-lite .app {
 
 /* Racha de limpieza ------------------------------------------------------- */
 
-.cleaning-streak {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding-right: 16px;
-  border-right: 1px solid var(--line);
-}
-
-.cleaning-streak__top {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.cleaning-streak__top strong {
-  color: var(--faint);
-  font-family: var(--font-serif);
-  font-size: 38px;
-  font-weight: 400;
-  letter-spacing: -0.04em;
-  line-height: 0.78;
-}
-
-.cleaning-streak.is-on .cleaning-streak__top strong {
-  color: var(--amber);
-}
-
-.cleaning-streak__top span {
-  color: var(--muted);
-  font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.06em;
-  line-height: 1.15;
-  text-transform: uppercase;
-}
-
-.cleaning-streak__leader {
-  color: var(--muted);
-  font-size: 13px;
-  white-space: nowrap;
-}
-
 /* Decoración de temporada (SeasonDecor) ----------------------------------- */
 
 /* Empieza en el filo del rail, sin cruzarlo. Va por debajo de .app-main (z-index 2 en
@@ -5030,22 +4873,6 @@ html.is-lite .app {
   font-size: 14px;
 }
 
-.cleaning-row.is-off {
-  opacity: 0.6;
-}
-
-.cleaning-row__off {
-  display: flex;
-  align-items: center;
-  margin: 0;
-  padding: 0 18px;
-  color: var(--faint);
-  font-family: var(--font-serif);
-  font-size: 19px;
-  font-style: italic;
-  grid-column: 2 / -1;
-}
-
 /* Lo siguiente: avisos con acción */
 
 .today-next__add,
@@ -5134,33 +4961,6 @@ html.is-lite .app {
 
 .postit--compact blockquote {
   font-size: 18px;
-}
-
-.notes-sheet__form {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 0 22px;
-}
-
-.notes-sheet__form textarea {
-  padding: 12px 14px;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  background: var(--postit, #fdf3cf);
-  color: #3a2f1d;
-  font-family: var(--font-serif);
-  font-size: 22px;
-  font-style: italic;
-  resize: none;
-  outline: none;
-}
-
-.notes-sheet__row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px;
 }
 
 .notes-sheet__chips,
@@ -5523,22 +5323,6 @@ html.is-lite .app {
 
 .today-now__sky strong {
   white-space: nowrap;
-}
-
-.postit__by {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  line-height: 1.15;
-}
-
-.postit__by strong {
-  font-weight: 600;
-}
-
-.postit__by small {
-  font-size: 11.5px;
-  opacity: 0.8;
 }
 
 /* Las horas, más ligeras: sin fondo, separadas por un filete. */
@@ -5917,7 +5701,7 @@ html.is-lite .app {
   width: 100%;
   height: 100%;
   pointer-events: none;
-  transition: transform 0.35s cubic-bezier(0.3, 1.4, 0.5, 1);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .yoshi__img.is-flipped {
@@ -6000,7 +5784,7 @@ html.is-lite .app {
   max-width: 230px;
   white-space: normal;
   transform: translateX(-50%);
-  animation: yoshi-pop 0.35s cubic-bezier(0.2, 1.6, 0.4, 1);
+  animation: yoshi-pop 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .yoshi__bubble::after {
@@ -6433,7 +6217,7 @@ button:not(:disabled):active {
 /* Pósits: entrada, chinchetas y barra ---------------------------------------- */
 
 .board-note {
-  animation: note-in 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) backwards;
+  animation: note-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 
 .board-note.is-selected {
@@ -6469,7 +6253,7 @@ button:not(:disabled):active {
   border-radius: 26px;
   background: #fffaf0;
   box-shadow: 0 0 0 3px #3f9a2b, 0 22px 40px -18px rgba(0, 0, 0, 0.6);
-  animation: tools-in 0.3s cubic-bezier(0.2, 1.4, 0.4, 1);
+  animation: tools-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .app.is-night .board-tools {
@@ -6658,7 +6442,7 @@ button:not(:disabled):active {
 }
 
 .today-strip__person.is-mvp strong {
-  color: #b07a0c;
+  color: var(--house-ink);
 }
 
 .app.is-night .today-strip__person.is-mvp strong {
@@ -7260,18 +7044,6 @@ button:not(:disabled):active {
   font-weight: 800;
 }
 
-.list-panel__fold {
-  min-height: 40px;
-  padding: 0 14px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: var(--surface-2);
-  color: var(--muted);
-  font: inherit;
-  font-size: 13px;
-  font-weight: 700;
-}
-
 
 /* La ventana de Yoshi ------------------------------------------------------------ */
 /* Su rincón en Hoy: por la ventana se ve el cielo de verdad (hora y tiempo) y
@@ -7660,8 +7432,8 @@ button:not(:disabled):active {
    el crema. Solo de día; de noche manda el modo noche. */
 .app:not(.is-night) .today-shopping { --tile: #e1e9d5; }
 .app:not(.is-night) .today-strip__item--cleaning { --tile: #d9e8e4; }
-.app:not(.is-night) .today-strip__team { --tile: #e6e0ee; }
-.app:not(.is-night) .today-strip__item--power { --tile: #f4e9c6; }
+.app:not(.is-night) .today-strip__team { --tile: var(--tile-lilac); }
+.app:not(.is-night) .today-strip__item--power { --tile: var(--tile-sun); }
 
 .app:not(.is-night) .card.today-shopping {
   border-color: rgba(70, 96, 52, 0.2);
@@ -7784,7 +7556,7 @@ button:not(:disabled):active {
    terracota: manda por el color de las cifras, sin oscurecer la pantalla.
    Solo de día; de noche Hoy pasa a NightHome. */
 .app:not(.is-night) .today-now {
-  --hero-accent: #b0571c;
+  --hero-accent: var(--house);
 }
 
 .app:not(.is-night) .card.today-now {
@@ -7932,7 +7704,7 @@ button:not(:disabled):active {
 }
 
 .lists-view .list-panel__group.is-today h3 {
-  color: #b0571c;
+  color: var(--house);
 }
 
 .lists-view .task-row__content > span:first-child {
@@ -8006,7 +7778,7 @@ button:not(:disabled):active {
 }
 
 .tasks-group--today h2 {
-  color: #b0571c;
+  color: var(--house);
 }
 
 .tasks-group ul,
@@ -8086,7 +7858,7 @@ button:not(:disabled):active {
 }
 
 .chore.is-late .chore__copy span {
-  color: #b0571c;
+  color: var(--house);
 }
 
 .chore__points {
@@ -8213,7 +7985,7 @@ button:not(:disabled):active {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: var(--tone, #b0571c);
+  background: var(--tone, var(--house));
 }
 
 .tasks-score__row strong {
@@ -8262,8 +8034,8 @@ button:not(:disabled):active {
 }
 
 .tasks-chip.is-on {
-  border-color: #b0571c;
-  background: #f6e3d4;
+  border-color: var(--house);
+  background: var(--house-soft);
 }
 
 .tasks-manual__recent li {
@@ -8359,7 +8131,7 @@ button:not(:disabled):active {
 
 .tasks-new__hint {
   margin: 6px 0 0;
-  color: #b0571c;
+  color: var(--house);
   font-size: 14px;
 }
 
@@ -8391,10 +8163,10 @@ button:not(:disabled):active {
   min-height: 36px;
   align-items: center;
   padding: 0 12px;
-  border: 1px solid #b0571c;
+  border: 1px solid var(--house);
   border-radius: 999px;
-  background: #f6e3d4;
-  color: #8a3f10;
+  background: var(--house-soft);
+  color: var(--house-ink);
   font: inherit;
   font-size: 14px;
   font-weight: 600;
@@ -8428,8 +8200,8 @@ button:not(:disabled):active {
 }
 
 .rewards-who__person.is-on {
-  border-color: #b0571c;
-  box-shadow: inset 0 0 0 1px #b0571c;
+  border-color: var(--house);
+  box-shadow: inset 0 0 0 1px var(--house);
 }
 
 .rewards-who__person > span {
@@ -8479,14 +8251,14 @@ button:not(:disabled):active {
 }
 
 .rewards-card span {
-  color: #b0571c;
+  color: var(--house);
   font-size: 14px;
   font-weight: 600;
 }
 
 .rewards-card.is-on {
-  border-color: #b0571c;
-  box-shadow: inset 0 0 0 2px #b0571c;
+  border-color: var(--house);
+  box-shadow: inset 0 0 0 2px var(--house);
 }
 
 .rewards-card.is-locked {
@@ -8506,8 +8278,8 @@ button:not(:disabled):active {
   min-height: 54px;
   border: 0;
   border-radius: 16px;
-  background: #b0571c;
-  color: #fff;
+  background: var(--house);
+  color: var(--on-house);
   font: inherit;
   font-size: 17px;
   font-weight: 600;
@@ -8525,7 +8297,7 @@ button:not(:disabled):active {
 }
 
 .rewards-foot__done {
-  color: #b0571c;
+  color: var(--house);
   font-weight: 600;
 }
 
@@ -8574,8 +8346,8 @@ button:not(:disabled):active {
 }
 
 .rail__status--warn {
-  background: #f6e3d4;
-  color: #8a3f10;
+  background: var(--house-soft);
+  color: var(--house-ink);
 }
 
 .rail__status-dot {
@@ -8586,7 +8358,7 @@ button:not(:disabled):active {
   height: 9px;
   border: 2px solid var(--paper);
   border-radius: 50%;
-  background: #d9822b;
+  background: var(--house);
 }
 
 .status-banner,
@@ -8701,13 +8473,13 @@ button:not(:disabled):active {
 }
 
 .morning-home__hello strong {
-  color: #b0571c;
+  color: var(--house);
   font-weight: 600;
 }
 
 .morning-home__clock {
   margin: 10px 0 14px -6px;
-  color: #b0571c;
+  color: var(--house);
   font-family: var(--font-serif);
   font-size: 190px;
   font-variant-numeric: tabular-nums;
@@ -8727,7 +8499,7 @@ button:not(:disabled):active {
 .morning-home__weather svg {
   flex: none;
   margin-right: 12px;
-  color: #b0571c;
+  color: var(--house);
 }
 
 .morning-home__hours {
@@ -8760,7 +8532,7 @@ button:not(:disabled):active {
 
 .morning-home__hours li.is-rain,
 .morning-home__hours li.is-rain strong {
-  color: #2f6f9f;
+  color: var(--rain);
 }
 
 .morning-home__cards {
@@ -8777,23 +8549,23 @@ button:not(:disabled):active {
   margin-bottom: 12px;
   padding: 16px 20px;
   border-radius: 20px;
-  background: var(--paper-strong, #fff8ec);
+  background: var(--paper-strong, var(--card-paper));
 }
 
 .morning-card.is-advice {
-  background: #f6e3d4;
+  background: var(--house-soft);
 }
 
 .morning-card.is-advice.tone-rain {
-  background: #dfe9f1;
+  background: var(--tile-water);
 }
 
 .morning-card.is-advice.tone-cold {
-  background: #e3e6f2;
+  background: var(--tile-cold);
 }
 
 .morning-card.is-advice.tone-mild {
-  background: #dfece5;
+  background: var(--tile-green);
 }
 
 .morning-card__label {
@@ -8936,16 +8708,16 @@ button:not(:disabled):active {
   justify-content: center;
   margin-right: 12px;
   border-radius: 12px;
-  background: #f6e3d4;
-  color: #8a3f10;
+  background: var(--house-soft);
+  color: var(--house-ink);
 }
 
-.bill__icon.kind-luz { background: #f4e9c6; color: #7a5a0c; }
-.bill__icon.kind-agua { background: #dfe9f1; color: #2f5f86; }
+.bill__icon.kind-luz { background: var(--tile-sun); color: var(--tile-sun-ink); }
+.bill__icon.kind-agua { background: var(--tile-water); color: var(--rain); }
 .bill__icon.kind-basura,
-.bill__icon.kind-comunidad { background: #dfece5; color: #2f6b4f; }
+.bill__icon.kind-comunidad { background: var(--tile-green); color: var(--tile-green-ink); }
 .bill__icon.kind-internet,
-.bill__icon.kind-gas { background: #e6e0ee; color: #5a4a7a; }
+.bill__icon.kind-gas { background: var(--tile-lilac); color: var(--tile-lilac-ink); }
 
 .bill__copy {
   display: flex;
@@ -8967,7 +8739,7 @@ button:not(:disabled):active {
 }
 
 .bill__copy small.is-alert {
-  color: #b0571c;
+  color: var(--house);
   font-weight: 600;
 }
 
@@ -8996,8 +8768,8 @@ button:not(:disabled):active {
 
 .bill__delete.is-confirm {
   padding: 0 12px;
-  background: #b0571c;
-  color: #fff;
+  background: var(--house);
+  color: var(--on-house);
   font-weight: 600;
 }
 
@@ -9034,12 +8806,12 @@ button:not(:disabled):active {
 
 .bill__share.is-paid {
   border-style: solid;
-  border-color: #3b6d11;
-  background: #e5efd9;
+  border-color: var(--ok);
+  background: var(--ok-soft);
 }
 
 .bill__share.is-paid em {
-  color: #3b6d11;
+  color: var(--ok);
   font-weight: 600;
 }
 
@@ -9110,19 +8882,19 @@ button:not(:disabled):active {
   min-height: 2px;
   margin-bottom: 4px;
   border-radius: 6px 6px 2px 2px;
-  background: #e8d9c6;
+  background: var(--house-faint);
 }
 
 .bills-chart__bar.is-now i {
-  background: #d9a77f;
+  background: var(--house-mid);
 }
 
 .bills-chart__bar.is-on i {
-  background: #b0571c;
+  background: var(--house);
 }
 
 .bills-chart__bar.is-on {
-  color: #b0571c;
+  color: var(--house);
   font-weight: 600;
 }
 
@@ -9168,8 +8940,8 @@ button:not(:disabled):active {
   padding: 0 18px;
   border: 0;
   border-radius: 14px;
-  background: #b0571c;
-  color: #fff;
+  background: var(--house);
+  color: var(--on-house);
   font: inherit;
   font-size: 16px;
   font-weight: 600;
@@ -9182,7 +8954,7 @@ button:not(:disabled):active {
 }
 
 .bills-new__msg.is-alert {
-  color: #b0571c;
+  color: var(--house);
   font-weight: 600;
 }
 
@@ -9208,4 +8980,338 @@ button:not(:disabled):active {
 .rail__item {
   min-height: 54px;
   padding: 7px 5px 6px;
+}
+
+/* Las hojas (ink-sheet) son oscuras también de día: el terracota y sus
+   fondos usan la versión de noche para que se lean. */
+.ink-sheet {
+  --house: #e09a62;
+  --on-house: #1f1712;
+  --house-ink: #f0b98c;
+  --house-soft: #3a2a20;
+  --ok: #9fd27a;
+  --ok-soft: #22311a;
+}
+
+/* Tocar en la pared: los controles miden al menos 44 px. Donde el dibujo es
+   más pequeño (cruces, partes pagadas), crece la zona tocable, no el icono. */
+.rail__status,
+.energy-button,
+.elec-tabs button,
+.elec-foot .text-button,
+.appliance-flex button,
+.today-link,
+.cleaning-reset,
+.tasks-score__rewards,
+.tasks-chip,
+.tasks-chip.is-small,
+.today-shopping__chip,
+.shop-chip,
+.bill__share,
+.bill.is-compact .bill__share {
+  min-height: 44px;
+}
+
+.energy-icon-button,
+.energy-stepper button,
+.bill__delete,
+.shop-chip__remove,
+.chore__remove {
+  min-width: 44px;
+  height: 44px;
+}
+
+.rail__status {
+  justify-content: center;
+}
+
+/* Reducir movimiento: sin entradas ni saltos; el cambio de estado (nota
+   nueva, herramientas, Yoshi) se ve igual, solo que sin animar. */
+@media (prefers-reduced-motion: reduce) {
+  .yoshi__img,
+  .yoshi__bubble,
+  .board-note,
+  .board-tools,
+  .view,
+  .ink-sheet,
+  .tasks-undo {
+    animation: none;
+    transition: none;
+  }
+}
+
+/* El rail entra en 800 px con 8 pestañas: la pastilla del icono baja a 36 px
+   (la pestaña entera sigue siendo la zona de toque, de más de 44 px) y el
+   estado solo crece cuando hay un aviso que tocar. */
+.rail__item svg {
+  padding: 8px;
+}
+
+.rail__nav {
+  margin-top: 14px;
+}
+
+.rail__status:disabled {
+  min-height: 0;
+}
+
+.rail__nav {
+  gap: 2px;
+}
+
+.rail__item {
+  gap: 3px;
+  min-height: 0;
+  padding: 4px 5px 3px;
+}
+
+/* Texto sobre los fondos de color de cada tono: la versión oscura del tono
+   (4,5:1 o más sobre su pastel). De noche y en las hojas oscuras, el tono
+   claro de siempre. */
+:root {
+  --pink-ink: #a3154a;
+  --mint-ink: #155c4c;
+  --amber-ink: #6f4b12;
+  --lilac-ink: #4b3d8f;
+}
+
+.tone-pink { --tone-ink: var(--pink-ink); }
+.tone-mint { --tone-ink: var(--mint-ink); }
+.tone-amber { --tone-ink: var(--amber-ink); }
+.tone-lilac { --tone-ink: var(--lilac-ink); }
+.tone-ink { --tone-ink: var(--text); }
+
+.app.is-night,
+.ink-sheet {
+  --pink-ink: var(--pink);
+  --mint-ink: var(--mint);
+  --amber-ink: var(--amber);
+  --lilac-ink: var(--lilac);
+}
+
+.today-entry__meta {
+  color: var(--tone-ink, var(--tone));
+}
+
+/* El color es de las personas y los calendarios; un lugar va en neutro. */
+.today-entry__meta.is-place {
+  background: var(--surface-3);
+  color: var(--muted);
+}
+
+/* Hoy, para leer desde 2–3 m: menos cosas y más grandes. «Mañana» va en una
+   sola línea y cada dato sale una vez. */
+.today-day__tomorrow {
+  display: flex;
+  width: 100%;
+  min-height: 52px;
+  align-items: center;
+  gap: 14px;
+  margin-top: 6px;
+  padding: 8px 10px;
+  border: 0;
+  border-top: 1px solid var(--line);
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 19px;
+  text-align: left;
+}
+
+.today-day__tomorrow strong {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.today-day__tomorrow span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.today-entry__title,
+.today-board .today-entry__title {
+  font-size: 22px;
+}
+
+.today-entry__time,
+.today-board .today-entry__time {
+  font-size: 18px;
+}
+
+.today-entry__meta,
+.today-board .today-entry__meta {
+  font-size: 16px;
+}
+
+.today-next__rest li {
+  font-size: 18px;
+}
+
+.today-shopping__chip {
+  font-size: 20px;
+}
+
+.today-strip__text small,
+.today-board .today-strip__text small {
+  font-size: 16px;
+}
+
+/* El saludo, en el acento de la casa y no en un tercer color. */
+.app:not(.is-night) .today-now__greeting strong {
+  color: var(--house);
+}
+
+/* Hoy, reorganizado para mirarlo desde lejos. Arriba, a lo ancho, la hora y
+   el tiempo; a la derecha, Yoshi con su temporada en una ventana grande.
+   Debajo, tres columnas: lo siguiente, el día y la compra. Abajo, las tres
+   baldosas de color. Los pósits siguen libres por encima. */
+.today-board {
+  grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.5fr) minmax(0, 0.88fr);
+  grid-template-rows: 290px minmax(0, 1fr) auto;
+  grid-template-areas:
+    "now now yoshi"
+    "next day shop"
+    "strip strip strip";
+}
+
+.today-board > .today-side {
+  grid-area: shop;
+}
+
+.today-board .today-now__clock {
+  font-size: 132px;
+  line-height: 0.85;
+}
+
+.today-board .today-now__temp {
+  font-size: 72px;
+}
+
+.today-now__sky {
+  min-width: 0;
+  flex: 1 1 180px;
+}
+
+.today-board .today-now__sky strong {
+  font-size: 26px;
+}
+
+.today-board .today-now__sky span {
+  font-size: 18px;
+}
+
+.today-board > .yoshi-window {
+  min-height: 0;
+}
+
+.today-board .today-next__title {
+  font-size: 32px;
+}
+
+
+/* En Hoy, la compra ya está en el menú lateral: sin el enlace repetido. */
+.today-board .today-shopping .today-link:not(.today-link--note) {
+  display: none;
+}
+
+.today-board .today-entry,
+.today-entry {
+  grid-template-columns: 58px 24px minmax(0, 1fr) auto;
+}
+
+/* Bricolage Grotesque: la hora en el corte grueso, para leerla desde lejos. */
+.today-now__clock,
+.morning-home__clock,
+.night-home__time time,
+.rail__clock {
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+/* Pósits: letra a mano, papel que se levanta un poco y, si avisan, su hora y
+   para quién son. A su hora se encienden: borde del color de la casa y la
+   campana en negro. */
+.postit blockquote,
+.postit figcaption,
+.board-new textarea {
+  font-family: "BBDS Hand", var(--font-serif);
+  font-style: normal;
+}
+
+.postit figcaption {
+  font-size: 15px;
+}
+
+.home-notes .board-note {
+  box-shadow:
+    0 1px 1px rgba(60, 40, 20, 0.12),
+    0 10px 18px -12px rgba(60, 40, 20, 0.45);
+}
+
+.postit__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.postit__for,
+.postit__when {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.55);
+  color: #3a2f25;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.postit__for {
+  color: var(--tone-ink, #3a2f25);
+}
+
+.postit__when.is-now {
+  background: #1f1c18;
+  color: #fff8ec;
+}
+
+.home-notes .board-note.is-due {
+  outline: 3px solid var(--house);
+  outline-offset: 3px;
+}
+
+.board-new__options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.board-new__options .notes-sheet__chips > span {
+  min-width: 52px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.board-new__options .notes-sheet__chips {
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.board-new__options .notes-sheet__chips button {
+  min-height: 44px;
+}
+
+.board-new__options .notes-sheet__chips button.is-on {
+  border-color: var(--tone, var(--house));
+  background: var(--tone-soft, var(--house-soft));
 }

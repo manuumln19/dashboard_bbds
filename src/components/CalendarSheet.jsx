@@ -243,7 +243,6 @@ export function CalendarSheet({ open, onClose, calendar, people }) {
             <CalendarDays size={23} strokeWidth={1.7} />
           </span>
           <div>
-            <span className="eyebrow">Agenda compartida</span>
             <h2 id="calendar-sheet-title">Calendarios</h2>
             <p>
               Añade la dirección secreta de iCal de cada calendario. El color y

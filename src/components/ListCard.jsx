@@ -287,7 +287,6 @@ export function ListCard({
             </span>
           )}
           <div>
-            <span className="eyebrow">Lista compartida</span>
             <h2>{title}</h2>
             <p>{subtitle}</p>
           </div>

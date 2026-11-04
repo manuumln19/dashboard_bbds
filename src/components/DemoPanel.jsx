@@ -148,7 +148,6 @@ export function DemoPanel({
             <FlaskConical size={22} strokeWidth={1.7} />
           </span>
           <div>
-            <span className="eyebrow">Solo este navegador</span>
             <h2 id="demo-title">Panel de pruebas</h2>
             <p>Cambia la hora, el idle y la red sin esperar.</p>
           </div>
@@ -497,7 +496,6 @@ export function Diagnostics({ open, onClose, data, onOpenDemo }) {
             <Bug size={22} strokeWidth={1.7} />
           </span>
           <div>
-            <span className="eyebrow">BBDS · soporte</span>
             <h2 id="diag-title">Diagnóstico</h2>
             <p>Lo que ve la pantalla y lo que tiene guardado.</p>
           </div>
