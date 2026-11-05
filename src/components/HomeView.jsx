@@ -3,9 +3,9 @@ import { HomeNotes, NoteComposer } from "./HomeNotes";
 import { markMorningBrief, MorningBrief, morningBriefDue } from "./MorningBrief";
 import { dismissMorning, isMorningTime, MorningHome, morningDismissed } from "./MorningHome";
 import { NightHome } from "./NightHome";
-import { TodayNext } from "./TodayNext";
+import { SHOWN_ELSEWHERE, TodayNext } from "./TodayNext";
+import { nextItems } from "../lib/today";
 import { TodayNow } from "./TodayNow";
-import { TodayShopping } from "./TodayShopping";
 import { TodayStrip } from "./TodayStrip";
 import { TodayTimeline } from "./TodayTimeline";
 import { YoshiWindow } from "./YoshiWindow";
@@ -52,6 +52,12 @@ export const HomeView = memo(function HomeView({
   const closeSummary = useCallback(() => setSummaryOpen(false), []);
   const openWriting = useCallback(() => setWriting(true), []);
   const closeWriting = useCallback(() => setWriting(false), []);
+  // Los avisos que no son lo principal (lluvia, facturas, recordatorios,
+  // cumpleaños…) van dentro de la línea del día, no en otra tarjeta.
+  const nextList = nextItems({ now, events: calendar.events, weather: weather.weather, electricity, cleaning, menu, bills }).filter(
+    (item) => !SHOWN_ELSEWHERE.has(item.kind)
+  );
+  const alerts = nextList.slice(1).filter((item) => item.kind !== "event");
   // Tres momentos: la mañana (salir de casa), el día (el panel de siempre) y
   // la noche (NightHome). «Ver todo el día» quita la mañana hasta mañana.
   const [morningOff, setMorningOff] = useState(() => morningDismissed(new Date()));
@@ -138,12 +144,13 @@ export const HomeView = memo(function HomeView({
             events={calendar.events}
             lists={lists}
             cleaning={cleaning}
+            alerts={alerts}
             onOpenAgenda={onOpenAgenda}
             onOpenLists={onOpenCleaning}
+            onOpenShopping={onOpenLists}
+            onOpenBills={onOpenBills}
+            onWriteNote={openWriting}
           />
-          <div className="today-side">
-            <TodayShopping lists={lists} onOpenLists={onOpenLists} onWriteNote={openWriting} />
-          </div>
           <TodayStrip
             now={now}
             cleaning={cleaning}

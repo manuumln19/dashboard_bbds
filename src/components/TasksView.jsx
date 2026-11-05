@@ -5,6 +5,7 @@ import { formatPoints, levelFor, weeklyScores } from "../lib/points";
 import { cleaningDayIndex } from "../lib/today";
 import { CheckMark } from "./CheckMark";
 import { CleaningEditor } from "./CleaningEditor";
+import { YoshiEmpty } from "./YoshiEmpty";
 import { RewardsSheet } from "./RewardsSheet";
 
 const UNDO_MS = 6000;
@@ -216,7 +217,7 @@ export function TasksView({ now, cleaning, lists, points }) {
               </section>
             ))
           ) : (
-            <p className="tasks-empty">Nada pendiente. Casa en orden.</p>
+            <YoshiEmpty pose="cheer" title="Nada pendiente" text="Casa en orden. ¡Qué equipo!" />
           )}
           <p className="tasks-foot">
             {doneThisWeek} {doneThisWeek === 1 ? "hecha" : "hechas"} esta semana

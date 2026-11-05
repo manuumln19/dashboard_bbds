@@ -26,6 +26,7 @@ import {
   shareOf,
   shiftPeriod,
 } from "../lib/bills";
+import { YoshiEmpty } from "./YoshiEmpty";
 
 const KIND_ICONS = {
   alquiler: House,
@@ -96,7 +97,7 @@ export function BillsView({ now, bills, people }) {
               ))}
             </ul>
           ) : (
-            <p className="bills-empty">Todo pagado. Casa en orden.</p>
+            <YoshiEmpty pose="trophy" title="Todo pagado" text="Casa en orden este mes." />
           )}
 
           {paidByMonth.map((group) => (

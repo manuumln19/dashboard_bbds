@@ -51,6 +51,8 @@ const TAP_LINES = {
   cold: ["Brrr… ¡qué frío!", "Chaqueta, ¿eh?", "Me quedo en la manta."],
   hot: ["¡Uf, qué calor!", "Agua, mucha agua.", "Persianas abajo."],
   sleep: ["Zzz… cinco minutos más.", "Mmm… ¿ya es de día?", "¡Shhh! Que duermo."],
+  dizzy: ["Uf, se acumulan las tareas…", "¡Me mareo de tanto pendiente!", "¿Hacemos una entre los dos?"],
+  cheer: ["¡Todo hecho por hoy!", "¡Casa en orden!", "¡Qué equipo!"],
 };
 
 const HAPPY_LINES = ["¡Bien hecho!", "¡Una menos!", "¡Así se hace!", "¡Puntos!", "¡Toma ya!"];
@@ -59,9 +61,13 @@ const IDLE_LINES = ["Mmmh…", "¿Alguien tiene manzanas?", "¡Qué bien se est�
 
 // Cómo está Yoshi: duerme de noche, saca el paraguas si llueve, bufanda con
 // frío y abanico con calor; a la hora de comer o cenar, con hambre.
-export function yoshiMood({ now, weather, isNight }) {
+export function yoshiMood({ now, weather, isNight, house = "normal" }) {
   const hour = now.getHours();
   if (isNight || hour >= 23 || hour < 7) return "sleep";
+  // Cómo va la casa manda sobre el tiempo: mareado si se acumula, de fiesta
+  // si lo de hoy está hecho.
+  if (house === "busy") return "dizzy";
+  if (house === "clear") return "cheer";
   const current = weather && weather.current ? weather.current : null;
   if (current && RAIN_CODES.has(Number(current.weatherCode))) return "rain";
   if (current && Number(current.temperature) <= 10) return "cold";
@@ -166,6 +172,7 @@ export const Yoshi = memo(function Yoshi({
   const [apples, setApples] = useState(() => (main ? todayApples() : 0));
   const houseRef = useRef(house);
   houseRef.current = house;
+  const houseTurn = useRef(0);
   const applesRef = useRef(apples);
   applesRef.current = apples;
 
@@ -390,8 +397,11 @@ export const Yoshi = memo(function Yoshi({
       act("cheer", pick(FULL_LINES), 2800);
       return;
     }
-    if (house.length && Math.random() < 0.65) {
-      act("happy", pick(house), 3200);
+    // Cada toque, lo siguiente del día, en orden de importancia.
+    if (house.length) {
+      const line = house[houseTurn.current % house.length];
+      houseTurn.current += 1;
+      act("happy", line, 4200);
       return;
     }
     act("happy", pick(TAP_LINES[mood] || TAP_LINES.idle));

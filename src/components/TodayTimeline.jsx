@@ -1,11 +1,12 @@
 import { Fragment, memo } from "react";
-import { ArrowUpRight, CalendarDays, ListChecks, SprayCan } from "lucide-react";
+import { ArrowUpRight, BellRing, Cake, CalendarDays, ListChecks, Receipt, ShoppingBasket, Sparkles, SprayCan, StickyNote, Trophy, Umbrella, UtensilsCrossed } from "lucide-react";
 import { useRecentlyDone } from "../hooks/useRecentlyDone";
 import { timelineDays } from "../lib/today";
 import { CheckMark } from "./CheckMark";
 import { SeasonMark } from "./SeasonDecor";
 
 const KIND_ICONS = { event: CalendarDays, task: ListChecks, cleaning: SprayCan };
+const ALERT_ICONS = { rain: Umbrella, bill: Receipt, reminder: BellRing, birthday: Cake, trophy: Trophy, menu: UtensilsCrossed };
 const CLOCK = /^\d\d:\d\d$/;
 
 function pad(value) {
@@ -23,7 +24,18 @@ function splitAtNow(entries, nowKey) {
 
 // Hoy y mañana en una lista por orden de hora. Las tareas y la limpieza se
 // marcan aquí mismo; los eventos abren la agenda.
-export const TodayTimeline = memo(function TodayTimeline({ now, events, lists, cleaning, onOpenAgenda, onOpenLists }) {
+export const TodayTimeline = memo(function TodayTimeline({
+  now,
+  events,
+  lists,
+  cleaning,
+  alerts = [],
+  onOpenAgenda,
+  onOpenLists,
+  onOpenShopping,
+  onOpenBills,
+  onWriteNote,
+}) {
   const recent = useRecentlyDone();
   const days = timelineDays({
     now,
@@ -38,6 +50,7 @@ export const TodayTimeline = memo(function TodayTimeline({ now, events, lists, c
   ).length;
 
   const nowKey = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  const toBuy = lists.items.filter((item) => item.listId === "shopping" && !item.done).length;
 
   function activate(entry) {
     if (entry.kind === "task") {
@@ -53,14 +66,52 @@ export const TodayTimeline = memo(function TodayTimeline({ now, events, lists, c
     <article className="card today-timeline" aria-labelledby="today-timeline-title">
       <header className="today-card__head">
         <h2 id="today-timeline-title">
-          Hoy y mañana
+          Hoy
           <SeasonMark />
         </h2>
+        {onWriteNote ? (
+          <button type="button" className="today-link today-link--note" onClick={onWriteNote}>
+            <StickyNote size={15} strokeWidth={2} aria-hidden="true" />
+            Nota
+          </button>
+        ) : null}
+        {onOpenShopping ? (
+          <button type="button" className="today-link" onClick={onOpenShopping}>
+            <ShoppingBasket size={15} strokeWidth={2} aria-hidden="true" />
+            {toBuy ? `Compra · ${toBuy}` : "Compra"}
+          </button>
+        ) : null}
         <button type="button" className="today-link" onClick={onOpenAgenda}>
           Agenda
           <ArrowUpRight size={15} strokeWidth={2} aria-hidden="true" />
         </button>
       </header>
+
+      {alerts.length ? (
+        <ul className="today-alerts" aria-label="Avisos de hoy">
+          {alerts.slice(0, 3).map((item) => {
+            const Icon = ALERT_ICONS[item.kind] || Sparkles;
+            const content = (
+              <>
+                <Icon size={16} strokeWidth={2} aria-hidden="true" />
+                <strong>{item.title}</strong>
+                {item.kind === "bill" ? <small>{item.kicker}</small> : item.detail ? <small>{item.detail}</small> : null}
+              </>
+            );
+            return (
+              <li key={item.id} className={`today-alert tone-${item.tone || "amber"}`}>
+                {item.kind === "bill" && onOpenBills ? (
+                  <button type="button" onClick={onOpenBills}>
+                    {content}
+                  </button>
+                ) : (
+                  <span>{content}</span>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      ) : null}
 
       <div className="today-timeline__days">
         {days.map((day) => {

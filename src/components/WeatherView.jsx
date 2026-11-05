@@ -37,7 +37,7 @@ function sunTop(progress) {
   return ((27 - 52 * progress * (1 - progress)) / 30) * 100;
 }
 
-export function WeatherView({ now, weather, error, loading }) {
+export function WeatherView({ now, weather, error, loading, electricity }) {
   const current = weather && weather.current ? weather.current : null;
   const today = weather && weather.today ? weather.today : null;
   const days = weather && Array.isArray(weather.days) ? weather.days : [];
@@ -236,7 +236,7 @@ export function WeatherView({ now, weather, error, loading }) {
 
         <WeeklyForecast days={days} now={now} />
 
-        <HourlyPanel weather={weather} now={now} />
+        <HourlyPanel weather={weather} now={now} electricity={electricity} />
       </div>
     </section>
   );

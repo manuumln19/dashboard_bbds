@@ -5,6 +5,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   useSyncExternalStore,
 } from "react";
@@ -50,10 +51,12 @@ import { Rail } from "./components/Rail";
 import { SeasonContext, SeasonDecor } from "./components/SeasonDecor";
 import { HomeView } from "./components/HomeView";
 import { StatusBanner } from "./components/StatusBanner";
+import { ViewTabs } from "./components/ViewTabs";
+import { SECTIONS, sectionOf } from "./lib/sections";
 import { Yoshi, YoshiStroll, yoshiMood } from "./components/Yoshi";
 import { LITE_MODE } from "./lib/perf";
 import { setPollingPaused } from "./lib/polling";
-import { doneState, houseLines } from "./lib/yoshiTalk";
+import { doneState, houseLines, houseState } from "./lib/yoshiTalk";
 
 // Las vistas que no se usan al arrancar se descargan aparte y se precargan
 // cuando el arranque ya ha terminado (ver PRELOAD_DELAY_MS).
@@ -204,8 +207,12 @@ export default function App() {
       }
     : dataHealth, [zoneIssue, dataHealth]);
 
+  // Cada sección del menú recuerda su última vista (Casa → Tareas, por ejemplo).
+  const lastInSection = useRef({});
   const setView = useCallback((nextView) => {
     if (!VALID_VIEWS.has(nextView)) return;
+    const section = sectionOf(nextView);
+    if (section) lastInSection.current[section.id] = nextView;
     setRailView(nextView);
     startTransition(() => setViewState(nextView));
     if (typeof window !== "undefined") {
@@ -218,6 +225,17 @@ export default function App() {
   // punto y, al tocarlo, se abre el detalle.
   const [statusOpen, setStatusOpen] = useState(false);
   const toggleStatus = useCallback(() => setStatusOpen((open) => !open), []);
+  // Lo pendiente de la compra, como número sobre su pestaña (ya no está en Hoy).
+  const toBuy = lists.items.filter((item) => item.listId === "shopping" && !item.done).length;
+  const railBadges = useMemo(() => ({ casa: toBuy }), [toBuy]);
+  const tabBadges = useMemo(() => ({ lists: toBuy }), [toBuy]);
+  const railChange = useCallback(
+    (id) => {
+      const section = SECTIONS.find((item) => item.id === id);
+      setView(section ? lastInSection.current[id] || section.views[0].id : id);
+    },
+    [setView]
+  );
   const closeStatus = useCallback(() => setStatusOpen(false), []);
   const openAgenda = useCallback(() => setView("agenda"), [setView]);
   const openLists = useCallback(() => setView("lists"), [setView]);
@@ -391,14 +409,15 @@ export default function App() {
 
   // Yoshi vive en la tarjeta «Lo siguiente» de Hoy (en la barra tapaba el menú
   // en el marco). Elemento memorizado: uno nuevo en cada render repintaba Hoy.
-  const yoshiMoodNow = yoshiMood({ now, weather: weather.weather, isNight });
+  const yoshiHouseState = houseState({ now, cleaning, lists });
+  const yoshiMoodNow = yoshiMood({ now, weather: weather.weather, isNight, house: yoshiHouseState });
   // Semana de limpieza completa: Yoshi luce el trofeo en Hoy hasta el lunes
   // (dormido, no: de noche duerme).
   const yoshiTrophy = cleaning.weekComplete && yoshiMoodNow !== "sleep";
   const yoshiCheer = cleaning.loading || lists.loading ? null : doneState({ cleaning, lists });
   const yoshiHouse = useMemo(
-    () => houseLines({ now, cleaning, events: calendar.events, lists }),
-    [now, cleaning, calendar.events, lists]
+    () => houseLines({ now, cleaning, events: calendar.events, lists, weather: weather.weather, electricity, bills }),
+    [now, cleaning, calendar.events, lists, weather.weather, electricity, bills]
   );
   const homeVisible = view === "home";
   const mascot = useMemo(
@@ -435,12 +454,13 @@ export default function App() {
       <Rail
         now={now}
         view={railView}
-        onChange={setView}
+        onChange={railChange}
         isNight={isNight}
         onToggleNight={toggleNight}
         onOpenGallery={openGallery}
         status={status}
         issueCount={DEMO_MODE ? 0 : health.issues.length}
+        badges={railBadges}
         onStatus={toggleStatus}
         seasonId={season.id}
       />
@@ -455,6 +475,7 @@ export default function App() {
       />
 
       <main className="app-main">
+        <ViewTabs view={railView} badges={tabBadges} onChange={setView} />
         <Suspense
           fallback={
             <div className="view-loading" role="status">
@@ -515,6 +536,7 @@ export default function App() {
               weather={weather.weather}
               error={weather.error}
               loading={weather.loading}
+              electricity={electricity}
             />
           ) : null}
 

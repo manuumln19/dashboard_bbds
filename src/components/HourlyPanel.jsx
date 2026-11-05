@@ -1,5 +1,7 @@
-import { Droplets } from "lucide-react";
+import { Droplets, Zap } from "lucide-react";
 import { LOCATION } from "../config";
+import { bandForPrice, classifyPriceBands } from "../lib/energy";
+import { cheapPower } from "../lib/today";
 import { hourLabel, isRainyHour, nextHours } from "../lib/weather";
 import { WeatherGlyph } from "./WeatherGlyph";
 
@@ -11,7 +13,23 @@ function round(value) {
 
 // Previsión real hora a hora (Open-Meteo). Sustituye al antiguo radar, que
 // era un mapa ilustrativo sin datos.
-export function HourlyPanel({ weather, now }) {
+// La banda de precio de la luz de cada hora ("YYYY-MM-DDTHH" local), para
+// ponerla junto al tiempo: lo que cuesta poner la lavadora a esa hora.
+function powerBands(electricity) {
+  const map = {};
+  const days = electricity && electricity.data && Array.isArray(electricity.data.days) ? electricity.data.days : [];
+  days.forEach((day) => {
+    const bands = classifyPriceBands(day);
+    (day.hours || []).forEach((slot) => {
+      map[String(slot.start).slice(0, 13)] = bandForPrice(slot.price, bands);
+    });
+  });
+  return map;
+}
+
+export function HourlyPanel({ weather, now, electricity }) {
+  const power = powerBands(electricity);
+  const cheap = cheapPower(electricity, now);
   const hours = nextHours(weather, now, HOURS);
   const rainy = hours.find(isRainyHour);
   const temperatures = hours.map((hour) => Number(hour.temperature)).filter(Number.isFinite);
@@ -39,6 +57,12 @@ export function HourlyPanel({ weather, now }) {
         <Droplets size={14} strokeWidth={1.9} aria-hidden="true" />
         {summary}
       </p>
+      {cheap ? (
+        <p className="hourly-summary is-power">
+          <Zap size={14} strokeWidth={1.9} aria-hidden="true" />
+          {cheap.label}
+        </p>
+      ) : null}
 
       <ol className="hourly-list">
         {hours.map((hour) => {
@@ -66,6 +90,13 @@ export function HourlyPanel({ weather, now }) {
                 </span>
                 <small>{round(chance)}%</small>
               </span>
+              {power[String(hour.time).slice(0, 13)] ? (
+                <span className={`hourly-power energy-band energy-band--${power[String(hour.time).slice(0, 13)].id}`}>
+                  {power[String(hour.time).slice(0, 13)].short}
+                </span>
+              ) : (
+                <span className="hourly-power" />
+              )}
             </li>
           );
         })}

@@ -55,13 +55,15 @@ function clockOf(date) {
 function AgendaBoard({ days, events, now, onSelect }) {
   return (
     <div className="agenda-board">
-      {days.map((day) => {
+      {days.map((day, index) => {
+        // Hoy y mañana, en grande y con el lugar; el resto de la semana, compacto.
+        const near = index < 2;
         const items = eventsForDay(events, day).sort(
           (a, b) => (a.allDay === b.allDay ? a.start - b.start : a.allDay ? -1 : 1)
         );
         const isToday = isSameDay(day, now);
         return (
-          <section className={`agenda-board__day${isToday ? " is-today" : ""}`} key={day.toISOString()}>
+          <section className={`agenda-board__day${isToday ? " is-today" : ""}${near ? " is-near" : ""}`} key={day.toISOString()}>
             <header>
               <span>{weekdayShort(day)}</span>
               <strong>{day.getDate()}</strong>
@@ -77,6 +79,7 @@ function AgendaBoard({ days, events, now, onSelect }) {
                     >
                       <small>{allDay ? "Todo el día" : clockOf(start)}</small>
                       <strong>{event.summary || "Sin título"}</strong>
+                      {near && event.location ? <span>{event.location}</span> : null}
                     </button>
                   </li>
                 ))}

@@ -1,6 +1,8 @@
 import { eventStartDate } from "./date";
 import { birthdaysOn, upcomingBirthday } from "./season";
-import { cleaningDayIndex } from "./today";
+import { billStatus, kindLabel, periodLabel, periodOf } from "./bills";
+import { cheapPower, cleaningDayIndex } from "./today";
+import { hourLabel, isRainyHour, nextHours } from "./weather";
 
 // Lo que Yoshi sabe de casa: frases sobre la limpieza de hoy, el próximo
 // evento, la compra y los cumpleaños. Se calcula en cada render (barato) y
@@ -58,13 +60,56 @@ function birthdayLines(people, now) {
   return next ? [`¡Mañana es el cumple de ${next.person.name}! 🎂`] : [];
 }
 
-export function houseLines({ now, cleaning, events, lists }) {
+function rainLines(weather, now) {
+  const rainy = nextHours(weather, now, Math.min(12, 24 - now.getHours())).find(isRainyHour);
+  return rainy ? [`Va a llover hacia las ${hourLabel(rainy)}. ¡Coged paraguas! ☔`] : [];
+}
+
+function powerLines(electricity, now) {
+  const cheap = cheapPower(electricity, now);
+  if (!cheap) return [];
+  return cheap.now ? [`${cheap.label}: buen momento para la lavadora.`] : [`${cheap.label}.`];
+}
+
+// El alquiler del mes, si falta alguien y ya empezó el plazo.
+function billLines(bills, people, now) {
+  if (!bills || !Array.isArray(bills.bills) || !(people || []).length) return [];
+  const period = periodOf(now);
+  return (bills.rules || [])
+    .filter((rule) => rule.active && now.getDate() >= rule.dayFrom)
+    .map((rule) => bills.bills.find((bill) => bill.ruleId === rule.id && bill.period === period))
+    .filter((bill) => bill && !billStatus(bill, people).done)
+    .map((bill) => {
+      const missing = billStatus(bill, people).missing.map((person) => person.name);
+      return `${kindLabel(bill.kind)} de ${periodLabel(period)}: queda la parte de ${joinEs(missing)}.`;
+    });
+}
+
+// Lo que Yoshi cuenta, en orden de importancia: al tocarlo va diciendo una
+// cosa tras otra, como un resumen del día.
+export function houseLines({ now, cleaning, events, lists, weather, electricity, bills }) {
   return [
     ...birthdayLines(cleaning ? cleaning.people : [], now),
     ...eventLines(events, now),
+    ...rainLines(weather, now),
     ...cleaningLines(cleaning, now),
+    ...billLines(bills, cleaning ? cleaning.people : [], now),
+    ...powerLines(electricity, now),
     ...shoppingLines(lists),
   ];
+}
+
+// Cómo va la casa hoy, para el ánimo de Yoshi: «clear» si lo de hoy está
+// hecho, «busy» si se acumula (4 o más pendientes de hoy o atrasadas).
+export function houseState({ now, cleaning, lists }) {
+  const today = cleaningDayIndex(now);
+  const todayTasks = ((cleaning && cleaning.tasks) || []).filter((task) => task.day <= today);
+  const pending = todayTasks.filter((task) => !task.done).length;
+  const key = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  const lateItems = (lists && lists.byList ? lists.byList("tasks") : []).filter((item) => !item.done && item.dueOn && item.dueOn <= key).length;
+  if (pending + lateItems >= 4) return "busy";
+  if (todayTasks.length && pending === 0 && lateItems === 0) return "clear";
+  return "normal";
 }
 
 // Las tareas que alimentan a Yoshi (limpieza de la semana y tareas de la

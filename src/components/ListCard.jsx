@@ -11,6 +11,7 @@ import { isLegacyDrawing } from "../lib/listItems";
 import { groupByAisle } from "../lib/aisles";
 import { usualShopping } from "../lib/usualShopping";
 import { CheckMark } from "./CheckMark";
+import { YoshiEmpty } from "./YoshiEmpty";
 import { Sticker } from "./SeasonDecor";
 import { TodoBadges, TodoMetaFields } from "./TodoFields";
 
@@ -164,12 +165,14 @@ export function ListCard({
     );
   }
 
-  const emptyState = (
+  const emptyState = isTasks ? (
     <div className="empty-state empty-state--list">
       {sticker ? <Sticker name={sticker} size={72} /> : <Icon size={35} strokeWidth={1.25} aria-hidden="true" />}
       <strong>{items.length ? "Todo hecho" : "La lista está vacía"}</strong>
       <span>{items.length ? "Nada pendiente. Bien." : "Escribe arriba para añadir lo primero."}</span>
     </div>
+  ) : (
+    <YoshiEmpty pose="happy" title="No falta nada" text="La despensa está al día. Apunta arriba lo que se acabe." />
   );
 
   function renderItem(item) {

@@ -4248,7 +4248,6 @@ html.is-lite .app {
 .today-board > .today-next { grid-area: next; }
 .today-board > .yoshi-window { grid-area: yoshi; }
 .today-board > .today-timeline { grid-area: day; }
-.today-board > .today-side { grid-area: shop; }
 .today-board > .today-strip { grid-area: strip; }
 
 .today-board .card {
@@ -4290,20 +4289,6 @@ html.is-lite .app {
   font-size: 13px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-}
-
-.today-count {
-  display: inline-grid;
-  min-width: 24px;
-  height: 24px;
-  place-items: center;
-  padding: 0 6px;
-  border-radius: 999px;
-  background: var(--surface-3);
-  color: var(--muted);
-  font-family: var(--font-mono);
-  font-size: 13.5px;
-  letter-spacing: 0;
 }
 
 /* Hora y tiempo */
@@ -4609,67 +4594,6 @@ html.is-lite .app {
 }
 
 /* Compra y luz */
-
-.today-side {
-  display: flex;
-  min-width: 0;
-  min-height: 0;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.today-shopping {
-  display: flex;
-  min-height: 0;
-  flex: 1;
-  flex-direction: column;
-  padding: 16px 20px 14px;
-}
-
-.today-shopping__drawing {
-  max-height: 30px;
-}
-
-.today-shopping__add {
-  display: flex;
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.today-shopping__add input {
-  min-width: 0;
-  height: 44px;
-  flex: 1;
-  padding: 0 14px;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  background: var(--surface-2);
-  color: var(--text);
-  font: inherit;
-  font-size: 15px;
-  outline: none;
-}
-
-.today-shopping__add input:focus {
-  border-color: var(--accent);
-}
-
-.today-shopping__add button {
-  display: grid;
-  width: 44px;
-  height: 44px;
-  flex: none;
-  place-items: center;
-  padding: 0;
-  border: 0;
-  border-radius: 14px;
-  background: var(--accent);
-  color: #fffaf2;
-}
-
-.today-shopping__add button:disabled {
-  opacity: 0.35;
-}
 
 /* En Hoy el reloj grande ya está en la tarjeta: el del rail sobra. */
 .app--home .rail__clock {
@@ -5289,10 +5213,6 @@ html.is-lite .app {
 }
 
 /* Compra en Hoy ----------------------------------------------------------- */
-
-.today-shopping {
-  position: relative;
-}
 
 .postit__tape {
   position: absolute;
@@ -6474,38 +6394,6 @@ button:not(:disabled):active {
 
 /* Compra vacía: un estado tranquilo arriba, que deja el resto de la
    tarjeta libre para los pósits que se pegan ahí. */
-.today-shopping__empty {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
-  padding-top: 6px;
-  margin: 0;
-  color: var(--muted);
-  text-align: left;
-}
-
-.today-shopping__empty svg {
-  margin-bottom: 8px;
-  padding: 8px;
-  border-radius: 50%;
-  background: var(--sage-soft);
-  color: var(--sage);
-  box-sizing: content-box;
-}
-
-.today-shopping__empty strong {
-  color: var(--text);
-  font-family: var(--font-serif);
-  font-size: 24px;
-  font-weight: 400;
-}
-
-.today-shopping__empty span {
-  margin-top: 2px;
-  font-size: 13px;
-}
 
 /* Línea del día: la marca de «ahora» separa lo pasado de lo que viene. */
 .today-now-mark {
@@ -6945,10 +6833,6 @@ button:not(:disabled):active {
 /* Por la mañana manda lo que viene; por la tarde, la compra. */
 .app.phase-amanecer .today-next__title {
   font-size: 40px;
-}
-
-.app.phase-tarde .today-shopping {
-  border-color: var(--amber);
 }
 
 /* Sello al marcar en Hoy: una marca de tinta girada, como un tampón. */
@@ -7430,16 +7314,9 @@ button:not(:disabled):active {
    agua, equipo en lila, luz en mantequilla). Color macizo, sin transparencia
    ni degradado: se distingue desde el sofá y en el marco cuesta lo mismo que
    el crema. Solo de día; de noche manda el modo noche. */
-.app:not(.is-night) .today-shopping { --tile: #e1e9d5; }
 .app:not(.is-night) .today-strip__item--cleaning { --tile: #d9e8e4; }
 .app:not(.is-night) .today-strip__team { --tile: var(--tile-lilac); }
 .app:not(.is-night) .today-strip__item--power { --tile: var(--tile-sun); }
-
-.app:not(.is-night) .card.today-shopping {
-  border-color: rgba(70, 96, 52, 0.2);
-  background: var(--tile);
-  box-shadow: none;
-}
 
 /* La franja deja de ser una tarjeta: tres baldosas sueltas. */
 .app .card.today-strip,
@@ -7531,10 +7408,6 @@ button:not(:disabled):active {
 
 .today-board .today-now-mark span {
   font-size: 13px;
-}
-
-.today-board .today-count {
-  font-size: 15px;
 }
 
 .today-board .yoshi-window__label span,
@@ -7925,15 +7798,6 @@ button:not(:disabled):active {
 .chore__who button .who-dot,
 .tasks-chip .who-dot {
   margin-right: 8px;
-}
-
-.tasks-empty {
-  margin: 40px 0;
-  color: var(--muted);
-  font-family: var(--font-serif);
-  font-size: 24px;
-  font-style: italic;
-  text-align: center;
 }
 
 .tasks-foot {
@@ -8371,60 +8235,6 @@ button:not(:disabled):active {
 }
 
 /* Compra en Hoy: etiquetas por pasillo, como en la pantalla Compra. */
-.today-shopping__aisles {
-  min-height: 0;
-  flex: 1;
-  overflow-x: hidden;
-  overflow-y: auto;
-}
-
-.today-shopping__aisle + .today-shopping__aisle {
-  margin-top: 8px;
-}
-
-.today-shopping__aisle h3 {
-  margin: 0 0 2px;
-  color: var(--muted);
-  font-family: var(--font-mono);
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.today-shopping__chips {
-  display: flex;
-  flex-wrap: wrap;
-  margin: 0 -4px;
-}
-
-.today-shopping__chip {
-  margin: 3px 4px;
-  padding: 7px 14px;
-  border: 1px solid var(--line-strong);
-  border-radius: 999px;
-  background: var(--paper);
-  color: var(--text);
-  font-family: var(--font-serif);
-  font-size: 18px;
-  line-height: 1.1;
-}
-
-.today-shopping__chip.is-done {
-  border-style: dashed;
-  background: transparent;
-  color: var(--faint);
-  text-decoration: line-through;
-}
-
-.today-shopping__more-link {
-  margin-top: 6px;
-  padding: 4px 0;
-  border: 0;
-  background: none;
-  color: var(--muted);
-  font-size: 14px;
-}
 
 /* Hoy y mañana, para leer desde lejos: filas más altas y letra mayor. */
 .today-entry,
@@ -8675,14 +8485,6 @@ button:not(:disabled):active {
   margin: 0;
   padding: 0;
   list-style: none;
-}
-
-.bills-empty {
-  margin: 18px 0;
-  color: var(--muted);
-  font-family: var(--font-serif);
-  font-size: 22px;
-  font-style: italic;
 }
 
 .bill {
@@ -9152,10 +8954,6 @@ button:not(:disabled):active {
   font-size: 18px;
 }
 
-.today-shopping__chip {
-  font-size: 20px;
-}
-
 .today-strip__text small,
 .today-board .today-strip__text small {
   font-size: 16px;
@@ -9177,10 +8975,6 @@ button:not(:disabled):active {
     "now now yoshi"
     "next day shop"
     "strip strip strip";
-}
-
-.today-board > .today-side {
-  grid-area: shop;
 }
 
 .today-board .today-now__clock {
@@ -9215,9 +9009,6 @@ button:not(:disabled):active {
 
 
 /* En Hoy, la compra ya está en el menú lateral: sin el enlace repetido. */
-.today-board .today-shopping .today-link:not(.today-link--note) {
-  display: none;
-}
 
 .today-board .today-entry,
 .today-entry {
@@ -9314,4 +9105,466 @@ button:not(:disabled):active {
 .board-new__options .notes-sheet__chips button.is-on {
   border-color: var(--tone, var(--house));
   background: var(--tone-soft, var(--house-soft));
+}
+
+/* Hoy, en una sola línea del día: arriba la hora y Yoshi; debajo, el día a lo
+   ancho (con los avisos dentro) y lo principal en grande a su derecha. La
+   compra ya no ocupa sitio: su número va en el menú lateral. */
+.today-board {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.9fr);
+  grid-template-areas:
+    "now now yoshi"
+    "day day next"
+    "strip strip strip";
+}
+
+.today-alerts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 10px;
+  padding: 0;
+  list-style: none;
+}
+
+.today-alert > span,
+.today-alert > button {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--tone-soft, var(--house-soft));
+  color: var(--text);
+  font: inherit;
+  font-size: 17px;
+  text-align: left;
+}
+
+.today-alert svg {
+  flex: none;
+  color: var(--tone-ink, var(--house-ink));
+}
+
+.today-alert small {
+  color: var(--tone-ink, var(--muted));
+  font-size: 14px;
+}
+
+.rail__item {
+  position: relative;
+}
+
+.rail__badge {
+  position: absolute;
+  top: 2px;
+  right: 14px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--house);
+  color: var(--on-house);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 22px;
+  text-align: center;
+}
+
+/* Los avisos en una sola fila: lo que no cabe, se ve en su sitio. */
+.today-alerts {
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+
+.today-alert {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.today-alert > span,
+.today-alert > button {
+  max-width: 100%;
+  min-height: 40px;
+  font-size: 15px;
+  white-space: nowrap;
+}
+
+.today-alert strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.today-alert small {
+  display: none;
+}
+
+/* Pestañas dentro de una sección (Casa, Tiempo): una fila de botones grandes
+   encima de la vista, con el número de lo pendiente. */
+.view-tabs {
+  display: flex;
+  flex: none;
+  gap: 6px;
+  margin: 0 0 10px;
+}
+
+.view-tabs__tab {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 18px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.view-tabs__tab.is-on {
+  border-color: var(--text);
+  background: var(--text);
+  color: var(--bg);
+}
+
+.view-tabs__tab b {
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--house);
+  color: var(--on-house);
+  font-size: 12px;
+  line-height: 22px;
+  text-align: center;
+}
+
+/* Con cuatro pestañas, el menú vuelve a tener aire. */
+.rail__nav {
+  gap: 10px;
+  margin-top: 26px;
+}
+
+/* ==========================================================================
+   Piezas comunes. Cinco clases de control para toda la app, para que cada
+   cosa se vea y se toque igual en cualquier pantalla:
+   1. Principal: la acción de la pantalla, en terracota (una por vista).
+   2. Secundario: borde y texto apagado.
+   3. Opción: se elige entre varias; la elegida, en el pastel terracota.
+   4. Selector de vista: pastilla; la activa, rellena de tinta.
+   5. Icono: redondo de 44 px, sin fondo.
+   ========================================================================== */
+
+/* 1. Principal */
+.bills-new__add,
+.list-panel__submit,
+.tasks-new__add,
+.rewards-foot__confirm {
+  min-height: 48px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--house);
+  color: var(--on-house);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.list-panel__submit:disabled {
+  background: var(--surface-3);
+  color: var(--muted);
+}
+
+/* 2. Secundario */
+.cleaning-reset,
+.cleaning-reset.cleaning-edit,
+.energy-button,
+.energy-button--quiet,
+.agenda-calendars-button,
+.text-button,
+.clear-button,
+.tasks-score__rewards {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.cleaning-reset:disabled {
+  opacity: 0.45;
+}
+
+/* Los enlaces de las cabeceras de tarjeta: secundario sin borde. */
+.today-link {
+  min-height: 44px;
+  padding: 0 10px;
+  border-radius: 999px;
+  color: var(--muted);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+/* 3. Opción */
+.tasks-chip,
+.tasks-chip.is-small,
+.notes-sheet__chips button {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.tasks-chip.is-on,
+.notes-sheet__chips button.is-on {
+  border-color: var(--house);
+  background: var(--house-soft);
+  color: var(--house-ink);
+}
+
+/* Las cantidades (+5, 10 pts) son cifras: un punto más grandes. */
+.tasks-chip.is-amount {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* 4. Selector de vista */
+.view-tabs__tab,
+.segmented button,
+.elec-tabs button,
+.appliance-flex button {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.view-tabs__tab.is-on,
+.segmented button.is-active,
+.elec-tabs button.is-active,
+.appliance-flex button.is-active {
+  border-color: var(--text);
+  background: var(--text);
+  color: var(--bg);
+}
+
+/* 5. Icono */
+.chore__remove,
+.shop-chip__remove,
+.bill__delete:not(.is-confirm),
+.energy-icon-button,
+.agenda-nav__button,
+.ink-close {
+  display: inline-flex;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+}
+
+/* Personas: el mismo punto de color en todas partes. */
+.who-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+/* Dentro de un grupo con contorno propio, los botones no llevan borde. */
+.segmented button:not(.is-active),
+.elec-tabs button:not(.is-active),
+.appliance-flex button:not(.is-active) {
+  border-color: transparent;
+}
+
+/* «Margen para moverlo» lleva cinco opciones en una columna estrecha. */
+.appliance-flex button {
+  padding: 0 10px;
+  font-size: 14px;
+}
+
+/* Compra a lo ancho (ya no comparte pantalla): los pasillos en columnas, en el
+   orden del súper, y «Lo de siempre» en una banda a la derecha; lo comprado,
+   debajo de los pasillos. */
+.lists-view .lists-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.lists-view .list-panel__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  grid-template-rows: auto 1fr;
+  gap: 0 28px;
+  align-content: start;
+}
+
+.lists-view .list-panel__body > .shop-aisles,
+.lists-view .list-panel__body > .shop-chips,
+.lists-view .list-panel__body > .empty-state,
+.lists-view .list-panel__body > .list-panel__done {
+  grid-column: 1;
+}
+
+.lists-view .list-panel__body > .list-panel__usual {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: start;
+  padding: 4px 0 4px 24px;
+  border-left: 1px solid var(--line);
+}
+
+.lists-view .shop-aisles {
+  column-count: 3;
+}
+
+.lists-view .list-panel__usual h3 {
+  margin-top: 4px;
+}
+
+/* En Compra, cada dato una vez: el número va en la pestaña y en la tarjeta;
+   la tarjeta no repite el título de la página. */
+.lists-view .list-panel__head,
+.lists-view .list-panel__progress {
+  display: none;
+}
+
+/* Agenda: hoy y mañana el doble de anchos y legibles desde lejos; el resto de
+   la semana, compacto. El color del calendario tiñe cada evento. */
+.agenda-board__day.is-near {
+  flex: 2.1 1 0;
+}
+
+.agenda-board__day.is-near header strong {
+  font-size: 44px;
+}
+
+.agenda-board__day.is-near .agenda-board__event {
+  padding: 10px 14px;
+}
+
+.agenda-board__day.is-near .agenda-board__event small {
+  font-size: 14px;
+}
+
+.agenda-board__day.is-near .agenda-board__event strong {
+  font-size: 20px;
+}
+
+.agenda-board__event > span {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.agenda-board__day:not(.is-near) {
+  padding: 12px 8px;
+}
+
+.agenda-board__day:not(.is-near) .agenda-board__event strong {
+  font-size: 13px;
+}
+
+/* Tiempo y luz en el mismo eje: cada hora lleva su banda de precio. */
+.hourly-list li {
+  grid-template-columns: 44px 22px minmax(0, 1.2fr) minmax(0, 0.9fr) 62px;
+}
+
+.hourly-power {
+  justify-self: end;
+  font-size: 12px;
+}
+
+.hourly-summary.is-power svg {
+  color: var(--mint-ink, var(--mint));
+}
+
+/* Una sola fila para todo lo que se marca o se paga (Hoy, Tareas, Cuentas):
+   la misma altura, la misma casilla, el título al mismo tamaño y el detalle
+   debajo en gris. Tocar una tarea se siente igual en cualquier pantalla. */
+.today-entry,
+.chore__main,
+.bill__main {
+  min-height: 56px;
+}
+
+.today-entry .check-mark,
+.chore__main .check-mark {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+}
+
+.today-entry__title,
+.today-board .today-entry__title,
+.chore__copy strong,
+.bill__copy strong {
+  font-family: var(--font-serif);
+  font-size: 21px;
+  font-weight: 400;
+  line-height: 1.15;
+}
+
+.chore__copy span,
+.bill__copy small {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* Vacíos con Yoshi: la buena noticia, centrada y tranquila. */
+.yoshi-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin: 24px auto;
+  text-align: center;
+}
+
+.yoshi-empty img {
+  width: 88px;
+  height: 88px;
+  object-fit: contain;
+}
+
+.yoshi-empty strong {
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.yoshi-empty span {
+  max-width: 280px;
+  color: var(--muted);
+  font-size: 15px;
 }

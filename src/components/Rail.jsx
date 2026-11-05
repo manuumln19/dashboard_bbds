@@ -2,34 +2,26 @@ import { memo } from "react";
 import {
   CalendarDays,
   CloudSun,
-  Droplets,
   FlaskConical,
   House,
   Images,
-  ListChecks,
   Moon,
-  Receipt,
-  ShoppingBasket,
+  Sofa,
   Wifi,
   WifiOff,
-  Zap,
 } from "lucide-react";
-import { CLIMATE_ENABLED } from "../config";
 import { formatClock } from "../lib/date";
+import { sectionOf } from "../lib/sections";
 import { Brand } from "./Brand";
 import { SeasonBadge } from "./SeasonDecor";
 
+// Cuatro pestañas: Casa agrupa compra, tareas y cuentas; Tiempo, el tiempo,
+// la luz y el clima de dentro (src/lib/sections.js).
 const TABS = [
   { id: "home", label: "Hoy", Icon: House },
   { id: "agenda", label: "Agenda", Icon: CalendarDays },
-  { id: "lists", label: "Compra", Icon: ShoppingBasket },
-  { id: "cleaning", label: "Tareas", Icon: ListChecks },
-  { id: "weather", label: "Tiempo", Icon: CloudSun },
-  { id: "energy", label: "Energía", Icon: Zap },
-  { id: "cuentas", label: "Cuentas", Icon: Receipt },
-  ...(CLIMATE_ENABLED
-    ? [{ id: "climate", label: "Casa", Icon: Droplets }]
-    : []),
+  { id: "casa", label: "Casa", Icon: Sofa },
+  { id: "tiempo", label: "Tiempo", Icon: CloudSun },
 ];
 
 export const Rail = memo(function Rail({
@@ -41,9 +33,13 @@ export const Rail = memo(function Rail({
   onOpenGallery,
   status,
   issueCount = 0,
+  badges = {},
   onStatus,
   seasonId,
 }) {
+  const current = sectionOf(view);
+  const isActive = (id) => view === id || (current && current.id === id);
+
   const StatusIcon =
     status.tone === "bad"
       ? WifiOff
@@ -60,11 +56,12 @@ export const Rail = memo(function Rail({
           <button
             key={id}
             type="button"
-            className={`rail__item${view === id ? " is-active" : ""}`}
+            className={`rail__item${isActive(id) ? " is-active" : ""}`}
             onClick={() => onChange(id)}
-            aria-current={view === id ? "page" : undefined}
+            aria-current={isActive(id) ? "page" : undefined}
           >
             <Icon size={21} strokeWidth={1.8} aria-hidden="true" />
+            {badges[id] ? <b className="rail__badge">{badges[id]}</b> : null}
             <span>{label}</span>
           </button>
         ))}
