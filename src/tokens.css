@@ -1,0 +1,167 @@
+/* ==========================================================================
+   BBDS · Tokens
+   Única fuente de color, tipografía, radios y sombras. Se carga la primera
+   (main.jsx): el resto de hojas solo consume var(--…). Lo que cambia por
+   hora o por temporada (features.css) va después y por eso gana.
+   ========================================================================== */
+
+:root {
+  color-scheme: light;
+  --bg: #f3ede4;
+  --bg-deep: #e8dfd1;
+  --paper: #fbf6ed;
+  --paper-hi: #faf6ef;
+  --paper-strong: #fffdf8;
+  --surface: rgba(255, 252, 247, 0.56);
+  --surface-2: rgba(255, 255, 255, 0.32);
+  --surface-3: rgba(49, 39, 33, 0.055);
+  --line: rgba(49, 39, 33, 0.13);
+  --line-strong: rgba(49, 39, 33, 0.24);
+  --text: #1f1c18;
+  --muted: #5f574c;
+  --faint: #6b6256;
+  /* El terracota de la casa y sus fondos (Tareas, Compra, Cuentas, mañana). */
+  --house: #b0571c;
+  --on-house: #ffffff;
+  --house-ink: #8a3f10;
+  --house-soft: #f6e3d4;
+  --house-faint: #e8d9c6;
+  --house-mid: #d9a77f;
+  --ok: #3b6d11;
+  --ok-soft: #e5efd9;
+  --rain: #2f5f86;
+  --card-paper: #fff8ec;
+  --tile-sun: #f4e9c6;
+  --tile-sun-ink: #7a5a0c;
+  --tile-water: #dfe9f1;
+  --tile-cold: #e3e6f2;
+  --tile-green: #dfece5;
+  --tile-green-ink: #2f6b4f;
+  --tile-lilac: #e6e0ee;
+  --tile-lilac-ink: #5a4a7a;
+  --ink: #1f1c18;
+  --track: rgba(49, 39, 33, 0.12);
+  --accent: #cf1f5e;
+  --accent-soft: rgba(207, 31, 94, 0.1);
+  --pink: #cf1f5e;
+  --pink-soft: rgba(207, 31, 94, 0.1);
+  --mint: #1f7a66;
+  --mint-soft: rgba(31, 122, 102, 0.12);
+  --amber: #96671f;
+  --amber-soft: rgba(150, 103, 31, 0.12);
+  --lilac: #6c57a9;
+  --lilac-soft: rgba(108, 87, 169, 0.12);
+  --blue: #3d7c9f;
+  --blue-soft: rgba(61, 124, 159, 0.12);
+  --sage: #249b80;
+  --sage-soft: rgba(36, 155, 128, 0.12);
+  --warm: #a76a1c;
+  --warm-soft: rgba(167, 106, 28, 0.12);
+  --violet: #6c57a9;
+  --violet-soft: rgba(108, 87, 169, 0.12);
+  --danger: #b7473d;
+  --danger-soft: rgba(183, 71, 61, 0.1);
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Bricolage Grotesque", "Manrope", sans-serif;
+  --font-mono: "BBDS Label", "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --radius: 28px;
+  --glass-blur: 0px;
+  --shadow: none;
+  --shadow-soft: none;
+}
+
+/* Texto sobre los fondos de color de cada tono: la versión oscura del tono
+   (4,5:1 o más sobre su pastel). De noche y en las hojas oscuras, el tono
+   claro de siempre. */
+:root {
+  --pink-ink: #a3154a;
+  --mint-ink: #155c4c;
+  --amber-ink: #6f4b12;
+  --lilac-ink: #4b3d8f;
+}
+
+.tone-pink { --tone-ink: var(--pink-ink); }
+.tone-mint { --tone-ink: var(--mint-ink); }
+.tone-amber { --tone-ink: var(--amber-ink); }
+.tone-lilac { --tone-ink: var(--lilac-ink); }
+.tone-ink { --tone-ink: var(--text); }
+
+.app.is-night,
+.ink-sheet {
+  --pink-ink: var(--pink);
+  --mint-ink: var(--mint);
+  --amber-ink: var(--amber);
+  --lilac-ink: var(--lilac);
+}
+
+.app.is-night {
+  color-scheme: dark;
+  --bg: #141311;
+  --bg-deep: #0e0d0c;
+  /* Se usa como texto sobre --ink (botones activos): de noche --ink es
+     claro, así que --paper tiene que ser oscuro o no se lee. */
+  --paper: #141311;
+  --paper-hi: #211e1a;
+  --paper-strong: #24211d;
+  --surface: rgba(31, 28, 24, 0.78);
+  --surface-2: rgba(255, 248, 238, 0.055);
+  --surface-3: rgba(255, 248, 238, 0.07);
+  --line: rgba(255, 248, 238, 0.12);
+  --line-strong: rgba(255, 248, 238, 0.24);
+  --text: #f2ecdf;
+  --muted: #b8b0a3;
+  --faint: #8c8478;
+  --house: #e09a62;
+  --on-house: #1f1712;
+  --house-ink: #f0b98c;
+  --house-soft: #3a2a20;
+  --house-faint: #3a3129;
+  --house-mid: #8a5a36;
+  --ok: #9fd27a;
+  --ok-soft: #22311a;
+  --rain: #8fc0e6;
+  --card-paper: #22201c;
+  --tile-sun: #332a1c;
+  --tile-sun-ink: #f0bd6e;
+  --tile-water: #1c2a33;
+  --tile-cold: #23263a;
+  --tile-green: #1b302b;
+  --tile-green-ink: #7bd8bd;
+  --tile-lilac: #2a2438;
+  --tile-lilac-ink: #b8a8ff;
+  --ink: #f2ecdf;
+  --track: rgba(255, 250, 242, 0.13);
+  --accent: #ff7eac;
+  --accent-soft: rgba(255, 126, 172, 0.12);
+  --pink: #ff7eac;
+  --pink-soft: rgba(255, 126, 172, 0.12);
+  --mint: #7bd8bd;
+  --mint-soft: rgba(123, 216, 189, 0.12);
+  --amber: #f0bd6e;
+  --amber-soft: rgba(240, 189, 110, 0.12);
+  --lilac: #b8a8ff;
+  --lilac-soft: rgba(184, 168, 255, 0.12);
+  --blue: #8cc8f2;
+  --blue-soft: rgba(140, 200, 242, 0.12);
+  --sage: #7bd8bd;
+  --sage-soft: rgba(123, 216, 189, 0.12);
+  --warm: #f0bd6e;
+  --warm-soft: rgba(240, 189, 110, 0.12);
+  --violet: #b8a8ff;
+  --violet-soft: rgba(184, 168, 255, 0.12);
+  --danger: #ff9d93;
+  --danger-soft: rgba(255, 157, 147, 0.1);
+  --shadow:
+    0 30px 64px -42px rgba(0, 0, 0, 0.78),
+    0 1px 0 rgba(255, 255, 255, 0.06) inset;
+  --shadow-soft:
+    0 18px 40px -32px rgba(0, 0, 0, 0.66),
+    0 1px 0 rgba(255, 255, 255, 0.05) inset;
+}
+
+/* Iconos del tiempo: relleno de nubes y luna en modo noche. */
+.app.is-night {
+  --weather-cloud: #56636f;
+  --weather-moon: #d9c27a;
+  --weather-snow: #e8eef4;
+}

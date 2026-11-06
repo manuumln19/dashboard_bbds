@@ -188,8 +188,7 @@
     height: auto;
   }
 
-  .weather-now,
-  .weekly-card {
+  .weather-now {
     grid-column: 1;
     grid-row: auto;
     min-height: 240px;

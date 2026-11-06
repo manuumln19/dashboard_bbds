@@ -502,6 +502,7 @@ src/
                     galería, demo, frescura, controles demo y utilidades
   assets/gallery/   fotos locales del salvapantallas
   config.js         lugar, modo noche, agenda, clima, idle, recarga y kiosco
+  tokens.css        única fuente de color, tipografía, radios y sombras
   styles.css        tema papel/tinta BBDS y reglas responsive
   views.css         estilos de tiempo, limpieza y fotos
   features.css      estilos de las funciones nuevas, energía y hojas de edición

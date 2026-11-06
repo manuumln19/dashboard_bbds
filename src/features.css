@@ -4724,13 +4724,6 @@ html.is-lite .app {
   opacity: 0.45;
 }
 
-/* Iconos del tiempo: relleno de nubes y luna en modo noche. */
-.app.is-night {
-  --weather-cloud: #56636f;
-  --weather-moon: #d9c27a;
-  --weather-snow: #e8eef4;
-}
-
 /* Agenda: eventos cortos en una línea (hora + título) */
 
 .agenda-event.is-short {
@@ -8865,30 +8858,6 @@ button:not(:disabled):active {
   gap: 3px;
   min-height: 0;
   padding: 4px 5px 3px;
-}
-
-/* Texto sobre los fondos de color de cada tono: la versión oscura del tono
-   (4,5:1 o más sobre su pastel). De noche y en las hojas oscuras, el tono
-   claro de siempre. */
-:root {
-  --pink-ink: #a3154a;
-  --mint-ink: #155c4c;
-  --amber-ink: #6f4b12;
-  --lilac-ink: #4b3d8f;
-}
-
-.tone-pink { --tone-ink: var(--pink-ink); }
-.tone-mint { --tone-ink: var(--mint-ink); }
-.tone-amber { --tone-ink: var(--amber-ink); }
-.tone-lilac { --tone-ink: var(--lilac-ink); }
-.tone-ink { --tone-ink: var(--text); }
-
-.app.is-night,
-.ink-sheet {
-  --pink-ink: var(--pink);
-  --mint-ink: var(--mint);
-  --amber-ink: var(--amber);
-  --lilac-ink: var(--lilac);
 }
 
 .today-entry__meta {

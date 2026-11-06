@@ -230,9 +230,9 @@ export function TasksView({ now, cleaning, lists, points }) {
         </section>
 
         <aside className="tasks-side">
+          <NewTask people={people} lists={lists} cleaning={cleaning} now={now} />
           <Scoreboard scores={scores} mvp={mvp} onRewards={() => setRewardsOpen(true)} />
           <ManualPoints people={people} points={points} />
-          <NewTask people={people} lists={lists} cleaning={cleaning} now={now} />
         </aside>
       </div>
 

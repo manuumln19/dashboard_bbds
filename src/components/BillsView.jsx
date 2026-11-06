@@ -113,8 +113,8 @@ export function BillsView({ now, bills, people }) {
         </section>
 
         <aside className="tasks-side bills-side">
-          <YearChart bills={bills.bills} people={people} now={now} />
           <NewBill bills={bills} people={people} now={now} />
+          <YearChart bills={bills.bills} people={people} now={now} />
           <RentRule bills={bills} />
         </aside>
       </div>
